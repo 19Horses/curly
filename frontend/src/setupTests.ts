@@ -14,3 +14,5 @@ Object.defineProperty(window, 'matchMedia', {
     },
   }),
 });
+
+export {};
