@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { styled, css } from 'styled-components';
 import { StaggerRow } from './StaggerRow';
 import { fadeIn, fadeInAbsoluteCenter } from '../styles/animations';
@@ -32,6 +33,7 @@ function formatHeaderDate(date: Date): string {
 
 const Shell = styled.header`
   position: relative;
+  z-index: 2;
   --header-pad: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
   padding: var(--header-pad);
   display: flex;
@@ -58,11 +60,13 @@ const navItemStyles = css`
   }
 `;
 
-const DateDisplay = styled.time`
+const DateDisplay = styled.time<{ $jobsBleed: boolean }>`
   flex: 1 1 0;
   min-width: 0;
   text-align: left;
   animation: ${fadeIn} 0.5s ease-out both;
+  color: ${({ $jobsBleed }) => ($jobsBleed ? '#fff' : 'inherit')};
+  transition: color 0.4s ease;
 `;
 
 const LogoLink = styled(Link)`
@@ -76,7 +80,7 @@ const LogoLink = styled(Link)`
   animation-delay: 0.1s;
 `;
 
-const Nav = styled.nav`
+const Nav = styled.nav<{ $jobsLight: boolean }>`
   flex: 1 1 0;
   min-width: 0;
   display: flex;
@@ -85,6 +89,8 @@ const Nav = styled.nav`
   gap: clamp(1px, 0.1rem + 0.15vw, 2px);
   line-height: 1.25;
   text-transform: lowercase;
+  color: ${({ $jobsLight }) => ($jobsLight ? '#fff' : 'inherit')};
+  transition: color 0.4s ease;
 `;
 
 const NavLink = styled(Link)`
@@ -96,15 +102,37 @@ const NavPlaceholder = styled.span`
   cursor: default;
 `;
 
+/** Matches JobsPage narrow stacking breakpoint */
+const JOBS_STACK_MQ = '(max-width: 42rem)';
+
 function Header() {
+  const { pathname } = useLocation();
+  const jobsBleed = pathname === '/jobs';
+  const [narrowStack, setNarrowStack] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia(JOBS_STACK_MQ).matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(JOBS_STACK_MQ);
+    const sync = () => setNarrowStack(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+
+  const jobsNavLight = jobsBleed && narrowStack;
   const formattedDate = formatHeaderDate(new Date());
   const today = new Date().toISOString().slice(0, 10);
 
   return (
     <Shell>
-      <DateDisplay dateTime={today}>{formattedDate}</DateDisplay>
+      <DateDisplay dateTime={today} $jobsBleed={jobsBleed}>
+        {formattedDate}
+      </DateDisplay>
       <LogoLink to="/">Curly</LogoLink>
-      <Nav aria-label="Main">
+      <Nav aria-label="Main" $jobsLight={jobsNavLight}>
         <StaggerRow $staggerIndex={0} $align="end" $delayOffset={2}>
           <NavPlaceholder>other stuff</NavPlaceholder>
         </StaggerRow>
