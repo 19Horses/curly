@@ -9,6 +9,7 @@ export type CaseStudyImage = {
 
 export type CaseStudyType = {
   _id: string;
+  slug: string;
   client: string;
   title: string;
   brief: unknown[];
@@ -21,6 +22,7 @@ export type CaseStudyType = {
 const query = `
   *[_type == 'caseStudy'] | order(_createdAt desc){
     _id,
+    "slug": slug.current,
     client,
     title,
     brief,
