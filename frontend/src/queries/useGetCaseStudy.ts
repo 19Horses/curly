@@ -3,12 +3,13 @@ import axios from 'axios';
 import { getApiUrl } from '../sanityIntegration';
 import type { CaseStudyType } from './useGetCaseStudies';
 
-const getCaseStudyById = async (
-  id: string
+const getCaseStudyBySlug = async (
+  slug: string
 ): Promise<{ result: CaseStudyType | null }> => {
   const query = `
-    *[_type == 'caseStudy' && _id == ${JSON.stringify(id)}][0]{
+    *[_type == 'caseStudy' && slug.current == ${JSON.stringify(slug)}][0]{
       _id,
+      "slug": slug.current,
       client,
       title,
       brief,
@@ -25,18 +26,18 @@ const getCaseStudyById = async (
   return response.data;
 };
 
-export const useGetCaseStudy = (id: string | undefined) => {
+export const useGetCaseStudy = (slug: string | undefined) => {
   const queryClient = useQueryClient();
 
   return useQuery({
-    queryKey: ['caseStudy', id],
-    queryFn: () => getCaseStudyById(id as string),
-    enabled: Boolean(id),
+    queryKey: ['caseStudy', slug],
+    queryFn: () => getCaseStudyBySlug(slug as string),
+    enabled: Boolean(slug),
     initialData: () => {
-      if (!id) return undefined;
+      if (!slug) return undefined;
       const list = queryClient.getQueryData<CaseStudyType[]>(['caseStudies']);
       if (!list) return undefined;
-      const hit = list.find((cs) => cs._id === id);
+      const hit = list.find((cs) => cs.slug === slug);
       return hit ? { result: hit } : undefined;
     },
     initialDataUpdatedAt: () =>

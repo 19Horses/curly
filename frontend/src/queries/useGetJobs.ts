@@ -4,6 +4,7 @@ import { getApiUrl } from '../sanityIntegration';
 
 export type JobType = {
   _id: string;
+  slug: string;
   title: string;
   overview: unknown[];
   responsibilities: string[];
@@ -16,6 +17,7 @@ export type JobType = {
 const query = `
   *[_type == 'job'] | order(applicationDeadline desc){
     _id,
+    "slug": slug.current,
     title,
     overview,
     responsibilities,

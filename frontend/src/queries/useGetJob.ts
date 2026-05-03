@@ -3,10 +3,13 @@ import axios from 'axios';
 import { getApiUrl } from '../sanityIntegration';
 import type { JobType } from './useGetJobs';
 
-const getJobById = async (id: string): Promise<{ result: JobType | null }> => {
+const getJobBySlug = async (
+  slug: string
+): Promise<{ result: JobType | null }> => {
   const query = `
-    *[_type == 'job' && _id == ${JSON.stringify(id)}][0]{
+    *[_type == 'job' && slug.current == ${JSON.stringify(slug)}][0]{
       _id,
+      "slug": slug.current,
       title,
       overview,
       responsibilities,
@@ -20,18 +23,18 @@ const getJobById = async (id: string): Promise<{ result: JobType | null }> => {
   return response.data;
 };
 
-export const useGetJob = (id: string | undefined) => {
+export const useGetJob = (slug: string | undefined) => {
   const queryClient = useQueryClient();
 
   return useQuery({
-    queryKey: ['job', id],
-    queryFn: () => getJobById(id as string),
-    enabled: Boolean(id),
+    queryKey: ['job', slug],
+    queryFn: () => getJobBySlug(slug as string),
+    enabled: Boolean(slug),
     initialData: () => {
-      if (!id) return undefined;
+      if (!slug) return undefined;
       const list = queryClient.getQueryData<JobType[]>(['jobs']);
       if (!list) return undefined;
-      const hit = list.find((job) => job._id === id);
+      const hit = list.find((job) => job.slug === slug);
       return hit ? { result: hit } : undefined;
     },
     initialDataUpdatedAt: () =>
