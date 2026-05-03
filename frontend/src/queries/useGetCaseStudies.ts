@@ -1,22 +1,22 @@
-import {useQuery} from '@tanstack/react-query'
-import axios from 'axios'
-import {getApiUrl} from '../sanityIntegration'
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { getApiUrl } from '../sanityIntegration';
 
 export type CaseStudyImage = {
-  alt: string
-  url: string
-}
+  alt: string;
+  url: string;
+};
 
 export type CaseStudyType = {
-  _id: string
-  client: string
-  title: string
-  brief: unknown[]
-  approach: unknown[]
-  results: unknown[]
-  images: CaseStudyImage[]
-  videoLink: string
-}
+  _id: string;
+  client: string;
+  title: string;
+  brief: unknown[];
+  approach: unknown[];
+  results: unknown[];
+  images: CaseStudyImage[];
+  videoLink: string;
+};
 
 const query = `
   *[_type == 'caseStudy'] | order(_createdAt desc){
@@ -32,18 +32,17 @@ const query = `
     },
     videoLink
   }
-`
+`;
 
-const getCaseStudies = async (): Promise<{result: CaseStudyType[]}> => {
-  const response = await axios.get(getApiUrl(query))
-  return response.data
-}
+const getCaseStudies = async (): Promise<{ result: CaseStudyType[] }> => {
+  const response = await axios.get(getApiUrl(query));
+  return response.data;
+};
 
 export const useGetCaseStudies = () => {
   return useQuery({
     queryKey: ['caseStudies'],
     queryFn: getCaseStudies,
     select: (res) => res.result,
-  })
-}
-
+  });
+};
