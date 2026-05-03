@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { styled, css } from 'styled-components';
 import { StaggerRow } from './StaggerRow';
-import { fadeIn } from '../styles/animations';
+import { fadeIn, fadeInAbsoluteCenter } from '../styles/animations';
 
 function ordinalDay(n: number): string {
   const mod100 = n % 100;
@@ -31,11 +31,14 @@ function formatHeaderDate(date: Date): string {
 }
 
 const Shell = styled.header`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: start;
+  position: relative;
+  --header-pad: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
+  padding: var(--header-pad);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: clamp(0.5rem, 0.35rem + 0.8vw, 1rem);
-  padding: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
   font-size: clamp(0.8125rem, 0.72rem + 0.45vw, 1.125rem);
   font-weight: bold;
 `;
@@ -56,27 +59,30 @@ const navItemStyles = css`
 `;
 
 const DateDisplay = styled.time`
-  justify-self: start;
+  flex: 1 1 0;
+  min-width: 0;
   text-align: left;
   animation: ${fadeIn} 0.5s ease-out both;
 `;
 
-const LogoRow = styled.span`
+const LogoLink = styled(Link)`
+  position: absolute;
+  left: 50%;
+  top: var(--header-pad);
+  z-index: 1;
+  ${navItemStyles}
   text-align: center;
-  animation: ${fadeIn} 0.5s ease-out both;
+  animation: ${fadeInAbsoluteCenter} 0.5s ease-out both;
   animation-delay: 0.1s;
 `;
 
-const LogoLink = styled(Link)`
-  ${navItemStyles}
-`;
-
 const Nav = styled.nav`
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: clamp(1px, 0.1rem + 0.15vw, 2px);
-  justify-self: end;
   line-height: 1.25;
   text-transform: lowercase;
 `;
@@ -97,9 +103,7 @@ function Header() {
   return (
     <Shell>
       <DateDisplay dateTime={today}>{formattedDate}</DateDisplay>
-      <LogoRow>
-        <LogoLink to="/">Curly</LogoLink>
-      </LogoRow>
+      <LogoLink to="/">Curly</LogoLink>
       <Nav aria-label="Main">
         <StaggerRow $staggerIndex={0} $align="end" $delayOffset={2}>
           <NavPlaceholder>other stuff</NavPlaceholder>
