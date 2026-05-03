@@ -1,6 +1,6 @@
 name: Backend Actions
 
-on: [push]
+on: [ push ]
 
 permissions:
   contents: write
@@ -21,8 +21,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.13.1
-          cache: yarn
-          cache-dependency-path: backend/yarn.lock
 
       - name: Install & Deploy
         run: |
