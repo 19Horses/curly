@@ -40,3 +40,13 @@ export const useGetJobs = () => {
     select: (res) => res.result,
   });
 };
+
+export const useGetJobBySlug = (slug: string | undefined) => {
+  return useQuery({
+    queryKey: ['jobs'],
+    queryFn: getJobs,
+    enabled: Boolean(slug),
+    select: (data: { result: JobType[] }) =>
+      data.result.find((job) => job.slug === slug) ?? null,
+  });
+};
