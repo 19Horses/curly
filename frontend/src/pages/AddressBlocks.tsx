@@ -51,11 +51,7 @@ export function AddressBlocks({ blocks }: { blocks: unknown }) {
   return (
     <>
       {lines.map(({ key, text }, staggerIndex) => (
-        <AddressStaggerRow
-          key={key}
-          $staggerIndex={staggerIndex}
-          $align="end"
-        >
+        <AddressStaggerRow key={key} $staggerIndex={staggerIndex} $align="end">
           <AddressLine>{text}</AddressLine>
         </AddressStaggerRow>
       ))}

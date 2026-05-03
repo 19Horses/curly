@@ -130,11 +130,7 @@ const JobLink = styled(Link)`
   ${jobLinkStyles}
 `;
 
-function JobsLayout({
-  right,
-}: {
-  right: ReactNode;
-}) {
+function JobsLayout({ right }: { right: ReactNode }) {
   return (
     <JobsRoot>
       <LeftPanel>
@@ -149,15 +145,11 @@ function JobsPage() {
   const { data, isLoading, isError } = useGetJobs();
 
   if (isLoading) {
-    return (
-      <JobsLayout right={<p>Loading…</p>} />
-    );
+    return <JobsLayout right={<p>Loading…</p>} />;
   }
 
   if (isError || !data) {
-    return (
-      <JobsLayout right={<p>Could not load jobs.</p>} />
-    );
+    return <JobsLayout right={<p>Could not load jobs.</p>} />;
   }
 
   const jobs = data.filter((job) => job.slug);

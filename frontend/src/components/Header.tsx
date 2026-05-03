@@ -23,9 +23,11 @@ function ordinalDay(n: number): string {
 
 function formatHeaderDate(date: Date): string {
   const weekday = new Intl.DateTimeFormat('en-GB', { weekday: 'short' }).format(
-    date,
+    date
   );
-  const month = new Intl.DateTimeFormat('en-GB', { month: 'long' }).format(date);
+  const month = new Intl.DateTimeFormat('en-GB', { month: 'long' }).format(
+    date
+  );
   const year = date.getFullYear();
   const day = ordinalDay(date.getDate());
   return `${weekday} ${day} ${month} ${year}`;
@@ -110,8 +112,7 @@ function Header() {
   const jobsBleed = pathname === '/jobs';
   const [narrowStack, setNarrowStack] = useState(
     () =>
-      typeof window !== 'undefined' &&
-      window.matchMedia(JOBS_STACK_MQ).matches,
+      typeof window !== 'undefined' && window.matchMedia(JOBS_STACK_MQ).matches
   );
 
   useEffect(() => {

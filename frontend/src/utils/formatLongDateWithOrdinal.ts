@@ -9,12 +9,12 @@ export function formatLongDateWithOrdinal(isoDate: string): string {
     d % 100 >= 11 && d % 100 <= 13
       ? 'th'
       : d % 10 === 1
-        ? 'st'
-        : d % 10 === 2
-          ? 'nd'
-          : d % 10 === 3
-            ? 'rd'
-            : 'th';
+      ? 'st'
+      : d % 10 === 2
+      ? 'nd'
+      : d % 10 === 3
+      ? 'rd'
+      : 'th';
 
   const monthYear = new Intl.DateTimeFormat('en-GB', {
     month: 'long',
