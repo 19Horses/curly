@@ -1,4 +1,3 @@
-/** jsdom does not implement matchMedia; Header uses it for layout. */
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   configurable: true,
