@@ -32,9 +32,9 @@ export const useGetJob = (slug: string | undefined) => {
     enabled: Boolean(slug),
     initialData: () => {
       if (!slug) return undefined;
-      const list = queryClient.getQueryData<JobType[]>(['jobs']);
+      const list = queryClient.getQueryData<{ result: JobType[] }>(['jobs']);
       if (!list) return undefined;
-      const hit = list.find((job) => job.slug === slug);
+      const hit = list.result.find((job) => job.slug === slug);
       return hit ? { result: hit } : undefined;
     },
     initialDataUpdatedAt: () =>

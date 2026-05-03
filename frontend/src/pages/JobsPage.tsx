@@ -69,9 +69,11 @@ const HeroTitle = styled.h1`
   animation: ${fadeIn} 0.6s ease-out both;
 `;
 
-/** Full-width row for staggered job titles */
+/** Shrink to title text so hit area / cursor match the words */
 const JobStagger = styled(StaggerRow).attrs({ $align: 'start' })`
-  width: 100%;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
 `;
 
 const RightPanel = styled.div`
@@ -97,19 +99,21 @@ const RightPanel = styled.div`
 const JobList = styled.ul`
   list-style: none;
   margin: 0;
-  padding: clamp(1.25rem, 2vw + 0.5rem, 2.75rem);
+  padding-block: clamp(1.25rem, 2vw + 0.5rem, 2.75rem);
+  padding-inline: clamp(2rem, 5vw + 1.25rem, 5rem);
   display: flex;
   flex-direction: column;
   gap: clamp(1.5rem, 3vw + 0.5rem, 3rem);
 `;
 
 const jobLinkStyles = css`
-  display: block;
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
   color: inherit;
   text-decoration: none;
-  font-size: clamp(0.9375rem, 0.85rem + 0.35vw, 1.125rem);
+  font-size: clamp(1.5rem, 2.75vw + 1rem, 3rem);
   font-weight: bold;
-  text-transform: lowercase;
   transition: opacity 0.3s ease-in-out;
 
   &:hover {
