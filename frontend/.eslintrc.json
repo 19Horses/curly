@@ -1,4 +1,5 @@
 {
+  "ignorePatterns": ["src/setupTests.ts"],
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
