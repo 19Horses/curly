@@ -5,7 +5,6 @@ import { router } from './router';
 
 const queryClient = new QueryClient();
 
-
 const AppShell = styled.div`
   flex: 1;
   display: flex;
