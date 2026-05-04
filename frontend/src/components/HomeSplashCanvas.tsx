@@ -15,7 +15,6 @@ const CURLY_GLB = '/curly.glb';
 
 useGLTF.preload(CURLY_GLB);
 
-/** Camera rest pose after Enter (before model travels). */
 const SPLASH_CAMERA_POSITION = new Vector3(0, 2.5, 28);
 const SPLASH_MODEL_POSITION = new Vector3(0, 0, 0);
 
@@ -107,9 +106,10 @@ function ModelGroup({
     if (!controls) {
       return;
     }
-    controls.target.copy(modelCenterWorldRef.current);
-    if (controls.enabled) {
-      controls.update();
+    if (phase === 'main') {
+      controls.target.set(0, 0, 0);
+    } else {
+      controls.target.copy(modelCenterWorldRef.current);
     }
   });
 
@@ -129,11 +129,13 @@ function CameraEnterLerp({
   transitionStartTimeRef,
   cameraAtRestRef,
   modelCenterWorldRef,
+  modelMoveStartedAtRef,
 }: {
   phase: CanvasPhase;
   transitionStartTimeRef: React.MutableRefObject<number | null>;
   cameraAtRestRef: React.MutableRefObject<boolean>;
   modelCenterWorldRef: React.MutableRefObject<Vector3>;
+  modelMoveStartedAtRef: React.MutableRefObject<number | null>;
 }) {
   const { camera } = useThree();
   const cameraStartRef = useRef<Vector3 | null>(null);
@@ -174,8 +176,29 @@ function CameraEnterLerp({
       cameraAtRestRef.current = true;
     }
 
-    camera.lookAt(modelCenterWorldRef.current);
+    if (modelMoveStartedAtRef.current !== null) {
+      camera.lookAt(0, 0, 0);
+    } else {
+      camera.lookAt(modelCenterWorldRef.current);
+    }
   });
+
+  return null;
+}
+
+/** Runs after OrbitControls mounts so ref exists; aligns orbit pivot with post-transition look-at (origin). */
+function SyncMainOrbitTarget({
+  phase,
+  controlsRef,
+}: {
+  phase: CanvasPhase;
+  controlsRef: React.RefObject<OrbitControlsImpl | null>;
+}) {
+  useLayoutEffect(() => {
+    if (phase === 'main') {
+      controlsRef.current?.target.set(0, 0, 0);
+    }
+  }, [phase, controlsRef]);
 
   return null;
 }
@@ -197,7 +220,6 @@ function Scene({ phase }: { phase: CanvasPhase }) {
 
   return (
     <>
-      {/* Runs first: updates model matrix + modelCenterWorldRef for camera lookAt */}
       <ModelGroup
         phase={phase}
         controlsRef={controlsRef}
@@ -211,6 +233,7 @@ function Scene({ phase }: { phase: CanvasPhase }) {
         transitionStartTimeRef={transitionStartTimeRef}
         cameraAtRestRef={cameraAtRestRef}
         modelCenterWorldRef={modelCenterWorldRef}
+        modelMoveStartedAtRef={modelMoveStartedAtRef}
       />
       <directionalLight
         position={[5, 8, 12]}
@@ -238,6 +261,7 @@ function Scene({ phase }: { phase: CanvasPhase }) {
         enabled={orbitEnabled}
         target={[0, 0, 0]}
       />
+      <SyncMainOrbitTarget phase={phase} controlsRef={controlsRef} />
     </>
   );
 }
