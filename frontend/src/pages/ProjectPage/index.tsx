@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useGetCaseStudy } from '../queries/useGetCaseStudy';
+import { useGetCaseStudy } from '../../queries/useGetCaseStudy';
 
 function ProjectPage() {
   const { slug } = useParams();
