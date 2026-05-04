@@ -1,0 +1,58 @@
+frontend/src/pages/Home/index.tsx
+  512296bbc144dfc7 1-3,5-9,14,21,23,26-27,30-64,68-116
+frontend/src/context/HomeSplashChromeContext.tsx
+  512296bbc144dfc7 1-40
+frontend/src/pages/Home/styles.ts
+  512296bbc144dfc7 6,11-65
+frontend/src/constants/homeScene.ts
+  512296bbc144dfc7 1-14
+frontend/src/constants/splash.ts
+  512296bbc144dfc7 1-11
+frontend/src/components/HomeSplashCanvas.tsx
+  h_86d8924a44fb42 1,3,5-7,215-230,276
+  512296bbc144dfc7 2,4,8-214,231-275,277-288
+frontend/src/App.tsx
+  512296bbc144dfc7 4,9-11,24-26
+frontend/src/App.test.tsx
+  h_86d8924a44fb42 1,3,6
+frontend/src/pages/Layout/index.tsx
+  512296bbc144dfc7 3,7-8,11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.1",
+  "base_commit_sha": "c2f0fce4317fff5e10c2c62d88228af9b902f4c6",
+  "prompts": {
+    "512296bbc144dfc7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f6cf1629-b9bf-41a6-9531-785d50fc3b6c",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 2237,
+      "total_deletions": 1405,
+      "accepted_lines": 497,
+      "overriden_lines": 10
+    },
+    "6c670b5acdd15606": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f0980039-dffd-4e0e-a1a9-cfca9caab1d9",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 18,
+      "total_deletions": 23,
+      "accepted_lines": 367,
+      "overriden_lines": 5
+    }
+  },
+  "humans": {
+    "h_86d8924a44fb42": {
+      "author": "Cammy Docherty"
+    }
+  }
+}
