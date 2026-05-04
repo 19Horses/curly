@@ -3,9 +3,11 @@ import { styled } from 'styled-components';
 import Header from '../components/Header';
 
 const Root = styled.div`
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 `;
 
 const Main = styled.main`
@@ -13,6 +15,7 @@ const Main = styled.main`
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 `;
 
 function Layout() {

@@ -20,14 +20,37 @@ const hideScrollbar = css`
   }
 `;
 
+const thinPinkScrollbar = css`
+  scrollbar-width: thin;
+  scrollbar-color: ${accentPink} transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: ${accentPink};
+    border-radius: 0;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #db2777;
+  }
+`;
+
 const JobRoot = styled.article`
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
+  max-height: 100%;
   width: 100%;
   box-sizing: border-box;
-  /* Match Header Shell horizontal padding */
   padding-inline: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
   padding-top: 0;
   padding-bottom: clamp(0.85rem, 1.5vw + 0.35rem, 1.65rem);
@@ -40,12 +63,10 @@ const TitleRow = styled.div`
   padding-bottom: clamp(1.1rem, 2.5vw, 2rem);
 `;
 
-/** Fills viewport below title; does not scroll — middle/right columns scroll inside */
 const ColumnsRow = styled.div`
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-  /* Single row fills space below title so middle/right scroll inside, not the page */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   grid-template-rows: minmax(0, 1fr);
   column-gap: clamp(3rem, 9vw, 7.5rem);
   min-height: 0;
@@ -53,9 +74,11 @@ const ColumnsRow = styled.div`
   align-items: stretch;
 
   ${stackBp} {
-    grid-template-columns: 1fr;
-    grid-template-rows: none;
-    row-gap: clamp(1.5rem, 3.5vw, 2.5rem);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: clamp(1.75rem, 4vw, 2.75rem);
   }
 `;
 
@@ -65,35 +88,37 @@ const ColLeft = styled.div`
   overflow: hidden;
 
   ${stackBp} {
-    overflow: visible;
+    flex: 0 0 auto;
+    overflow: hidden;
   }
 `;
 
-const ColMiddle = styled.div`
+const MidRightScroll = styled.div`
   min-width: 0;
   min-height: 0;
   max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  ${hideScrollbar}
+  ${thinPinkScrollbar}
 
   ${stackBp} {
-    max-height: min(45vh, 520px);
+    flex: 1 1 0%;
+    min-height: 0;
+    max-height: none;
   }
 `;
 
-const ColRight = styled.div`
+const MidRightGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: clamp(3rem, 9vw, 7.5rem);
+  align-items: start;
   min-width: 0;
-  min-height: 0;
-  max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  ${hideScrollbar}
 
   ${stackBp} {
-    max-height: min(45vh, 520px);
+    grid-template-columns: 1fr;
+    gap: clamp(1.75rem, 4vw, 2.75rem);
   }
 `;
 
@@ -254,68 +279,68 @@ function JobPage() {
           </SectionChunk>
         </ColLeft>
 
-        <ColMiddle>
-          <MiddleInner>
-            <SectionChunk>
-              <FadeBox $delay={0.05}>
-                <SectionLabel>Task + Responsibilities</SectionLabel>
+        <MidRightScroll>
+          <MidRightGrid>
+            <MiddleInner>
+              <SectionChunk>
+                <FadeBox $delay={0.05}>
+                  <SectionLabel>Task + Responsibilities</SectionLabel>
+                </FadeBox>
+                <RespStack>
+                  {data.responsibilities.map((line, i) => (
+                    <RespStagger
+                      key={i}
+                      $staggerIndex={i}
+                      $delayOffset={5}
+                      $step={0.06}
+                      $align="start"
+                    >
+                      <RespLine>- {line}</RespLine>
+                    </RespStagger>
+                  ))}
+                </RespStack>
+              </SectionChunk>
+
+              <FadeBox $delay={0.22}>
+                <MetaBlock>
+                  <SectionLabel>Annual Leave</SectionLabel>
+                  <MetaText>{data.annualLeave}</MetaText>
+                </MetaBlock>
               </FadeBox>
-              <RespStack>
-                {data.responsibilities.map((line, i) => (
-                  <RespStagger
-                    key={i}
-                    $staggerIndex={i}
-                    $delayOffset={5}
-                    $step={0.06}
-                    $align="start"
-                  >
-                    <RespLine>- {line}</RespLine>
-                  </RespStagger>
-                ))}
-              </RespStack>
-            </SectionChunk>
 
-            <FadeBox $delay={0.22}>
-              <MetaBlock>
-                <SectionLabel>Annual Leave</SectionLabel>
-                <MetaText>{data.annualLeave}</MetaText>
-              </MetaBlock>
-            </FadeBox>
-
-            <FadeBox $delay={0.28}>
-              <MetaBlock>
-                <SectionLabel>Salary</SectionLabel>
-                <MetaText>{data.salary}</MetaText>
-              </MetaBlock>
-            </FadeBox>
-          </MiddleInner>
-        </ColMiddle>
-
-        <ColRight>
-          <RightInner>
-            <SectionChunk>
-              <FadeBox $delay={0.06}>
-                <SectionLabel>How to Apply</SectionLabel>
+              <FadeBox $delay={0.28}>
+                <MetaBlock>
+                  <SectionLabel>Salary</SectionLabel>
+                  <MetaText>{data.salary}</MetaText>
+                </MetaBlock>
               </FadeBox>
-              <FadeBox $delay={0.12}>
-                <ApplyCopy>
-                  Email a cover note and CV to{' '}
-                  <ApplyEmailLink href={`mailto:${APPLY_EMAIL}`}>
-                    {APPLY_EMAIL}
-                  </ApplyEmailLink>{' '}
-                  by {deadlineFormatted}.
-                </ApplyCopy>
-              </FadeBox>
-            </SectionChunk>
+            </MiddleInner>
 
-            <FadeBox $delay={0.22}>
-              <MetaBlock>
-                <SectionLabel>Details</SectionLabel>
-                <BlockParagraphs blocks={data.details} />
-              </MetaBlock>
-            </FadeBox>
-          </RightInner>
-        </ColRight>
+            <RightInner>
+              <SectionChunk>
+                <FadeBox $delay={0.06}>
+                  <SectionLabel>How to Apply</SectionLabel>
+                </FadeBox>
+                <FadeBox $delay={0.12}>
+                  <ApplyCopy>
+                    Email a cover note and CV to{' '}
+                    <ApplyEmailLink href={`mailto:${APPLY_EMAIL}`}>
+                      {APPLY_EMAIL}
+                    </ApplyEmailLink>{' '}
+                    by {deadlineFormatted}.
+                  </ApplyCopy>
+                </FadeBox>
+              </SectionChunk>
+
+              <FadeBox $delay={0.22}>
+                <MetaBlock>
+                  <SectionLabel>Details</SectionLabel>
+                  <BlockParagraphs blocks={data.details} />
+                </MetaBlock>
+              </FadeBox>
+            </RightInner>
+          </MidRightGrid>
+        </MidRightScroll>
       </ColumnsRow>
     </JobRoot>
   );
