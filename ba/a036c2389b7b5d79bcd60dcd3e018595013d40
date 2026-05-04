@@ -1,0 +1,36 @@
+frontend/src/global.css
+  6c670b5acdd15606 11-14,17,21-28
+frontend/src/pages/Layout.tsx
+  6c670b5acdd15606 6-7,10,18
+frontend/src/App.tsx
+  6c670b5acdd15606 3,9-16,19-23
+  h_86d8924a44fb42 8
+frontend/src/pages/JobPage.tsx
+  6c670b5acdd15606 23-44,50-51,69,77-81,91-92,96,103,106-108,112-116,120-121,282-308,311-315,317,319-333,335-339,341-343
+  h_86d8924a44fb42 318,334
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.1",
+  "base_commit_sha": "baa036c2389b7b5d79bcd60dcd3e018595013d40",
+  "prompts": {
+    "6c670b5acdd15606": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f0980039-dffd-4e0e-a1a9-cfca9caab1d9",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 164,
+      "total_deletions": 105,
+      "accepted_lines": 134,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_86d8924a44fb42": {
+      "author": "Cammy Docherty"
+    }
+  }
+}
