@@ -1,23 +1,59 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import binzSrc from '../assets/binz.mp3';
+import pauseSrc from '../assets/pause.svg';
+import playSrc from '../assets/play.svg';
 import { fadeIn } from '../styles/animations';
 
 const progressPink = '#ec4899';
 
 const trackRuleThickness = '2px';
 
-const TrackBlock = styled.div`
-  display: flex;
+const TrackIconSlot = styled.span`
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  max-width: 0;
+  margin-left: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(calc(-1 * 0.4em), -50%);
+  transition: max-width 0.28s ease, margin-left 0.28s ease, opacity 0.28s ease,
+    transform 0.28s ease;
+`;
+
+/** Title + rule column; line width matches the text button only. */
+const TrackTitleStack = styled.div`
+  display: inline-flex;
   flex-direction: column;
   align-items: stretch;
-  width: fit-content;
+  width: max-content;
+  max-width: 100%;
+`;
+
+const TrackBlock = styled.div`
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: max-content;
   max-width: 100%;
   animation: ${fadeIn} 0.5s ease-out both;
   animation-delay: 0.08s;
 `;
 
+const TrackIcon = styled.img<{ $jobsBleed: boolean }>`
+  width: 0.78rem;
+  height: 0.78rem;
+  display: block;
+  flex-shrink: 0;
+  ${({ $jobsBleed }) => ($jobsBleed ? 'filter: invert(1);' : 'filter: none;')}
+`;
+
 const TrackMeta = styled.button<{ $jobsBleed: boolean }>`
+  position: relative;
   appearance: none;
   border: none;
   margin: 0;
@@ -31,6 +67,21 @@ const TrackMeta = styled.button<{ $jobsBleed: boolean }>`
   line-height: 1.25;
   color: ${({ $jobsBleed }) => ($jobsBleed ? '#fff' : 'inherit')};
   transition: color 0.4s ease;
+  display: block;
+  align-self: flex-start;
+  width: max-content;
+  max-width: 100%;
+
+  &:hover ${TrackIconSlot} {
+    max-width: 1.05rem;
+    margin-left: 0.35em;
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+`;
+
+const TrackMetaLabel = styled.span`
+  display: block;
 `;
 
 const TrackRuleTrack = styled.div`
@@ -183,22 +234,31 @@ export function HeaderAudioTrack({ jobsBleed }: HeaderAudioTrackProps) {
   return (
     <>
       <TrackBlock>
-        <TrackMeta
-          type="button"
-          $jobsBleed={jobsBleed}
-          aria-label={isPlaying ? 'Pause track' : 'Play track'}
-          onClick={togglePlayback}
-        >
-          Solange - Binz
-        </TrackMeta>
-        <TrackRuleTrack
-          onClick={handleTrackClick}
-          aria-label="Seek audio"
-          title="Click to seek"
-        >
-          <TrackRuleBase $jobsBleed={jobsBleed} />
-          <TrackRuleProgress $p={trackProgress} />
-        </TrackRuleTrack>
+        <TrackTitleStack>
+          <TrackMeta
+            type="button"
+            $jobsBleed={jobsBleed}
+            aria-label={isPlaying ? 'Pause track' : 'Play track'}
+            onClick={togglePlayback}
+          >
+            <TrackMetaLabel>Solange - Binz</TrackMetaLabel>
+            <TrackIconSlot aria-hidden>
+              {isPlaying ? (
+                <TrackIcon src={pauseSrc} alt="" $jobsBleed={jobsBleed} />
+              ) : (
+                <TrackIcon src={playSrc} alt="" $jobsBleed={jobsBleed} />
+              )}
+            </TrackIconSlot>
+          </TrackMeta>
+          <TrackRuleTrack
+            onClick={handleTrackClick}
+            aria-label="Seek audio"
+            title="Click to seek"
+          >
+            <TrackRuleBase $jobsBleed={jobsBleed} />
+            <TrackRuleProgress $p={trackProgress} />
+          </TrackRuleTrack>
+        </TrackTitleStack>
       </TrackBlock>
       <VisuallyHiddenAudio
         ref={audioRef}
