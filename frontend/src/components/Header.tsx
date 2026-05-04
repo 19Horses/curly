@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { styled, css } from 'styled-components';
+import { HeaderAudioTrack } from './HeaderAudioTrack';
 import { StaggerRow } from './StaggerRow';
 import { fadeIn, fadeInAbsoluteCenter } from '../styles/animations';
 
@@ -62,9 +63,16 @@ const navItemStyles = css`
   }
 `;
 
-const DateDisplay = styled.time<{ $jobsBleed: boolean }>`
+const LeftCluster = styled.div`
   flex: 1 1 0;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.35rem, 0.22rem + 0.45vw, 0.55rem);
+`;
+
+const DateDisplay = styled.time<{ $jobsBleed: boolean }>`
   text-align: left;
   animation: ${fadeIn} 0.5s ease-out both;
   color: ${({ $jobsBleed }) => ($jobsBleed ? '#fff' : 'inherit')};
@@ -129,9 +137,12 @@ function Header() {
 
   return (
     <Shell>
-      <DateDisplay dateTime={today} $jobsBleed={jobsBleed}>
-        {formattedDate}
-      </DateDisplay>
+      <LeftCluster>
+        <DateDisplay dateTime={today} $jobsBleed={jobsBleed}>
+          {formattedDate}
+        </DateDisplay>
+        <HeaderAudioTrack jobsBleed={jobsBleed} />
+      </LeftCluster>
       <LogoLink to="/">Curly</LogoLink>
       <Nav aria-label="Main" $jobsLight={jobsNavLight}>
         <StaggerRow $staggerIndex={0} $align="end" $delayOffset={2}>
