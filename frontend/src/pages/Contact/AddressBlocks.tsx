@@ -1,8 +1,6 @@
 import styled from 'styled-components';
-import { StaggerRow } from '../components/StaggerRow';
-import { AddressLine } from './Contact';
-
-const narrowScreen = '@media (max-width: 42rem)';
+import { StaggerRow } from '../../components/StaggerRow';
+import { AddressLine, narrowScreen } from './styles';
 
 const AddressStaggerRow = styled(StaggerRow)`
   ${narrowScreen} {

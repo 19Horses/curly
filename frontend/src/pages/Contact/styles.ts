@@ -1,19 +1,18 @@
 import styled, { css } from 'styled-components';
-import { useGetContact } from '../queries/useGetContact';
-import { fadeIn } from '../styles/animations';
-import { AddressBlocks } from './AddressBlocks';
+import { fadeIn } from '../../styles/animations';
 
-const pagePadding = css`
+export const pagePadding = css`
   padding-inline: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
   margin-block: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
 `;
-const viewportCenterNudge = css`
+
+export const viewportCenterNudge = css`
   transform: translateY(calc(-0.5 * clamp(5rem, 14vw, 9rem)));
 `;
 
-const narrowScreen = '@media (max-width: 42rem)';
+export const narrowScreen = '@media (max-width: 42rem)';
 
-const ContactRoot = styled.section`
+export const ContactRoot = styled.section`
   flex: 1;
   width: 100%;
   min-height: 0;
@@ -25,7 +24,7 @@ const ContactRoot = styled.section`
   ${viewportCenterNudge}
 `;
 
-const ContactRow = styled.div`
+export const ContactRow = styled.div`
   position: relative;
   width: 100%;
   display: flex;
@@ -46,7 +45,7 @@ const ContactRow = styled.div`
   }
 `;
 
-const ContactTitle = styled.h1`
+export const ContactTitle = styled.h1`
   margin: 0;
   position: relative;
   z-index: 0;
@@ -59,7 +58,7 @@ const ContactTitle = styled.h1`
   text-transform: lowercase;
 `;
 
-const MiddleColumn = styled.div`
+export const MiddleColumn = styled.div`
   position: absolute;
   left: 50%;
   top: 50%;
@@ -87,7 +86,7 @@ const MiddleColumn = styled.div`
   }
 `;
 
-const RightColumn = styled.div`
+export const RightColumn = styled.div`
   position: relative;
   z-index: 0;
   flex: 1 1 0;
@@ -108,7 +107,7 @@ const RightColumn = styled.div`
   }
 `;
 
-const inlineLinkStyles = css`
+export const inlineLinkStyles = css`
   color: inherit;
   text-decoration: none;
   transition: opacity 0.3s ease-in-out;
@@ -123,11 +122,11 @@ const inlineLinkStyles = css`
   }
 `;
 
-const EmailText = styled.span`
+export const EmailText = styled.span`
   overflow-wrap: anywhere;
 `;
 
-const ExternalLink = styled.a`
+export const ExternalLink = styled.a`
   ${inlineLinkStyles}
   overflow-wrap: anywhere;
 `;
@@ -137,7 +136,7 @@ export const AddressLine = styled.span`
   overflow-wrap: break-word;
 `;
 
-const MessageWrap = styled.div`
+export const MessageWrap = styled.div`
   flex: 1;
   width: 100%;
   min-height: 0;
@@ -149,53 +148,6 @@ const MessageWrap = styled.div`
   ${viewportCenterNudge}
 `;
 
-const Message = styled.p`
+export const Message = styled.p`
   margin: 0;
 `;
-
-function Contact() {
-  const { data, isLoading, isError } = useGetContact();
-
-  if (isLoading) {
-    return (
-      <MessageWrap>
-        <Message>Loading…</Message>
-      </MessageWrap>
-    );
-  }
-
-  if (isError || !data) {
-    return (
-      <MessageWrap>
-        <Message>Could not load contact details.</Message>
-      </MessageWrap>
-    );
-  }
-
-  const igHandle = data.instagram.handle.startsWith('@')
-    ? data.instagram.handle
-    : `@${data.instagram.handle}`;
-
-  return (
-    <ContactRoot>
-      <ContactRow>
-        <ContactTitle>contact</ContactTitle>
-        <MiddleColumn>
-          <EmailText>{data.email}</EmailText>
-          <ExternalLink
-            href={data.instagram.link}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {igHandle}
-          </ExternalLink>
-        </MiddleColumn>
-        <RightColumn>
-          <AddressBlocks blocks={data.address} />
-        </RightColumn>
-      </ContactRow>
-    </ContactRoot>
-  );
-}
-
-export default Contact;

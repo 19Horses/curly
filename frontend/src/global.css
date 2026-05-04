@@ -8,9 +8,22 @@
   color: #fff;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
+  height: 100%;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
