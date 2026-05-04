@@ -1,0 +1,50 @@
+frontend/src/pages/JobPage/styles.ts
+  6c670b5acdd15606 2-3,5,7,9,11,33,48,54,73,84,100,113,122,129,136,141,149,156,162,168,176,183,189,195,214
+frontend/src/pages/Contact/styles.ts
+  6c670b5acdd15606 2,4,8-9,13,15,27,48,61,89,110,125,129,139,151
+frontend/src/pages/JobsPage/index.tsx
+  6c670b5acdd15606 1-58
+frontend/src/pages/JobPage/index.tsx
+  6c670b5acdd15606 1-146
+frontend/src/pages/Layout/index.tsx
+  6c670b5acdd15606 2-3
+frontend/src/pages/Contact/index.tsx
+  6c670b5acdd15606 1-60
+frontend/src/pages/JobsPage/styles.ts
+  6c670b5acdd15606 3-4,6,8,16,32,57,69,75,95,105,125
+frontend/src/pages/Layout/styles.ts
+  6c670b5acdd15606 1-17
+frontend/src/pages/ProjectPage/index.tsx
+  6c670b5acdd15606 2
+frontend/src/pages/Home/index.tsx
+  6c670b5acdd15606 1-13
+frontend/src/pages/Contact/AddressBlocks.tsx
+  6c670b5acdd15606 2-3
+frontend/src/pages/Home/styles.ts
+  6c670b5acdd15606 1-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.1",
+  "base_commit_sha": "05a73701d17a95d1eb1530b5c38064c262bf71bd",
+  "prompts": {
+    "6c670b5acdd15606": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f0980039-dffd-4e0e-a1a9-cfca9caab1d9",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 1050,
+      "total_deletions": 1003,
+      "accepted_lines": 1032,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_86d8924a44fb42": {
+      "author": "Cammy Docherty"
+    }
+  }
+}
