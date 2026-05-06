@@ -1,7 +1,13 @@
 /* eslint-disable react/no-unknown-property */
 import { Center, Environment, OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Suspense, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { styled } from 'styled-components';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { Vector3 } from 'three';
@@ -12,15 +18,18 @@ const EPSILON = 0.05;
 const SPLASH_CAMERA_POSITION = new Vector3(0, 2.5, 28);
 const SPLASH_TARGET = new Vector3(0, 0, 0);
 
-
-
 const INTRO_CAMERA_POSITION = new Vector3(0, 0, 0);
 const INTRO_TARGET = new Vector3(0, 0, -30);
 const INTRO_DURATION_SEC = 1;
 
 useGLTF.preload(CURLY_GLB);
 
-function CurlyModel({ onLoaded }: { onLoaded: () => void, splashDone: boolean }) {
+function CurlyModel({
+  onLoaded,
+}: {
+  onLoaded: () => void;
+  splashDone: boolean;
+}) {
   const gltf = useGLTF(CURLY_GLB);
   useLayoutEffect(() => {
     onLoaded();
@@ -70,7 +79,11 @@ function CameraRig({
 
       introT.current = Math.min(1, introT.current + delta / INTRO_DURATION_SEC);
       const t = 1 - (1 - introT.current) ** 3;
-      camera.position.lerpVectors(INTRO_CAMERA_POSITION, SPLASH_CAMERA_POSITION, t);
+      camera.position.lerpVectors(
+        INTRO_CAMERA_POSITION,
+        SPLASH_CAMERA_POSITION,
+        t
+      );
       controls.target.lerpVectors(INTRO_TARGET, SPLASH_TARGET, t);
       controls.update();
       return;
@@ -110,11 +123,7 @@ function Scene({ phase }: { phase: CanvasPhase }) {
           </Center>
         </Suspense>
       </group>
-      <directionalLight
-        position={[5, 8, 12]}
-        intensity={2.5}
-        color="#ffffff"
-      />
+      <directionalLight position={[5, 8, 12]} intensity={2.5} color="#ffffff" />
       <directionalLight
         position={[-10, 5, 6]}
         intensity={1.2}

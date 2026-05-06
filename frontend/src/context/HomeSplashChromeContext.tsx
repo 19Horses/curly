@@ -14,12 +14,16 @@ type HomeSplashChromeContextValue = {
 const HomeSplashChromeContext =
   createContext<HomeSplashChromeContextValue | null>(null);
 
-export function HomeSplashChromeProvider({ children }: { children: ReactNode }) {
+export function HomeSplashChromeProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [suppressSiteHeader, setSuppressSiteHeader] = useState(false);
 
   const value = useMemo(
     () => ({ suppressSiteHeader, setSuppressSiteHeader }),
-    [suppressSiteHeader],
+    [suppressSiteHeader]
   );
 
   return (
@@ -33,7 +37,7 @@ export function useHomeSplashChrome() {
   const ctx = useContext(HomeSplashChromeContext);
   if (!ctx) {
     throw new Error(
-      'useHomeSplashChrome must be used within HomeSplashChromeProvider',
+      'useHomeSplashChrome must be used within HomeSplashChromeProvider'
     );
   }
   return ctx;

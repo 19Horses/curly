@@ -30,7 +30,7 @@ function Home() {
   const { setSuppressSiteHeader } = useHomeSplashChrome();
 
   const [phase, setPhase] = useState<HomePhase>(() =>
-    readHasSeenSplashFromStorage() ? 'main' : 'splash',
+    readHasSeenSplashFromStorage() ? 'main' : 'splash'
   );
 
   useLayoutEffect(() => {
@@ -58,7 +58,7 @@ function Home() {
     }
     const id = window.setTimeout(
       persistSeenAndShowFooter,
-      HOME_ENTER_SEQUENCE_MS,
+      HOME_ENTER_SEQUENCE_MS
     );
     return () => window.clearTimeout(id);
   }, [phase, persistSeenAndShowFooter]);
@@ -94,19 +94,22 @@ function Home() {
               </StaggerRow>
               {isLoading && <FooterLine>Loading projects…</FooterLine>}
               {isError && <FooterLine>Could not load projects.</FooterLine>}
-              {!isLoading && !isError && caseStudies && caseStudies.length > 0 && (
-                <CaseList>
-                  {caseStudies.map((study, index) => (
-                    <li key={study._id}>
-                      <StaggerRow $staggerIndex={index + 1} $align="end">
-                        <CaseLink to={`/projects/${study.slug}`}>
-                          {study.client} – {study.title}
-                        </CaseLink>
-                      </StaggerRow>
-                    </li>
-                  ))}
-                </CaseList>
-              )}
+              {!isLoading &&
+                !isError &&
+                caseStudies &&
+                caseStudies.length > 0 && (
+                  <CaseList>
+                    {caseStudies.map((study, index) => (
+                      <li key={study._id}>
+                        <StaggerRow $staggerIndex={index + 1} $align="end">
+                          <CaseLink to={`/projects/${study.slug}`}>
+                            {study.client} – {study.title}
+                          </CaseLink>
+                        </StaggerRow>
+                      </li>
+                    ))}
+                  </CaseList>
+                )}
               {!isLoading && !isError && caseStudies?.length === 0 && (
                 <FooterLine>No projects yet.</FooterLine>
               )}

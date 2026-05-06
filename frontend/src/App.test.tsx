@@ -1,6 +1,4 @@
-
 import { describe, expect, test } from 'vitest';
-
 
 describe('When the app renders', () => {
   test('1+1=2', () => {
