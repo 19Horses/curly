@@ -1,240 +1,115 @@
 /* eslint-disable react/no-unknown-property */
-import { Bounds, Environment, OrbitControls, useGLTF } from '@react-three/drei';
+import { Center, Environment, OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Suspense, useLayoutEffect, useMemo, useRef } from 'react';
+import { Suspense, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { styled } from 'styled-components';
-import { Group, Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import {
-  HOME_CAMERA_ENTER_LERP_MS,
-  HOME_MODEL_REST_POSITION,
-  HOME_MODEL_TO_REST_LERP_MS,
-} from '../constants/homeScene';
+import { Vector3 } from 'three';
 
 const CURLY_GLB = '/curly.glb';
+const EPSILON = 0.05;
+
+const SPLASH_CAMERA_POSITION = new Vector3(0, 2.5, 28);
+const SPLASH_TARGET = new Vector3(0, 0, 0);
+
+
+
+const INTRO_CAMERA_POSITION = new Vector3(0, 0, 0);
+const INTRO_TARGET = new Vector3(0, 0, -30);
+const INTRO_DURATION_SEC = 1;
 
 useGLTF.preload(CURLY_GLB);
 
-const SPLASH_CAMERA_POSITION = new Vector3(0, 2.5, 28);
-const SPLASH_MODEL_POSITION = new Vector3(0, 0, 0);
-
-function easeInOutCubic(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
-}
-
-function CurlyModel() {
+function CurlyModel({ onLoaded }: { onLoaded: () => void, splashDone: boolean }) {
   const gltf = useGLTF(CURLY_GLB);
+  useLayoutEffect(() => {
+    onLoaded();
+  }, [onLoaded]);
   return <primitive object={gltf.scene} />;
 }
 
 type CanvasPhase = 'splash' | 'transitioning' | 'main';
 
-function ModelGroup({
+function CameraRig({
   phase,
-  controlsRef,
-  transitionStartTimeRef,
-  cameraAtRestRef,
-  modelCenterWorldRef,
-  modelMoveStartedAtRef,
+  modelLoaded,
+  onIntroDone,
+  onSplashDone,
 }: {
   phase: CanvasPhase;
-  controlsRef: React.RefObject<OrbitControlsImpl | null>;
-  transitionStartTimeRef: React.MutableRefObject<number | null>;
-  cameraAtRestRef: React.MutableRefObject<boolean>;
-  modelCenterWorldRef: React.MutableRefObject<Vector3>;
-  modelMoveStartedAtRef: React.MutableRefObject<number | null>;
+  modelLoaded: boolean;
+  onIntroDone: () => void;
+  onSplashDone: () => void;
 }) {
-  const ref = useRef<Group>(null);
-  const restVec = useMemo(
-    () =>
-      new Vector3(
-        HOME_MODEL_REST_POSITION[0],
-        HOME_MODEL_REST_POSITION[1],
-        HOME_MODEL_REST_POSITION[2],
-      ),
-    [],
-  );
+  const controls = useThree((s) => s.controls) as OrbitControlsImpl | null;
+  const introT = useRef(0);
+  const introEndFired = useRef(false);
+  const splash = phase === 'splash';
 
-  useLayoutEffect(() => {
-    if (phase === 'splash') {
-      ref.current?.position.copy(SPLASH_MODEL_POSITION);
-      modelMoveStartedAtRef.current = null;
-    }
-    if (phase === 'main') {
-      ref.current?.position.copy(restVec);
-    }
-  }, [phase, restVec, modelMoveStartedAtRef]);
+  useFrame(({ camera }, delta) => {
+    if (!controls) return;
 
-  useFrame(() => {
-    const controls = controlsRef.current;
-    if (!ref.current) {
-      return;
-    }
-
-    ref.current.getWorldPosition(modelCenterWorldRef.current);
-
-    if (phase === 'transitioning') {
-      if (transitionStartTimeRef.current === null) {
-        transitionStartTimeRef.current = performance.now();
+    if (splash) {
+      if (!modelLoaded) {
+        camera.position.copy(INTRO_CAMERA_POSITION);
+        controls.target.copy(INTRO_TARGET);
+        controls.update();
+        return;
       }
 
-      const Tm = HOME_MODEL_TO_REST_LERP_MS;
-
-      if (!cameraAtRestRef.current) {
-        ref.current.position.copy(SPLASH_MODEL_POSITION);
-        modelMoveStartedAtRef.current = null;
-      } else {
-        if (modelMoveStartedAtRef.current === null) {
-          modelMoveStartedAtRef.current = performance.now();
+      if (introT.current >= 1) {
+        if (!introEndFired.current) {
+          introEndFired.current = true;
+          camera.position.copy(SPLASH_CAMERA_POSITION);
+          controls.target.copy(SPLASH_TARGET);
+          controls.update();
+          onIntroDone();
         }
-        const t0 = modelMoveStartedAtRef.current;
-        const elapsedMove = t0 === null ? 0 : performance.now() - t0;
-
-        if (elapsedMove < Tm) {
-          const u = easeInOutCubic(Math.min(1, elapsedMove / Tm));
-          ref.current.position.lerpVectors(
-            SPLASH_MODEL_POSITION,
-            restVec,
-            u,
-          );
-        } else {
-          ref.current.position.copy(restVec);
-        }
+        return;
       }
-    }
 
-    if (!controls) {
-      return;
-    }
-    if (phase === 'main') {
-      controls.target.set(0, 0, 0);
-    } else {
-      controls.target.copy(modelCenterWorldRef.current);
-    }
-  });
-
-  return (
-    <group ref={ref}>
-      <Bounds fit clip margin={0.82}>
-        <Suspense fallback={null}>
-          <CurlyModel />
-        </Suspense>
-      </Bounds>
-    </group>
-  );
-}
-
-function CameraEnterLerp({
-  phase,
-  transitionStartTimeRef,
-  cameraAtRestRef,
-  modelCenterWorldRef,
-  modelMoveStartedAtRef,
-}: {
-  phase: CanvasPhase;
-  transitionStartTimeRef: React.MutableRefObject<number | null>;
-  cameraAtRestRef: React.MutableRefObject<boolean>;
-  modelCenterWorldRef: React.MutableRefObject<Vector3>;
-  modelMoveStartedAtRef: React.MutableRefObject<number | null>;
-}) {
-  const { camera } = useThree();
-  const cameraStartRef = useRef<Vector3 | null>(null);
-
-  useLayoutEffect(() => {
-    if (phase === 'transitioning') {
-      cameraStartRef.current = camera.position.clone();
-      transitionStartTimeRef.current = null;
-      cameraAtRestRef.current = false;
-    }
-    if (phase === 'splash') {
-      cameraStartRef.current = null;
-      transitionStartTimeRef.current = null;
-      cameraAtRestRef.current = false;
-    }
-  }, [phase, camera, transitionStartTimeRef, cameraAtRestRef]);
-
-  useFrame(() => {
-    if (phase !== 'transitioning') {
+      introT.current = Math.min(1, introT.current + delta / INTRO_DURATION_SEC);
+      const t = 1 - (1 - introT.current) ** 3;
+      camera.position.lerpVectors(INTRO_CAMERA_POSITION, SPLASH_CAMERA_POSITION, t);
+      controls.target.lerpVectors(INTRO_TARGET, SPLASH_TARGET, t);
+      controls.update();
       return;
     }
 
-    if (transitionStartTimeRef.current === null) {
-      transitionStartTimeRef.current = performance.now();
-    }
+    const k = Math.min(1, delta * 7);
+    camera.position.lerp(SPLASH_CAMERA_POSITION, k);
+    controls.target.lerp(SPLASH_TARGET, k);
+    controls.update();
 
-    const t0 = transitionStartTimeRef.current;
-    const elapsed = t0 === null ? 0 : performance.now() - t0;
-    const T = HOME_CAMERA_ENTER_LERP_MS;
-
-    if (elapsed < T) {
-      cameraAtRestRef.current = false;
-      const start = cameraStartRef.current ?? camera.position.clone();
-      const u = easeInOutCubic(Math.min(1, elapsed / T));
-      camera.position.lerpVectors(start, SPLASH_CAMERA_POSITION, u);
-    } else {
+    if (camera.position.distanceTo(SPLASH_CAMERA_POSITION) < EPSILON) {
       camera.position.copy(SPLASH_CAMERA_POSITION);
-      cameraAtRestRef.current = true;
-    }
-
-    if (modelMoveStartedAtRef.current !== null) {
-      camera.lookAt(0, 0, 0);
-    } else {
-      camera.lookAt(modelCenterWorldRef.current);
+      controls.target.copy(SPLASH_TARGET);
+      controls.update();
+      onSplashDone();
     }
   });
-
-  return null;
-}
-
-/** Runs after OrbitControls mounts so ref exists; aligns orbit pivot with post-transition look-at (origin). */
-function SyncMainOrbitTarget({
-  phase,
-  controlsRef,
-}: {
-  phase: CanvasPhase;
-  controlsRef: React.RefObject<OrbitControlsImpl | null>;
-}) {
-  useLayoutEffect(() => {
-    if (phase === 'main') {
-      controlsRef.current?.target.set(0, 0, 0);
-    }
-  }, [phase, controlsRef]);
 
   return null;
 }
 
 function Scene({ phase }: { phase: CanvasPhase }) {
-  const controlsRef = useRef<OrbitControlsImpl | null>(null);
-  const transitionStartTimeRef = useRef<number | null>(null);
-  const cameraAtRestRef = useRef(false);
-  const modelCenterWorldRef = useRef(new Vector3());
-  const modelMoveStartedAtRef = useRef<number | null>(null);
+  const [modelLoaded, setModelLoaded] = useState(false);
+  const [introDone, setIntroDone] = useState(false);
+  const [splashDone, setSplashDone] = useState(false);
+  const isSplash = phase === 'splash';
 
-  const orbitEnabled = phase !== 'transitioning';
-
-  useLayoutEffect(() => {
-    transitionStartTimeRef.current = null;
-    cameraAtRestRef.current = false;
-    modelMoveStartedAtRef.current = null;
-  }, [phase]);
-
+  const onModelLoaded = useCallback(() => setModelLoaded(true), []);
+  const onIntroDone = useCallback(() => setIntroDone(true), []);
+  const onSplashDone = useCallback(() => setSplashDone(true), []);
   return (
     <>
-      <ModelGroup
-        phase={phase}
-        controlsRef={controlsRef}
-        transitionStartTimeRef={transitionStartTimeRef}
-        cameraAtRestRef={cameraAtRestRef}
-        modelCenterWorldRef={modelCenterWorldRef}
-        modelMoveStartedAtRef={modelMoveStartedAtRef}
-      />
-      <CameraEnterLerp
-        phase={phase}
-        transitionStartTimeRef={transitionStartTimeRef}
-        cameraAtRestRef={cameraAtRestRef}
-        modelCenterWorldRef={modelCenterWorldRef}
-        modelMoveStartedAtRef={modelMoveStartedAtRef}
-      />
+      <group>
+        <Suspense fallback={null}>
+          <Center>
+            <CurlyModel onLoaded={onModelLoaded} splashDone={splashDone} />
+          </Center>
+        </Suspense>
+      </group>
       <directionalLight
         position={[5, 8, 12]}
         intensity={2.5}
@@ -252,16 +127,21 @@ function Scene({ phase }: { phase: CanvasPhase }) {
       />
       <Environment preset="studio" environmentIntensity={0.3} />
       <OrbitControls
-        ref={controlsRef}
         makeDefault
+        enableDamping={false}
+        target={[INTRO_TARGET.x, INTRO_TARGET.y, INTRO_TARGET.z]}
+        autoRotate={isSplash && introDone}
+        autoRotateSpeed={0.7}
         enableZoom={false}
         enablePan={false}
-        minPolarAngle={0.15}
-        maxPolarAngle={Math.PI - 0.15}
-        enabled={orbitEnabled}
-        target={[0, 0, 0]}
+        enableRotate={false}
       />
-      <SyncMainOrbitTarget phase={phase} controlsRef={controlsRef} />
+      <CameraRig
+        phase={phase}
+        modelLoaded={modelLoaded}
+        onIntroDone={onIntroDone}
+        onSplashDone={onSplashDone}
+      />
     </>
   );
 }
@@ -280,11 +160,7 @@ const CanvasLayer = styled.div`
     display: block;
     width: 100%;
     height: 100%;
-    cursor: grab;
-  }
-
-  canvas:active {
-    cursor: grabbing;
+    cursor: crosshair;
   }
 `;
 
@@ -297,8 +173,12 @@ function HomeSplashCanvas({ phase }: HomeSplashCanvasProps) {
     <CanvasLayer aria-hidden>
       <Canvas
         gl={{ antialias: true, alpha: false }}
-        camera={{ position: [0, 0, 6], fov: 42, near: 0.1, far: 100 }}
-        dpr={[1, 2]}
+        camera={{
+          position: INTRO_CAMERA_POSITION.toArray(),
+          fov: 42,
+          near: 0.1,
+          far: 100,
+        }}
         onCreated={({ gl }) => {
           gl.setClearColor('#ffffff', 1);
         }}
