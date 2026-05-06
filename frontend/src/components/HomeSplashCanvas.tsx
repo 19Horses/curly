@@ -97,7 +97,7 @@ function CameraRig({
       camera.position.lerpVectors(
         INTRO_CAMERA_POSITION,
         SPLASH_CAMERA_POSITION,
-        t,
+        t
       );
       controls.target.lerpVectors(INTRO_TARGET, SPLASH_TARGET, t);
       controls.update();
@@ -113,11 +113,15 @@ function CameraRig({
     const enterSec = HOME_CAMERA_ENTER_LERP_MS / 1000;
     const rawT = Math.min(
       1,
-      (clock.elapsedTime - enterStartRef.current) / enterSec,
+      (clock.elapsedTime - enterStartRef.current) / enterSec
     );
     const t = easeFromT(rawT);
 
-    camera.position.lerpVectors(enterFromPos.current, SPLASH_CAMERA_POSITION, t);
+    camera.position.lerpVectors(
+      enterFromPos.current,
+      SPLASH_CAMERA_POSITION,
+      t
+    );
     controls.target.lerpVectors(enterFromTarget.current, SPLASH_TARGET, t);
     controls.update();
 
@@ -142,10 +146,7 @@ function ModelRestGroup({
   const tweenStartRef = useRef<number | null>(null);
 
   const startPos = useMemo(() => new Vector3(0, 0, 0), []);
-  const endPos = useMemo(
-    () => new Vector3(...HOME_MODEL_REST_POSITION),
-    [],
-  );
+  const endPos = useMemo(() => new Vector3(...HOME_MODEL_REST_POSITION), []);
 
   const atSplash = phase === 'splash';
 
@@ -170,10 +171,7 @@ function ModelRestGroup({
     }
 
     const dur = HOME_MODEL_TO_REST_LERP_MS / 1000;
-    const rawT = Math.min(
-      1,
-      (clock.elapsedTime - tweenStartRef.current) / dur,
-    );
+    const rawT = Math.min(1, (clock.elapsedTime - tweenStartRef.current) / dur);
     const t = easeFromT(rawT);
 
     g.position.lerpVectors(startPos, endPos, t);

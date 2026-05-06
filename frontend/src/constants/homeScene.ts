@@ -13,5 +13,5 @@ export const HOME_MODEL_TO_REST_LERP_MS = 1600;
 /** Full Enter sequence wall time (camera + model tweens run together). */
 export const HOME_ENTER_SEQUENCE_MS = Math.max(
   HOME_CAMERA_ENTER_LERP_MS,
-  HOME_MODEL_TO_REST_LERP_MS,
+  HOME_MODEL_TO_REST_LERP_MS
 );
