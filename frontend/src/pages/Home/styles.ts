@@ -3,10 +3,66 @@ import { styled, css } from 'styled-components';
 import { StaggerRow } from '../../components/StaggerRow';
 
 export const HomeRoot = styled.div`
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
+`;
+
+/** Stacks splash chrome or footer above the fixed canvas */
+export const HomeUiStack = styled.div`
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  pointer-events: none;
+
+  & > * {
+    pointer-events: auto;
+  }
+`;
+
+/** Full-area layer for Enter only (canvas stays fullscreen underneath) */
+export const SplashChrome = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  pointer-events: none;
+`;
+
+export const EnterButton = styled.button`
+  margin-top: auto;
+  align-self: center;
+  margin-bottom: clamp(1rem, 3.5vh, 1.75rem);
+  padding: 0;
+  font: inherit;
+  font-size: clamp(0.8125rem, 1.75vw, 0.9375rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: #111111;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  appearance: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  pointer-events: auto;
+
+  &:hover {
+    color: #000000;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ec4899;
+    outline-offset: 4px;
+  }
 `;
 
 export const footerLinkStyles = css`
