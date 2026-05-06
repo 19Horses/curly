@@ -50,12 +50,10 @@ function CameraRig({
   phase,
   modelLoaded,
   onIntroDone,
-  onSplashDone,
 }: {
   phase: CanvasPhase;
   modelLoaded: boolean;
   onIntroDone: () => void;
-  onSplashDone: () => void;
 }) {
   const controls = useThree((s) => s.controls) as OrbitControlsImpl | null;
   const introT = useRef(0);
@@ -65,12 +63,10 @@ function CameraRig({
   const enterStartRef = useRef<number | null>(null);
   const enterFromPos = useRef(new Vector3());
   const enterFromTarget = useRef(new Vector3());
-  const splashRestFiredRef = useRef(false);
 
   useLayoutEffect(() => {
     if (phase === 'splash') {
       enterStartRef.current = null;
-      splashRestFiredRef.current = false;
     }
   }, [phase]);
 
@@ -125,14 +121,10 @@ function CameraRig({
     controls.target.lerpVectors(enterFromTarget.current, SPLASH_TARGET, t);
     controls.update();
 
-    if (rawT >= 0.8) {
+    if (rawT >= 1) {
       camera.position.copy(SPLASH_CAMERA_POSITION);
       controls.target.copy(SPLASH_TARGET);
       controls.update();
-      if (!splashRestFiredRef.current) {
-        splashRestFiredRef.current = true;
-        onSplashDone();
-      }
     }
   });
 
@@ -141,11 +133,9 @@ function CameraRig({
 
 function ModelRestGroup({
   phase,
-  cameraAtRest,
   children,
 }: {
   phase: CanvasPhase;
-  cameraAtRest: boolean;
   children: ReactNode;
 }) {
   const groupRef = useRef<Group>(null);
@@ -169,7 +159,7 @@ function ModelRestGroup({
     const g = groupRef.current;
     if (!g) return;
 
-    if (atSplash || !cameraAtRest) {
+    if (atSplash) {
       g.position.copy(startPos);
       g.scale.setScalar(1);
       return;
@@ -202,16 +192,14 @@ function ModelRestGroup({
 function Scene({ phase }: { phase: CanvasPhase }) {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [introDone, setIntroDone] = useState(false);
-  const [splashDone, setSplashDone] = useState(false);
   const isSplash = phase === 'splash';
 
   const onModelLoaded = useCallback(() => setModelLoaded(true), []);
   const onIntroDone = useCallback(() => setIntroDone(true), []);
-  const onSplashDone = useCallback(() => setSplashDone(true), []);
 
   return (
     <>
-      <ModelRestGroup phase={phase} cameraAtRest={splashDone}>
+      <ModelRestGroup phase={phase}>
         <Suspense fallback={null}>
           <Center>
             <CurlyModel onLoaded={onModelLoaded} />
@@ -235,7 +223,7 @@ function Scene({ phase }: { phase: CanvasPhase }) {
         enableDamping={false}
         target={[INTRO_TARGET.x, INTRO_TARGET.y, INTRO_TARGET.z]}
         autoRotate={isSplash && introDone}
-        autoRotateSpeed={0.7}
+        autoRotateSpeed={0.9}
         enableZoom={false}
         enablePan={false}
         enableRotate={false}
@@ -244,7 +232,6 @@ function Scene({ phase }: { phase: CanvasPhase }) {
         phase={phase}
         modelLoaded={modelLoaded}
         onIntroDone={onIntroDone}
-        onSplashDone={onSplashDone}
       />
     </>
   );
