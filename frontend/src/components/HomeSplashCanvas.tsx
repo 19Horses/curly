@@ -20,8 +20,9 @@ import {
   HOME_MODEL_REST_SCALE,
   HOME_MODEL_TO_REST_LERP_MS,
 } from '../constants/homeScene';
+import { HomePhotoRingPlaceholder } from './HomePhotoRingPlaceholder';
 
-const CURLY_GLB = '/curly.glb';
+const CURLY_GLB = './curly.glb';
 
 const SPLASH_CAMERA_POSITION = new Vector3(0, 2.5, 28);
 const SPLASH_TARGET = new Vector3(0, 0, 0);
@@ -204,6 +205,7 @@ function Scene({ phase }: { phase: CanvasPhase }) {
           </Center>
         </Suspense>
       </ModelRestGroup>
+      <HomePhotoRingPlaceholder phase={phase} />
       <directionalLight position={[5, 8, 12]} intensity={2.5} color="#ffffff" />
       <directionalLight
         position={[-10, 5, 6]}
