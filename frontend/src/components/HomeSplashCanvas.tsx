@@ -22,7 +22,7 @@ import {
 } from '../constants/homeScene';
 import { HomePhotoRingPlaceholder } from './HomePhotoRingPlaceholder';
 
-const CURLY_GLB = '/curly.glb';
+const CURLY_GLB = './curly.glb';
 
 const SPLASH_CAMERA_POSITION = new Vector3(0, 2.5, 28);
 const SPLASH_TARGET = new Vector3(0, 0, 0);
