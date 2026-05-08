@@ -124,6 +124,12 @@ export const ImagesColumn = styled.div`
 export const AsideColumn = styled.div`
   min-height: 0;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding-block-end: clamp(0.5rem, 1vw, 1rem);
+  font-size: clamp(0.8125rem, 0.72rem + 0.45vw, 1.125rem);
 
   ${stackBp} {
     display: none;

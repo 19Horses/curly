@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { styled, css } from 'styled-components';
+import { styled } from 'styled-components';
 import { StaggerRow } from '../../components/StaggerRow';
 
 export const HomeRoot = styled.div`
@@ -12,7 +11,6 @@ export const HomeRoot = styled.div`
   min-width: 0;
 `;
 
-/** Stacks splash chrome or footer above the fixed canvas */
 export const HomeUiStack = styled.div`
   position: relative;
   z-index: 1;
@@ -27,7 +25,6 @@ export const HomeUiStack = styled.div`
   }
 `;
 
-/** Full-area layer for Enter only (canvas stays fullscreen underneath) */
 export const SplashChrome = styled.div`
   flex: 1;
   display: flex;
@@ -63,21 +60,6 @@ export const EnterButton = styled.button`
   &:focus-visible {
     outline: 2px solid #ec4899;
     outline-offset: 4px;
-  }
-`;
-
-export const footerLinkStyles = css`
-  color: inherit;
-  text-decoration: none;
-  transition: opacity 0.3s ease-in-out;
-
-  &:hover {
-    opacity: 0.5;
-  }
-
-  &:focus-visible {
-    outline: 2px solid currentColor;
-    outline-offset: 2px;
   }
 `;
 
@@ -120,68 +102,4 @@ export const FooterRight = styled.div`
   align-items: flex-end;
   gap: clamp(0.25em, 0.15em + 0.6vw, 0.35em);
   text-align: right;
-`;
-
-export const ListHeading = styled.span`
-  display: inline-block;
-  font-weight: bold;
-  text-transform: lowercase;
-  margin-bottom: clamp(0.45em, 0.3em + 0.8vw, 0.7em);
-`;
-
-export const CaseList = styled.ul`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: clamp(0.15em, 0.08em + 0.45vw, 0.25em);
-`;
-
-/** Pink anchor — kept measurable for list ↔ ring connector line */
-export const CaseListDot = styled.span`
-  flex-shrink: 0;
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 0;
-  background: #ec4899;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-`;
-
-export const CaseListItem = styled.li<{ $highlighted?: boolean }>`
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.45em;
-
-  & > ${StaggerRow} {
-    align-self: center;
-  }
-
-  &:hover > ${CaseListDot}, &:has(:focus-visible) > ${CaseListDot} {
-    opacity: 1;
-  }
-
-  ${({ $highlighted }) =>
-    $highlighted &&
-    css`
-      > ${CaseListDot} {
-        opacity: 1;
-      }
-    `}
-`;
-
-export const CaseLink = styled(Link)<{ $syncHover?: boolean }>`
-  ${footerLinkStyles}
-  overflow-wrap: break-word;
-  text-align: right;
-
-  ${({ $syncHover }) =>
-    $syncHover &&
-    css`
-      opacity: 0.5;
-    `}
 `;
