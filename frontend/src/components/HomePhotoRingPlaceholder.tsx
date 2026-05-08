@@ -44,13 +44,14 @@ function easeFromT(t: number): number {
 
 type RingExitContextValue = {
   exitTargetCaseStudyId: string | null;
-  exitStartRef: React.MutableRefObject<number | null>;
+  /** Clock time when alignment finished — fades run from here */
+  exitSequenceStartRef: React.MutableRefObject<number | null>;
 };
 
 const RingExitContext = createContext<RingExitContextValue | null>(null);
 
 function ringPanelOpacity(
-  elapsedSinceExitStart: number,
+  elapsedSinceSequenceStart: number,
   panelCaseStudyId: string,
   exitTargetCaseStudyId: string,
   othersSec: number,
@@ -58,15 +59,15 @@ function ringPanelOpacity(
 ): number {
   const isSelected = panelCaseStudyId === exitTargetCaseStudyId;
   if (!isSelected) {
-    const rawT = Math.min(1, elapsedSinceExitStart / othersSec);
+    const rawT = Math.min(1, elapsedSinceSequenceStart / othersSec);
     return 1 - easeFromT(rawT);
   }
-  if (elapsedSinceExitStart < othersSec) {
+  if (elapsedSinceSequenceStart < othersSec) {
     return 1;
   }
   const rawT = Math.min(
     1,
-    (elapsedSinceExitStart - othersSec) / selectedSec
+    (elapsedSinceSequenceStart - othersSec) / selectedSec
   );
   return 1 - easeFromT(rawT);
 }
@@ -203,11 +204,12 @@ function RingPanel({
     if (!m) return;
 
     let opacity = 1;
+    const seqStart = exitCtx?.exitSequenceStartRef.current;
     if (
       exitCtx?.exitTargetCaseStudyId &&
-      exitCtx.exitStartRef.current != null
+      seqStart != null
     ) {
-      const elapsed = clock.elapsedTime - exitCtx.exitStartRef.current;
+      const elapsed = clock.elapsedTime - seqStart;
       opacity = ringPanelOpacity(
         elapsed,
         panel.reactKey,
@@ -227,9 +229,9 @@ function RingPanel({
       mm.needsUpdate = true;
     }
 
-    const target = isHovered ? HOME_PHOTO_RING_PANEL_HOVER_SCALE : 1;
+    const scaleTarget = isHovered ? HOME_PHOTO_RING_PANEL_HOVER_SCALE : 1;
     const k = 1 - Math.exp(-delta * HOME_PHOTO_RING_PANEL_HOVER_LERP);
-    const next = MathUtils.lerp(m.scale.x, target, k);
+    const next = MathUtils.lerp(m.scale.x, scaleTarget, k);
     m.scale.setScalar(next);
   });
 
@@ -300,7 +302,7 @@ export function HomePhotoRingPlaceholder({
   const tweenStartRef = useRef<number | null>(null);
   const scrollAngularVelocityRef = useRef(0);
   const hoverLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const exitStartRef = useRef<number | null>(null);
+  const exitSequenceStartRef = useRef<number | null>(null);
   const exitCompleteFiredRef = useRef(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const atSplash = phase === 'splash';
@@ -310,7 +312,7 @@ export function HomePhotoRingPlaceholder({
   const ringExitCtx = useMemo<RingExitContextValue>(
     () => ({
       exitTargetCaseStudyId: exitTargetId,
-      exitStartRef,
+      exitSequenceStartRef,
     }),
     [exitTargetId]
   );
@@ -405,7 +407,7 @@ export function HomePhotoRingPlaceholder({
 
   useLayoutEffect(() => {
     if (!exitTargetId) {
-      exitStartRef.current = null;
+      exitSequenceStartRef.current = null;
       exitCompleteFiredRef.current = false;
     }
   }, [exitTargetId]);
@@ -433,7 +435,7 @@ export function HomePhotoRingPlaceholder({
       if (exitTargetId && n > 0) {
         scrollAngularVelocityRef.current = 0;
         const exitIdx = ringPanels.findIndex((p) => p.reactKey === exitTargetId);
-        if (exitIdx >= 0 && exitStartRef.current === null) {
+        if (exitIdx >= 0 && exitSequenceStartRef.current === null) {
           const targetYaw = nearestYawToBringPanelForward(
             exitIdx,
             n,
@@ -451,15 +453,16 @@ export function HomePhotoRingPlaceholder({
             );
           } else {
             /* Stay at the current eased angle — no snap to targetYaw (avoids a visible jerk). */
-            exitStartRef.current = clock.elapsedTime;
+            exitSequenceStartRef.current = clock.elapsedTime;
           }
         }
 
         if (
-          exitStartRef.current !== null &&
+          exitSequenceStartRef.current !== null &&
           !exitCompleteFiredRef.current
         ) {
-          const elapsed = clock.elapsedTime - exitStartRef.current;
+          const elapsed =
+            clock.elapsedTime - exitSequenceStartRef.current;
           const exitTotalSec =
             HOME_PHOTO_RING_EXIT_OTHERS_MS / 1000 +
             HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000;
