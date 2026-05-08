@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
 import { HomeListRingConnector } from '../../components/HomeListRingConnector';
 import HomeSplashCanvas from '../../components/HomeSplashCanvas';
-import { StaggerRow } from '../../components/StaggerRow';
+import CaseStudiesList from '../../components/CaseStudiesList';
 import {
   HOME_ENTER_SEQUENCE_MS,
   HOME_FOOTER_EXIT_FADE_DURATION_S,
@@ -21,10 +21,6 @@ import {
 } from '../../constants/splash';
 import { useGetCaseStudySummaries } from '../../queries/useGetCaseStudySummaries';
 import {
-  CaseLink,
-  CaseList,
-  CaseListDot,
-  CaseListItem,
   EnterButton,
   FooterLeft,
   FooterLeftStagger,
@@ -33,7 +29,6 @@ import {
   HomeFooter,
   HomeRoot,
   HomeUiStack,
-  ListHeading,
   SplashChrome,
 } from './styles';
 
@@ -246,57 +241,27 @@ function Home() {
               </FooterLeftStagger>
             </FooterLeft>
             <FooterRight>
-              <StaggerRow $staggerIndex={0} $align="end">
-                <ListHeading>worlds we&apos;ve built</ListHeading>
-              </StaggerRow>
-              {isLoading && <FooterLine>Loading projects…</FooterLine>}
-              {isError && <FooterLine>Could not load projects.</FooterLine>}
-              {!isLoading &&
-                !isError &&
-                caseStudies &&
-                caseStudies.length > 0 && (
-                  <CaseList>
-                    {caseStudies.map((study, index) => {
-                      const rowHighlighted =
-                        highlightedCaseStudyId === study._id;
-                      return (
-                        <CaseListItem
-                          key={study._id}
-                          $highlighted={rowHighlighted}
-                        >
-                          <CaseListDot ref={getListDotRefCallback(study._id)} />
-                          <StaggerRow $staggerIndex={index + 1} $align="end">
-                            <CaseLink
-                              to={`/projects/${study.slug}`}
-                              $syncHover={rowHighlighted}
-                              onMouseEnter={() =>
-                                handleCaseLinkEnter(study._id)
-                              }
-                              onMouseLeave={handleCaseLinkLeave}
-                              onClick={(e) => {
-                                if (
-                                  e.ctrlKey ||
-                                  e.metaKey ||
-                                  e.shiftKey ||
-                                  e.altKey
-                                ) {
-                                  return;
-                                }
-                                e.preventDefault();
-                                beginProjectExit(study.slug, study._id);
-                              }}
-                            >
-                              {study.client} – {study.title}
-                            </CaseLink>
-                          </StaggerRow>
-                        </CaseListItem>
-                      );
-                    })}
-                  </CaseList>
-                )}
-              {!isLoading && !isError && caseStudies?.length === 0 && (
-                <FooterLine>No projects yet.</FooterLine>
-              )}
+              <CaseStudiesList
+                summaries={caseStudies}
+                isLoading={isLoading}
+                isError={isError}
+                highlightedId={highlightedCaseStudyId}
+                getDotRefCallback={getListDotRefCallback}
+                onItemEnter={handleCaseLinkEnter}
+                onItemLeave={handleCaseLinkLeave}
+                onItemClick={(e, slug, id) => {
+                  if (
+                    e.ctrlKey ||
+                    e.metaKey ||
+                    e.shiftKey ||
+                    e.altKey
+                  ) {
+                    return;
+                  }
+                  e.preventDefault();
+                  beginProjectExit(slug, id);
+                }}
+              />
             </FooterRight>
           </HomeFooter>
         ) : null}

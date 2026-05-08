@@ -1,8 +1,10 @@
 import { useParams } from 'react-router-dom';
+import CaseStudiesList from '../../components/CaseStudiesList';
 import { BlockParagraphs } from '../../sanity/BlockParagraphs';
 import { PROJECT_COPY_FADE_DELAYS_S } from '../../constants/projectPage';
 import { useSurfaceRevealTransition } from '../../hooks/useSurfaceRevealTransition';
 import { useGetCaseStudy } from '../../queries/useGetCaseStudy';
+import { useGetCaseStudySummaries } from '../../queries/useGetCaseStudySummaries';
 import { SectionLabel } from '../JobPage/styles';
 import {
   AsideColumn,
@@ -21,6 +23,11 @@ import {
 function ProjectPage() {
   const { slug } = useParams();
   const { data, isLoading, isError } = useGetCaseStudy(slug);
+  const {
+    data: caseStudies,
+    isLoading: caseStudiesLoading,
+    isError: caseStudiesError,
+  } = useGetCaseStudySummaries();
   const surfaceActive = useSurfaceRevealTransition(true, slug ?? '');
 
   if (!slug) {
@@ -89,7 +96,14 @@ function ProjectPage() {
             </ProjectCopyFade>
           </ProjectCopyRow>
         </ImagesColumn>
-        <AsideColumn />
+        <AsideColumn>
+          <CaseStudiesList
+            summaries={caseStudies}
+            isLoading={caseStudiesLoading}
+            isError={caseStudiesError}
+            currentSlug={slug}
+          />
+        </AsideColumn>
       </ProjectGrid>
     </ProjectRoot>
   );
