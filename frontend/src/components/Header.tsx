@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { styled, css } from 'styled-components';
+import HeaderLogoCanvas from './HeaderLogoCanvas';
 import { HeaderAudioTrack } from './HeaderAudioTrack';
 import { StaggerRow } from './StaggerRow';
 import { fadeIn, fadeInAbsoluteCenter } from '../styles/animations';
@@ -88,6 +89,15 @@ const LogoLink = styled(Link)`
   text-align: center;
   animation: ${fadeInAbsoluteCenter} 0.5s ease-out both;
   animation-delay: 0.1s;
+  display: block;
+  width: clamp(168px, 34vw, 300px);
+  height: clamp(52px, 12vw, 96px);
+`;
+
+const LogoCanvasInner = styled.span`
+  display: block;
+  width: 100%;
+  height: 100%;
 `;
 
 const Nav = styled.nav<{ $jobsLight: boolean }>`
@@ -143,7 +153,11 @@ function Header() {
         </DateDisplay>
         <HeaderAudioTrack jobsBleed={jobsBleed} />
       </LeftCluster>
-      <LogoLink to="/">Curly</LogoLink>
+      <LogoLink to="/" aria-label="Curly home">
+        <LogoCanvasInner>
+          <HeaderLogoCanvas />
+        </LogoCanvasInner>
+      </LogoLink>
       <Nav aria-label="Main" $jobsLight={jobsNavLight}>
         <StaggerRow $staggerIndex={0} $align="end" $delayOffset={2}>
           <NavPlaceholder>other stuff</NavPlaceholder>

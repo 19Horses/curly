@@ -23,3 +23,14 @@ export const fadeInAbsoluteCenter = keyframes`
     transform: translate(-50%, 0);
   }
 `;
+
+/** Opacity-only (no transform) — pairs well with WebGL canvases inside animated parents */
+export const fadeInOpacity = keyframes`
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+`;
