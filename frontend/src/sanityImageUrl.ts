@@ -11,7 +11,6 @@ export function urlFor(source: SanityImageSource) {
   return builder.image(source);
 }
 
-/** Builds a CDN URL with optional Image API transforms. Returns undefined if the source is missing or invalid. */
 export function sanityImageUrl(
   source: SanityImageSource | null | undefined,
   options?: { width?: number; height?: number; quality?: number }
@@ -33,7 +32,6 @@ const DETAIL_GALLERY_WIDTH = 1600;
 
 export type CoverImageFields = { alt: string; url: string };
 
-/** Maps a Sanity image field from GROQ to alt + optimized CDN URL for list / home hero. */
 export function toCoverImageFields(
   image: SanityImageSource | null | undefined,
   width: number = LIST_COVER_WIDTH
@@ -50,7 +48,6 @@ export function toCoverImageFields(
   return { alt, url };
 }
 
-/** Maps an array of Sanity image fields for case study detail pages. */
 export function toCaseStudyImageList(
   images: SanityImageSource[] | null | undefined,
   width: number = DETAIL_GALLERY_WIDTH

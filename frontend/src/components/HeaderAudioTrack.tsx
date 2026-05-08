@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import binzSrc from '../assets/binz.mp3';
+import { PROJECT_SURFACE_TIMING } from '../constants/projectSurface';
 import pauseSrc from '../assets/pause.svg';
 import playSrc from '../assets/play.svg';
 import { fadeIn } from '../styles/animations';
@@ -44,15 +45,16 @@ const TrackBlock = styled.div`
   animation-delay: 0.08s;
 `;
 
-const TrackIcon = styled.img<{ $jobsBleed: boolean }>`
+const TrackIcon = styled.img<{ $lightOnDark: boolean }>`
   width: 0.78rem;
   height: 0.78rem;
   display: block;
   flex-shrink: 0;
-  ${({ $jobsBleed }) => ($jobsBleed ? 'filter: invert(1);' : 'filter: none;')}
+  ${({ $lightOnDark }) =>
+    $lightOnDark ? 'filter: invert(1);' : 'filter: none;'}
 `;
 
-const TrackMeta = styled.button<{ $jobsBleed: boolean }>`
+const TrackMeta = styled.button<{ $lightOnDark: boolean }>`
   position: relative;
   appearance: none;
   border: none;
@@ -65,8 +67,8 @@ const TrackMeta = styled.button<{ $jobsBleed: boolean }>`
   font-weight: normal;
   font-size: clamp(0.78rem, 0.7rem + 0.3vw, 0.95rem);
   line-height: 1.25;
-  color: ${({ $jobsBleed }) => ($jobsBleed ? '#fff' : 'inherit')};
-  transition: color 0.4s ease;
+  color: ${({ $lightOnDark }) => ($lightOnDark ? '#ffffff' : 'inherit')};
+  transition: color ${PROJECT_SURFACE_TIMING};
   display: block;
   align-self: flex-start;
   width: max-content;
@@ -93,15 +95,15 @@ const TrackRuleTrack = styled.div`
   user-select: none;
 `;
 
-const TrackRuleBase = styled.div<{ $jobsBleed: boolean }>`
+const TrackRuleBase = styled.div<{ $lightOnDark: boolean }>`
   position: absolute;
   left: 0;
   right: 0;
   top: 50%;
   height: ${trackRuleThickness};
   transform: translateY(-50%);
-  background: ${({ $jobsBleed }) => ($jobsBleed ? '#fff' : '#000')};
-  transition: background 0.4s ease;
+  background: ${({ $lightOnDark }) => ($lightOnDark ? '#ffffff' : '#000000')};
+  transition: background-color ${PROJECT_SURFACE_TIMING};
   pointer-events: none;
 `;
 
@@ -129,10 +131,11 @@ const VisuallyHiddenAudio = styled.audio`
 `;
 
 export type HeaderAudioTrackProps = {
-  jobsBleed: boolean;
+  /** White/inverted chrome (jobs list bleed or project page). */
+  lightOnDark: boolean;
 };
 
-export function HeaderAudioTrack({ jobsBleed }: HeaderAudioTrackProps) {
+export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [trackProgress, setTrackProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -237,16 +240,16 @@ export function HeaderAudioTrack({ jobsBleed }: HeaderAudioTrackProps) {
         <TrackTitleStack>
           <TrackMeta
             type="button"
-            $jobsBleed={jobsBleed}
+            $lightOnDark={lightOnDark}
             aria-label={isPlaying ? 'Pause track' : 'Play track'}
             onClick={togglePlayback}
           >
             <TrackMetaLabel>Solange - Binz</TrackMetaLabel>
             <TrackIconSlot aria-hidden>
               {isPlaying ? (
-                <TrackIcon src={pauseSrc} alt="" $jobsBleed={jobsBleed} />
+                <TrackIcon src={pauseSrc} alt="" $lightOnDark={lightOnDark} />
               ) : (
-                <TrackIcon src={playSrc} alt="" $jobsBleed={jobsBleed} />
+                <TrackIcon src={playSrc} alt="" $lightOnDark={lightOnDark} />
               )}
             </TrackIconSlot>
           </TrackMeta>
@@ -255,7 +258,7 @@ export function HeaderAudioTrack({ jobsBleed }: HeaderAudioTrackProps) {
             aria-label="Seek audio"
             title="Click to seek"
           >
-            <TrackRuleBase $jobsBleed={jobsBleed} />
+            <TrackRuleBase $lightOnDark={lightOnDark} />
             <TrackRuleProgress $p={trackProgress} />
           </TrackRuleTrack>
         </TrackTitleStack>
