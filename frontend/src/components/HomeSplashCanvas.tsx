@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 import { Center, Environment, OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import type { MutableRefObject } from 'react';
 import {
   Suspense,
   useCallback,
@@ -182,6 +183,8 @@ function Scene({
   phase,
   caseStudySummaries,
   listDriveCaseStudyId,
+  highlightedCaseStudyId,
+  listFooterAnchorScreenRef,
   onHeroModelReady,
   onRingHighlightEnter,
   onRingHighlightLeave,
@@ -192,6 +195,11 @@ function Scene({
   phase: CanvasPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
   listDriveCaseStudyId: string | null;
+  highlightedCaseStudyId: string | null;
+  listFooterAnchorScreenRef?: MutableRefObject<{
+    x: number;
+    y: number;
+  } | null>;
   onHeroModelReady?: () => void;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
@@ -226,6 +234,8 @@ function Scene({
           phase={phase}
           caseStudySummaries={caseStudySummaries}
           listDriveCaseStudyId={listDriveCaseStudyId}
+          highlightedCaseStudyId={highlightedCaseStudyId}
+          listFooterAnchorScreenRef={listFooterAnchorScreenRef}
           onRingHighlightEnter={onRingHighlightEnter}
           onRingHighlightLeave={onRingHighlightLeave}
           onRingPanelClick={onRingPanelClick}
@@ -297,6 +307,13 @@ export type HomeSplashCanvasProps = {
   caseStudySummaries?: CaseStudySummary[];
   /** Footer list hover only — drives ring rotation toward that panel */
   listDriveCaseStudyId?: string | null;
+  /** List or ring pane hover — drives connector line (with listFooterAnchorScreenRef) */
+  highlightedCaseStudyId?: string | null;
+  /** Screen coords for connector dot below ring panel (written by WebGL) */
+  listFooterAnchorScreenRef?: MutableRefObject<{
+    x: number;
+    y: number;
+  } | null>;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
   onRingPanelClick?: (slug: string, caseStudyId: string) => void;
@@ -309,6 +326,8 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   phase,
   caseStudySummaries,
   listDriveCaseStudyId = null,
+  highlightedCaseStudyId = null,
+  listFooterAnchorScreenRef,
   onRingHighlightEnter,
   onRingHighlightLeave,
   onRingPanelClick,
@@ -346,6 +365,8 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
             phase={phase}
             caseStudySummaries={caseStudySummaries}
             listDriveCaseStudyId={listDriveCaseStudyId}
+            highlightedCaseStudyId={highlightedCaseStudyId}
+            listFooterAnchorScreenRef={listFooterAnchorScreenRef}
             onHeroModelReady={onHeroModelReady}
             onRingHighlightEnter={onRingHighlightEnter}
             onRingHighlightLeave={onRingHighlightLeave}

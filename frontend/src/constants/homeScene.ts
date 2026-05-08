@@ -40,6 +40,12 @@ export const HOME_PHOTO_RING_ENTER_OFFSET: [number, number, number] = [
 /** Ring group Y — lifts the layout so the forward panel reads nearer screen center (camera looks slightly down at origin). */
 export const HOME_PHOTO_RING_Y = 1.35;
 
+/**
+ * Local −Y offset from the panel image bottom (bbox) to the list↔ring connector anchor in world space
+ * (square center sits this far below the image, not on the edge).
+ */
+export const HOME_PHOTO_RING_CONNECTOR_BELOW_IMAGE = 0.15;
+
 /** Continuous rotation of the ring about Y (radians per second). */
 export const HOME_PHOTO_RING_ROTATE_RAD_PER_SEC = 0.05;
 

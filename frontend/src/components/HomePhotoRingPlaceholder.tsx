@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 import { useTexture } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
+import type { MutableRefObject } from 'react';
 import {
   Suspense,
   createContext,
@@ -24,6 +25,7 @@ import {
 import type { CaseStudySummary } from '../queries/useGetCaseStudySummaries';
 import {
   HOME_MODEL_TO_REST_LERP_MS,
+  HOME_PHOTO_RING_CONNECTOR_BELOW_IMAGE,
   HOME_PHOTO_RING_ENTER_OFFSET,
   HOME_PHOTO_RING_GUIDE_COLOR,
   HOME_PHOTO_RING_GUIDE_THICKNESS,
@@ -47,6 +49,9 @@ import {
   HOME_PHOTO_RING_VIEWPORT_PADDING,
   HOME_PHOTO_RING_Y,
 } from '../constants/homeScene';
+
+/** Bottom-center of panel mesh → screen (footer ↔ ring connector) */
+const _footerAnchorProj = new Vector3();
 
 /** Uniform scale so the ring fits horizontally (caps at 1); floored so panels don’t shrink past readability. */
 function ringViewportUniformScale(
@@ -72,7 +77,7 @@ function easeFromT(t: number): number {
 type RingExitContextValue = {
   exitTargetCaseStudyId: string | null;
   /** Clock time when alignment finished — fades run from here */
-  exitSequenceStartRef: React.MutableRefObject<number | null>;
+  exitSequenceStartRef: MutableRefObject<number | null>;
 };
 
 const RingExitContext = createContext<RingExitContextValue | null>(null);
@@ -207,6 +212,7 @@ function RingPanel({
   index,
   hoveredIndex,
   listDrivePanelIndex,
+  panelMeshesRef,
   panel,
   onPointerEnterPanel,
   onPointerLeavePanel,
@@ -217,12 +223,20 @@ function RingPanel({
   hoveredIndex: number | null;
   /** Footer list hover — same panel scale as direct ring hover */
   listDrivePanelIndex: number | null;
+  panelMeshesRef: MutableRefObject<(Mesh | null)[]>;
   panel: RingPanelData;
   onPointerEnterPanel: (index: number) => void;
   onPointerLeavePanel: () => void;
   onPanelClick: (slug: string, caseStudyId: string) => void;
 }) {
-  const meshRef = useRef<Mesh>(null);
+  const meshRef = useRef<Mesh | null>(null);
+  const setMeshRef = useCallback(
+    (node: Mesh | null) => {
+      meshRef.current = node;
+      panelMeshesRef.current[index] = node;
+    },
+    [panelMeshesRef, index]
+  );
   const exitCtx = useContext(RingExitContext);
   const isHovered =
     hoveredIndex === index ||
@@ -265,7 +279,7 @@ function RingPanel({
 
   return (
     <mesh
-      ref={meshRef}
+      ref={setMeshRef}
       position={[slot.x, 0, slot.z]}
       rotation={[0, slot.yaw, 0]}
       onPointerOver={(e) => {
@@ -306,6 +320,8 @@ export function HomePhotoRingPlaceholder({
   phase,
   caseStudySummaries,
   listDriveCaseStudyId,
+  highlightedCaseStudyId,
+  listFooterAnchorScreenRef,
   onRingHighlightEnter,
   onRingHighlightLeave,
   onRingPanelClick,
@@ -316,16 +332,24 @@ export function HomePhotoRingPlaceholder({
   caseStudySummaries: CaseStudySummary[] | undefined;
   /** Footer list hover only — when set, ring eases that panel forward */
   listDriveCaseStudyId: string | null;
+  /** Footer list or ring pane hover — drives connector line anchor */
+  highlightedCaseStudyId: string | null;
+  /** Screen coords for dot below highlighted panel + SVG connector line */
+  listFooterAnchorScreenRef?: MutableRefObject<{
+    x: number;
+    y: number;
+  } | null>;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
   onRingPanelClick?: (slug: string, caseStudyId: string) => void;
   exitTargetCaseStudyId?: string | null;
   onExitAnimationComplete?: () => void;
 }) {
-  const { gl, camera, controls } = useThree();
+  const { gl, camera, controls, size } = useThree();
   const orbitTargetFallbackRef = useRef(new Vector3(0, 0, 0));
   const outerRef = useRef<Group>(null);
   const innerRef = useRef<Group>(null);
+  const panelMeshesRef = useRef<(Mesh | null)[]>([]);
   const tweenStartRef = useRef<number | null>(null);
   const scrollAngularVelocityRef = useRef(0);
   const hoverLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -374,6 +398,13 @@ export function HomePhotoRingPlaceholder({
     const idx = ringPanels.findIndex((p) => p.reactKey === id);
     return idx >= 0 ? idx : null;
   }, [listDriveCaseStudyId, ringPanels]);
+
+  const connectorPanelIndex = useMemo(() => {
+    const id = highlightedCaseStudyId;
+    if (id == null || ringPanels.length === 0) return null;
+    const idx = ringPanels.findIndex((p) => p.reactKey === id);
+    return idx >= 0 ? idx : null;
+  }, [highlightedCaseStudyId, ringPanels]);
 
   useEffect(() => {
     const el = gl.domElement;
@@ -554,6 +585,34 @@ export function HomePhotoRingPlaceholder({
     if (rawT >= 1) {
       g.position.copy(endPos);
     }
+
+    if (listFooterAnchorScreenRef) {
+      if (highlightedCaseStudyId && connectorPanelIndex !== null) {
+        const mesh = panelMeshesRef.current[connectorPanelIndex];
+        if (mesh && camera instanceof PerspectiveCamera) {
+          mesh.updateWorldMatrix(true, true);
+          const geom = mesh.geometry;
+          if (!geom.boundingBox) geom.computeBoundingBox();
+          const bb = geom.boundingBox;
+          if (bb) {
+            _footerAnchorProj.set(
+              0,
+              bb.min.y - HOME_PHOTO_RING_CONNECTOR_BELOW_IMAGE,
+              0
+            );
+            _footerAnchorProj.applyMatrix4(mesh.matrixWorld);
+            _footerAnchorProj.project(camera);
+            const x = (_footerAnchorProj.x * 0.5 + 0.5) * size.width;
+            const y = (-_footerAnchorProj.y * 0.5 + 0.5) * size.height;
+            listFooterAnchorScreenRef.current = { x, y };
+          }
+        } else {
+          listFooterAnchorScreenRef.current = null;
+        }
+      } else {
+        listFooterAnchorScreenRef.current = null;
+      }
+    }
   });
 
   return (
@@ -582,6 +641,7 @@ export function HomePhotoRingPlaceholder({
               panel={ringPanels[i]}
               hoveredIndex={hoveredIndex}
               listDrivePanelIndex={focusPanelIndex}
+              panelMeshesRef={panelMeshesRef}
               onPointerEnterPanel={handlePointerEnterPanel}
               onPointerLeavePanel={handlePointerLeavePanel}
               onPanelClick={handlePanelClick}
