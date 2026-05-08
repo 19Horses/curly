@@ -69,3 +69,12 @@ export const HOME_PHOTO_RING_LIST_FOCUS_LERP = 5;
 
 /** Delay before clearing list-driven focus when leaving a link (matches ring hover feel). */
 export const HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS = 45;
+
+/** Exit: non-selected photo panels fade out (stage 1). */
+export const HOME_PHOTO_RING_EXIT_OTHERS_MS = 420;
+
+/** Exit: selected panel fades after stage 1, then navigation runs. */
+export const HOME_PHOTO_RING_EXIT_SELECTED_MS = 380;
+
+/** Exit: ring rotates until the chosen panel faces forward; then fades begin. */
+export const HOME_PHOTO_RING_EXIT_ALIGN_EPSILON_RAD = 0.022;

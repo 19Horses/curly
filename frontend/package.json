@@ -14,12 +14,13 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@sanity/image-url": "^2.0.3",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
+    "@sanity/image-url": "^2.0.3",
     "@tanstack/react-query": "^5.86.0",
     "axios": "^1.16.0",
     "gh-pages": "^5.0.0",
+    "motion": "^12.38.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.14.2",
