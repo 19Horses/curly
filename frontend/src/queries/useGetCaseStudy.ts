@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import type { SanityImageSource } from '@sanity/image-url';
 import { getApiUrl } from '../sanityIntegration';
+import { toCaseStudyImageList } from '../sanityImageUrl';
 import type { CaseStudyType } from './useGetCaseStudies';
 
 const getCaseStudyBySlug = async (
@@ -15,15 +17,21 @@ const getCaseStudyBySlug = async (
       brief,
       approach,
       results,
-      images[]{
-        alt,
-        "url": asset->url
-      },
+      images[],
       videoLink
     }
   `;
   const response = await axios.get(getApiUrl(query));
-  return response.data;
+  const raw = response.data.result as
+    | (Omit<CaseStudyType, 'images'> & { images: SanityImageSource[] })
+    | null;
+  if (raw == null) return response.data;
+  return {
+    result: {
+      ...raw,
+      images: toCaseStudyImageList(raw.images),
+    },
+  };
 };
 
 export const useGetCaseStudy = (slug: string | undefined) => {

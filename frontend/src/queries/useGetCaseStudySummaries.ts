@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import type { SanityImageSource } from '@sanity/image-url';
 import { getApiUrl } from '../sanityIntegration';
+import { toCoverImageFields } from '../sanityImageUrl';
 
 /** First gallery image only — enough for list / 3D ring without brief, approach, results, video. */
 export type CaseStudyCoverImage = {
@@ -22,10 +24,7 @@ const query = `
     "slug": slug.current,
     client,
     title,
-    "coverImage": images[0]{
-      alt,
-      "url": asset->url
-    }
+    "coverImage": images[0]
   }
 `;
 
@@ -33,7 +32,17 @@ const getCaseStudySummaries = async (): Promise<{
   result: CaseStudySummary[];
 }> => {
   const response = await axios.get(getApiUrl(query));
-  return response.data;
+  const rows = response.data.result as Array<
+    Omit<CaseStudySummary, 'coverImage'> & {
+      coverImage: SanityImageSource | null;
+    }
+  >;
+  return {
+    result: rows.map((row) => ({
+      ...row,
+      coverImage: toCoverImageFields(row.coverImage) ?? null,
+    })),
+  };
 };
 
 export const useGetCaseStudySummaries = () => {
