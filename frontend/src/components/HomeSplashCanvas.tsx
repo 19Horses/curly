@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type FC,
   type ReactNode,
 } from 'react';
 import { styled } from 'styled-components';
@@ -20,6 +21,7 @@ import {
   HOME_MODEL_REST_SCALE,
   HOME_MODEL_TO_REST_LERP_MS,
 } from '../constants/homeScene';
+import type { CaseStudySummary } from '../queries/useGetCaseStudySummaries';
 import { HomePhotoRingPlaceholder } from './HomePhotoRingPlaceholder';
 
 const CURLY_GLB = './curly.glb';
@@ -188,7 +190,21 @@ function ModelRestGroup({
   return <group ref={groupRef}>{children}</group>;
 }
 
-function Scene({ phase }: { phase: CanvasPhase }) {
+function Scene({
+  phase,
+  caseStudySummaries,
+  listDriveCaseStudyId,
+  onRingHighlightEnter,
+  onRingHighlightLeave,
+  onRingPanelClick,
+}: {
+  phase: CanvasPhase;
+  caseStudySummaries: CaseStudySummary[] | undefined;
+  listDriveCaseStudyId: string | null;
+  onRingHighlightEnter?: (caseStudyId: string) => void;
+  onRingHighlightLeave?: () => void;
+  onRingPanelClick?: (slug: string) => void;
+}) {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const isSplash = phase === 'splash';
@@ -205,7 +221,16 @@ function Scene({ phase }: { phase: CanvasPhase }) {
           </Center>
         </Suspense>
       </ModelRestGroup>
-      <HomePhotoRingPlaceholder phase={phase} />
+      <Suspense fallback={null}>
+        <HomePhotoRingPlaceholder
+          phase={phase}
+          caseStudySummaries={caseStudySummaries}
+          listDriveCaseStudyId={listDriveCaseStudyId}
+          onRingHighlightEnter={onRingHighlightEnter}
+          onRingHighlightLeave={onRingHighlightLeave}
+          onRingPanelClick={onRingPanelClick}
+        />
+      </Suspense>
       <directionalLight position={[5, 8, 12]} intensity={2.5} color="#ffffff" />
       <directionalLight
         position={[-10, 5, 6]}
@@ -257,9 +282,22 @@ const CanvasLayer = styled.div`
 
 export type HomeSplashCanvasProps = {
   phase: CanvasPhase;
+  caseStudySummaries?: CaseStudySummary[];
+  /** Footer list hover only — drives ring rotation toward that panel */
+  listDriveCaseStudyId?: string | null;
+  onRingHighlightEnter?: (caseStudyId: string) => void;
+  onRingHighlightLeave?: () => void;
+  onRingPanelClick?: (slug: string) => void;
 };
 
-function HomeSplashCanvas({ phase }: HomeSplashCanvasProps) {
+const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
+  phase,
+  caseStudySummaries,
+  listDriveCaseStudyId = null,
+  onRingHighlightEnter,
+  onRingHighlightLeave,
+  onRingPanelClick,
+}) => {
   return (
     <CanvasLayer aria-hidden>
       <Canvas
@@ -274,10 +312,17 @@ function HomeSplashCanvas({ phase }: HomeSplashCanvasProps) {
           gl.setClearColor('#ffffff', 1);
         }}
       >
-        <Scene phase={phase} />
+        <Scene
+          phase={phase}
+          caseStudySummaries={caseStudySummaries}
+          listDriveCaseStudyId={listDriveCaseStudyId}
+          onRingHighlightEnter={onRingHighlightEnter}
+          onRingHighlightLeave={onRingHighlightLeave}
+          onRingPanelClick={onRingPanelClick}
+        />
       </Canvas>
     </CanvasLayer>
   );
-}
+};
 
 export default HomeSplashCanvas;

@@ -138,8 +138,49 @@ export const CaseList = styled.ul`
   gap: clamp(0.15em, 0.08em + 0.45vw, 0.25em);
 `;
 
-export const CaseLink = styled(Link)`
+export const CaseListItem = styled.li<{ $highlighted?: boolean }>`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.45em;
+
+  & > ${StaggerRow} {
+    align-self: center;
+  }
+
+  &::before {
+    content: '';
+    flex-shrink: 0;
+    width: 0.375rem;
+    height: 0.375rem;
+    background: #ec4899;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover::before,
+  &:has(:focus-visible)::before {
+    opacity: 1;
+  }
+
+  ${({ $highlighted }) =>
+    $highlighted &&
+    css`
+      &::before {
+        opacity: 1;
+      }
+    `}
+`;
+
+export const CaseLink = styled(Link)<{ $syncHover?: boolean }>`
   ${footerLinkStyles}
   overflow-wrap: break-word;
   text-align: right;
+
+  ${({ $syncHover }) =>
+    $syncHover &&
+    css`
+      opacity: 0.5;
+    `}
 `;

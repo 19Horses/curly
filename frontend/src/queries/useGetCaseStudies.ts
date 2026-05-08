@@ -1,11 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { getApiUrl } from '../sanityIntegration';
+/**
+ * Full case study document shape (detail page). Prefer {@link useGetCaseStudySummaries}
+ * for home / listings — it only fetches slug, client, title, and first image.
+ */
+import type { CaseStudyCoverImage } from './useGetCaseStudySummaries';
 
-export type CaseStudyImage = {
-  alt: string;
-  url: string;
-};
+export type CaseStudyImage = CaseStudyCoverImage;
 
 export type CaseStudyType = {
   _id: string;
@@ -17,34 +16,4 @@ export type CaseStudyType = {
   results: unknown[];
   images: CaseStudyImage[];
   videoLink: string;
-};
-
-const query = `
-  *[_type == 'caseStudy'] | order(_createdAt desc){
-    _id,
-    "slug": slug.current,
-    client,
-    title,
-    brief,
-    approach,
-    results,
-    images[]{
-      alt,
-      "url": asset->url
-    },
-    videoLink
-  }
-`;
-
-const getCaseStudies = async (): Promise<{ result: CaseStudyType[] }> => {
-  const response = await axios.get(getApiUrl(query));
-  return response.data;
-};
-
-export const useGetCaseStudies = () => {
-  return useQuery({
-    queryKey: ['caseStudies'],
-    queryFn: getCaseStudies,
-    select: (res) => res.result,
-  });
 };
