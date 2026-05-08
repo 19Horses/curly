@@ -201,11 +201,16 @@ function RingPanel({
 export function HomePhotoRingPlaceholder({
   phase,
   caseStudySummaries,
-  listFocusedCaseStudyId,
+  listDriveCaseStudyId,
+  onRingHighlightEnter,
+  onRingHighlightLeave,
 }: {
   phase: HomePhotoRingPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
-  listFocusedCaseStudyId: string | null;
+  /** Footer list hover only — when set, ring eases that panel forward */
+  listDriveCaseStudyId: string | null;
+  onRingHighlightEnter?: (caseStudyId: string) => void;
+  onRingHighlightLeave?: () => void;
 }) {
   const { gl } = useThree();
   const outerRef = useRef<Group>(null);
@@ -240,11 +245,11 @@ export function HomePhotoRingPlaceholder({
   }, [caseStudySummaries]);
 
   const focusPanelIndex = useMemo(() => {
-    const id = listFocusedCaseStudyId;
+    const id = listDriveCaseStudyId;
     if (id == null || ringPanels.length === 0) return null;
     const idx = ringPanels.findIndex((p) => p.reactKey === id);
     return idx >= 0 ? idx : null;
-  }, [listFocusedCaseStudyId, ringPanels]);
+  }, [listDriveCaseStudyId, ringPanels]);
 
   useEffect(() => {
     const el = gl.domElement;
@@ -279,8 +284,12 @@ export function HomePhotoRingPlaceholder({
     (index: number) => {
       clearHoverLeaveTimer();
       setHoveredIndex(index);
+      const id = ringPanels[index]?.reactKey;
+      if (id) {
+        onRingHighlightEnter?.(id);
+      }
     },
-    [clearHoverLeaveTimer]
+    [clearHoverLeaveTimer, onRingHighlightEnter, ringPanels]
   );
 
   const handlePointerLeavePanel = useCallback(() => {
@@ -289,7 +298,8 @@ export function HomePhotoRingPlaceholder({
       setHoveredIndex(null);
       hoverLeaveTimerRef.current = null;
     }, HOME_PHOTO_RING_HOVER_LEAVE_MS);
-  }, [clearHoverLeaveTimer]);
+    onRingHighlightLeave?.();
+  }, [clearHoverLeaveTimer, onRingHighlightLeave]);
 
   const startOffset = useMemo(
     () => new Vector3(...HOME_PHOTO_RING_ENTER_OFFSET),

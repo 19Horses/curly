@@ -71,7 +71,7 @@ export const HOME_PHOTO_RING_PANEL_HOVER_LERP = 14;
 export const HOME_PHOTO_RING_HOVER_LEAVE_MS = 45;
 
 /** How fast the ring spins when a footer list item is hovered (higher = snappier). */
-export const HOME_PHOTO_RING_LIST_FOCUS_LERP = 8;
+export const HOME_PHOTO_RING_LIST_FOCUS_LERP = 5;
 
 /** Delay before clearing list-driven focus when leaving a link (matches ring hover feel). */
 export const HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS = 45;

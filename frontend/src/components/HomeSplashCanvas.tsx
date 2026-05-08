@@ -193,11 +193,15 @@ function ModelRestGroup({
 function Scene({
   phase,
   caseStudySummaries,
-  listFocusedCaseStudyId,
+  listDriveCaseStudyId,
+  onRingHighlightEnter,
+  onRingHighlightLeave,
 }: {
   phase: CanvasPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
-  listFocusedCaseStudyId: string | null;
+  listDriveCaseStudyId: string | null;
+  onRingHighlightEnter?: (caseStudyId: string) => void;
+  onRingHighlightLeave?: () => void;
 }) {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [introDone, setIntroDone] = useState(false);
@@ -219,7 +223,9 @@ function Scene({
         <HomePhotoRingPlaceholder
           phase={phase}
           caseStudySummaries={caseStudySummaries}
-          listFocusedCaseStudyId={listFocusedCaseStudyId}
+          listDriveCaseStudyId={listDriveCaseStudyId}
+          onRingHighlightEnter={onRingHighlightEnter}
+          onRingHighlightLeave={onRingHighlightLeave}
         />
       </Suspense>
       <directionalLight position={[5, 8, 12]} intensity={2.5} color="#ffffff" />
@@ -274,13 +280,18 @@ const CanvasLayer = styled.div`
 export type HomeSplashCanvasProps = {
   phase: CanvasPhase;
   caseStudySummaries?: CaseStudySummary[];
-  listFocusedCaseStudyId?: string | null;
+  /** Footer list hover only — drives ring rotation toward that panel */
+  listDriveCaseStudyId?: string | null;
+  onRingHighlightEnter?: (caseStudyId: string) => void;
+  onRingHighlightLeave?: () => void;
 };
 
 const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   phase,
   caseStudySummaries,
-  listFocusedCaseStudyId = null,
+  listDriveCaseStudyId = null,
+  onRingHighlightEnter,
+  onRingHighlightLeave,
 }) => {
   return (
     <CanvasLayer aria-hidden>
@@ -299,7 +310,9 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
         <Scene
           phase={phase}
           caseStudySummaries={caseStudySummaries}
-          listFocusedCaseStudyId={listFocusedCaseStudyId}
+          listDriveCaseStudyId={listDriveCaseStudyId}
+          onRingHighlightEnter={onRingHighlightEnter}
+          onRingHighlightLeave={onRingHighlightLeave}
         />
       </Canvas>
     </CanvasLayer>

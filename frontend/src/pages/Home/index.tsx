@@ -20,6 +20,7 @@ import { useGetCaseStudySummaries } from '../../queries/useGetCaseStudySummaries
 import {
   CaseLink,
   CaseList,
+  CaseListItem,
   EnterButton,
   FooterLeft,
   FooterLeftStagger,
@@ -41,33 +42,57 @@ function Home() {
   const [phase, setPhase] = useState<HomePhase>(() =>
     readHasSeenSplashFromStorage() ? 'main' : 'splash'
   );
-  const [listFocusCaseStudyId, setListFocusCaseStudyId] = useState<string | null>(
+  /** Footer row highlight — driven by list hover or ring pane hover */
+  const [highlightedCaseStudyId, setHighlightedCaseStudyId] = useState<
+    string | null
+  >(null);
+  /** Ring rotation lock — footer list hover only; ring hover does not set this */
+  const [listDriveCaseStudyId, setListDriveCaseStudyId] = useState<string | null>(
     null
   );
-  const listFocusLeaveTimerRef = useRef<number | null>(null);
+  const focusLeaveTimerRef = useRef<number | null>(null);
 
-  const clearListFocusLeaveTimer = useCallback(() => {
-    if (listFocusLeaveTimerRef.current !== null) {
-      clearTimeout(listFocusLeaveTimerRef.current);
-      listFocusLeaveTimerRef.current = null;
+  const clearFocusLeaveTimer = useCallback(() => {
+    if (focusLeaveTimerRef.current !== null) {
+      clearTimeout(focusLeaveTimerRef.current);
+      focusLeaveTimerRef.current = null;
     }
   }, []);
 
   const handleCaseLinkEnter = useCallback(
     (caseStudyId: string) => {
-      clearListFocusLeaveTimer();
-      setListFocusCaseStudyId(caseStudyId);
+      clearFocusLeaveTimer();
+      setHighlightedCaseStudyId(caseStudyId);
+      setListDriveCaseStudyId(caseStudyId);
     },
-    [clearListFocusLeaveTimer]
+    [clearFocusLeaveTimer]
   );
 
   const handleCaseLinkLeave = useCallback(() => {
-    clearListFocusLeaveTimer();
-    listFocusLeaveTimerRef.current = window.setTimeout(() => {
-      setListFocusCaseStudyId(null);
-      listFocusLeaveTimerRef.current = null;
+    clearFocusLeaveTimer();
+    focusLeaveTimerRef.current = window.setTimeout(() => {
+      setHighlightedCaseStudyId(null);
+      setListDriveCaseStudyId(null);
+      focusLeaveTimerRef.current = null;
     }, HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS);
-  }, [clearListFocusLeaveTimer]);
+  }, [clearFocusLeaveTimer]);
+
+  const handleRingHighlightEnter = useCallback(
+    (caseStudyId: string) => {
+      clearFocusLeaveTimer();
+      setHighlightedCaseStudyId(caseStudyId);
+      setListDriveCaseStudyId(null);
+    },
+    [clearFocusLeaveTimer]
+  );
+
+  const handleRingHighlightLeave = useCallback(() => {
+    clearFocusLeaveTimer();
+    focusLeaveTimerRef.current = window.setTimeout(() => {
+      setHighlightedCaseStudyId(null);
+      focusLeaveTimerRef.current = null;
+    }, HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS);
+  }, [clearFocusLeaveTimer]);
 
   useLayoutEffect(() => {
     const hideHeader = phase === 'splash' || phase === 'transitioning';
@@ -100,15 +125,17 @@ function Home() {
   }, [phase, persistSeenAndShowFooter]);
 
   useEffect(() => {
-    return () => clearListFocusLeaveTimer();
-  }, [clearListFocusLeaveTimer]);
+    return () => clearFocusLeaveTimer();
+  }, [clearFocusLeaveTimer]);
 
   return (
     <HomeRoot>
       <HomeSplashCanvas
         phase={phase}
         caseStudySummaries={caseStudies}
-        listFocusedCaseStudyId={listFocusCaseStudyId}
+        listDriveCaseStudyId={listDriveCaseStudyId}
+        onRingHighlightEnter={handleRingHighlightEnter}
+        onRingHighlightLeave={handleRingHighlightLeave}
       />
       <HomeUiStack>
         {phase === 'splash' ? (
@@ -143,21 +170,29 @@ function Home() {
                 caseStudies &&
                 caseStudies.length > 0 && (
                   <CaseList>
-                    {caseStudies.map((study, index) => (
-                      <li key={study._id}>
-                        <StaggerRow $staggerIndex={index + 1} $align="end">
-                          <CaseLink
-                            to={`/projects/${study.slug}`}
-                            onMouseEnter={() =>
-                              handleCaseLinkEnter(study._id)
-                            }
-                            onMouseLeave={handleCaseLinkLeave}
-                          >
-                            {study.client} – {study.title}
-                          </CaseLink>
-                        </StaggerRow>
-                      </li>
-                    ))}
+                    {caseStudies.map((study, index) => {
+                      const rowHighlighted =
+                        highlightedCaseStudyId === study._id;
+                      return (
+                        <CaseListItem
+                          key={study._id}
+                          $highlighted={rowHighlighted}
+                        >
+                          <StaggerRow $staggerIndex={index + 1} $align="end">
+                            <CaseLink
+                              to={`/projects/${study.slug}`}
+                              $syncHover={rowHighlighted}
+                              onMouseEnter={() =>
+                                handleCaseLinkEnter(study._id)
+                              }
+                              onMouseLeave={handleCaseLinkLeave}
+                            >
+                              {study.client} – {study.title}
+                            </CaseLink>
+                          </StaggerRow>
+                        </CaseListItem>
+                      );
+                    })}
                   </CaseList>
                 )}
               {!isLoading && !isError && caseStudies?.length === 0 && (
