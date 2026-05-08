@@ -250,12 +250,7 @@ function Home() {
                 onItemEnter={handleCaseLinkEnter}
                 onItemLeave={handleCaseLinkLeave}
                 onItemClick={(e, slug, id) => {
-                  if (
-                    e.ctrlKey ||
-                    e.metaKey ||
-                    e.shiftKey ||
-                    e.altKey
-                  ) {
+                  if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
                     return;
                   }
                   e.preventDefault();
