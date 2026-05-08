@@ -50,7 +50,8 @@ const TrackIcon = styled.img<{ $lightOnDark: boolean }>`
   height: 0.78rem;
   display: block;
   flex-shrink: 0;
-  ${({ $lightOnDark }) => ($lightOnDark ? 'filter: invert(1);' : 'filter: none;')}
+  ${({ $lightOnDark }) =>
+    $lightOnDark ? 'filter: invert(1);' : 'filter: none;'}
 `;
 
 const TrackMeta = styled.button<{ $lightOnDark: boolean }>`

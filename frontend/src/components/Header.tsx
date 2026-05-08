@@ -50,8 +50,7 @@ const Shell = styled.header<{ $projectChrome: boolean }>`
   font-size: clamp(0.8125rem, 0.72rem + 0.45vw, 1.125rem);
   font-weight: bold;
   background-color: transparent;
-  color: ${({ $projectChrome }) =>
-    $projectChrome ? '#ffffff' : 'inherit'};
+  color: ${({ $projectChrome }) => ($projectChrome ? '#ffffff' : 'inherit')};
   transition: color ${PROJECT_SURFACE_TIMING};
 `;
 
