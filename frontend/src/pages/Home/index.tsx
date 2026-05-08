@@ -49,9 +49,9 @@ function Home() {
     string | null
   >(null);
   /** Ring rotation lock — footer list hover only; ring hover does not set this */
-  const [listDriveCaseStudyId, setListDriveCaseStudyId] = useState<string | null>(
-    null
-  );
+  const [listDriveCaseStudyId, setListDriveCaseStudyId] = useState<
+    string | null
+  >(null);
   const focusLeaveTimerRef = useRef<number | null>(null);
 
   const clearFocusLeaveTimer = useCallback(() => {

@@ -350,11 +350,7 @@ export function HomePhotoRingPlaceholder({
           inner.rotation.y
         );
         const lk = 1 - Math.exp(-delta * HOME_PHOTO_RING_LIST_FOCUS_LERP);
-        inner.rotation.y = MathUtils.lerp(
-          inner.rotation.y,
-          targetYaw,
-          lk
-        );
+        inner.rotation.y = MathUtils.lerp(inner.rotation.y, targetYaw, lk);
       } else {
         inner.rotation.y += delta * HOME_PHOTO_RING_ROTATE_RAD_PER_SEC;
         inner.rotation.y += scrollAngularVelocityRef.current * delta;
@@ -390,10 +386,7 @@ export function HomePhotoRingPlaceholder({
   return (
     <group ref={outerRef}>
       <group ref={innerRef} position={[0, HOME_PHOTO_RING_Y, 0]}>
-        <mesh
-          rotation={[Math.PI / 2, 0, 0]}
-          raycast={() => null}
-        >
+        <mesh rotation={[Math.PI / 2, 0, 0]} raycast={() => null}>
           <torusGeometry
             args={[
               HOME_PHOTO_RING_RADIUS,
