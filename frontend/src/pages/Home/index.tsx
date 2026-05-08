@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
+import { HomeListRingConnector } from '../../components/HomeListRingConnector';
 import HomeSplashCanvas from '../../components/HomeSplashCanvas';
 import { StaggerRow } from '../../components/StaggerRow';
 import {
@@ -22,6 +23,7 @@ import { useGetCaseStudySummaries } from '../../queries/useGetCaseStudySummaries
 import {
   CaseLink,
   CaseList,
+  CaseListDot,
   CaseListItem,
   EnterButton,
   FooterLeft,
@@ -63,6 +65,26 @@ function Home() {
   const exitSlugRef = useRef<string | null>(null);
   const exitInProgressRef = useRef(false);
   const focusLeaveTimerRef = useRef<number | null>(null);
+  const listFooterAnchorScreenRef = useRef<{ x: number; y: number } | null>(
+    null
+  );
+  const listDotElementRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
+  const listDotRefCallbackCache = useRef<
+    Map<string, (el: HTMLSpanElement | null) => void>
+  >(new Map());
+
+  const getListDotRefCallback = useCallback((caseStudyId: string) => {
+    let cb = listDotRefCallbackCache.current.get(caseStudyId);
+    if (!cb) {
+      cb = (el: HTMLSpanElement | null) => {
+        const m = listDotElementRefs.current;
+        if (el) m.set(caseStudyId, el);
+        else m.delete(caseStudyId);
+      };
+      listDotRefCallbackCache.current.set(caseStudyId, cb);
+    }
+    return cb;
+  }, []);
 
   const clearFocusLeaveTimer = useCallback(() => {
     if (focusLeaveTimerRef.current !== null) {
@@ -115,7 +137,6 @@ function Home() {
       clearFocusLeaveTimer();
       setHighlightedCaseStudyId(caseStudyId);
       setListDriveCaseStudyId(caseStudyId);
-      setIsLeavingHome(true);
       setPendingExit({ slug, caseStudyId });
     },
     [phase, clearFocusLeaveTimer]
@@ -135,6 +156,10 @@ function Home() {
     },
     [beginProjectExit]
   );
+
+  const handleRingExitSelectedFadeStart = useCallback(() => {
+    setIsLeavingHome(true);
+  }, []);
 
   useLayoutEffect(() => {
     const hideHeader = phase === 'splash' || phase === 'transitioning';
@@ -176,11 +201,20 @@ function Home() {
         phase={phase}
         caseStudySummaries={caseStudies}
         listDriveCaseStudyId={listDriveCaseStudyId}
+        highlightedCaseStudyId={highlightedCaseStudyId}
+        listFooterAnchorScreenRef={listFooterAnchorScreenRef}
         onRingHighlightEnter={handleRingHighlightEnter}
         onRingHighlightLeave={handleRingHighlightLeave}
         onRingPanelClick={handleRingPanelClick}
         exitTargetCaseStudyId={pendingExit?.caseStudyId ?? null}
         onRingExitAnimationComplete={handleRingExitAnimationComplete}
+        onRingExitSelectedFadeStart={handleRingExitSelectedFadeStart}
+      />
+      <HomeListRingConnector
+        highlightedCaseStudyId={highlightedCaseStudyId}
+        listDotRefs={listDotElementRefs}
+        ringAnchorScreenRef={listFooterAnchorScreenRef}
+        isLeavingHome={isLeavingHome}
       />
       <HomeUiStack>
         {phase === 'splash' ? (
@@ -230,6 +264,7 @@ function Home() {
                           key={study._id}
                           $highlighted={rowHighlighted}
                         >
+                          <CaseListDot ref={getListDotRefCallback(study._id)} />
                           <StaggerRow $staggerIndex={index + 1} $align="end">
                             <CaseLink
                               to={`/projects/${study.slug}`}

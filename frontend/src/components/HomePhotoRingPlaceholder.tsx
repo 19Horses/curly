@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 import { useTexture } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
+import type { MutableRefObject } from 'react';
 import {
   Suspense,
   createContext,
@@ -12,11 +13,19 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { Group, Material, Mesh } from 'three';
-import { DoubleSide, MathUtils, SRGBColorSpace, Vector3 } from 'three';
+import type { Camera, Group, Material, Mesh } from 'three';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import {
+  DoubleSide,
+  MathUtils,
+  PerspectiveCamera,
+  SRGBColorSpace,
+  Vector3,
+} from 'three';
 import type { CaseStudySummary } from '../queries/useGetCaseStudySummaries';
 import {
   HOME_MODEL_TO_REST_LERP_MS,
+  HOME_PHOTO_RING_CONNECTOR_BELOW_IMAGE,
   HOME_PHOTO_RING_ENTER_OFFSET,
   HOME_PHOTO_RING_GUIDE_COLOR,
   HOME_PHOTO_RING_GUIDE_THICKNESS,
@@ -35,8 +44,31 @@ import {
   HOME_PHOTO_RING_EXIT_OTHERS_MS,
   HOME_PHOTO_RING_EXIT_SELECTED_MS,
   HOME_PHOTO_RING_EXIT_ALIGN_EPSILON_RAD,
+  HOME_PHOTO_RING_LAYOUT_HALF_SPAN,
+  HOME_PHOTO_RING_VIEWPORT_MIN_SCALE,
+  HOME_PHOTO_RING_VIEWPORT_PADDING,
   HOME_PHOTO_RING_Y,
 } from '../constants/homeScene';
+
+/** Bottom-center of panel mesh → screen (footer ↔ ring connector) */
+const _footerAnchorProj = new Vector3();
+
+/** Uniform scale so the ring fits horizontally (caps at 1); floored so panels don’t shrink past readability. */
+function ringViewportUniformScale(
+  camera: Camera,
+  orbitTarget: Vector3,
+  layoutHalfSpan: number,
+  padding: number,
+  minScale: number
+): number {
+  if (!(camera instanceof PerspectiveCamera)) return 1;
+  const dist = camera.position.distanceTo(orbitTarget);
+  if (!(dist > 1e-6)) return 1;
+  const vFovRad = MathUtils.degToRad(camera.fov);
+  const visibleHalfWidth = Math.tan(vFovRad / 2) * dist * camera.aspect;
+  const fit = (visibleHalfWidth * padding) / layoutHalfSpan;
+  return Math.min(1, Math.max(minScale, fit));
+}
 
 function easeFromT(t: number): number {
   return 1 - (1 - Math.min(1, Math.max(0, t))) ** 3;
@@ -45,7 +77,7 @@ function easeFromT(t: number): number {
 type RingExitContextValue = {
   exitTargetCaseStudyId: string | null;
   /** Clock time when alignment finished — fades run from here */
-  exitSequenceStartRef: React.MutableRefObject<number | null>;
+  exitSequenceStartRef: MutableRefObject<number | null>;
 };
 
 const RingExitContext = createContext<RingExitContextValue | null>(null);
@@ -179,6 +211,8 @@ function RingPanel({
   slot,
   index,
   hoveredIndex,
+  listDrivePanelIndex,
+  panelMeshesRef,
   panel,
   onPointerEnterPanel,
   onPointerLeavePanel,
@@ -187,14 +221,26 @@ function RingPanel({
   slot: Slot;
   index: number;
   hoveredIndex: number | null;
+  /** Footer list hover — same panel scale as direct ring hover */
+  listDrivePanelIndex: number | null;
+  panelMeshesRef: MutableRefObject<(Mesh | null)[]>;
   panel: RingPanelData;
   onPointerEnterPanel: (index: number) => void;
   onPointerLeavePanel: () => void;
   onPanelClick: (slug: string, caseStudyId: string) => void;
 }) {
-  const meshRef = useRef<Mesh>(null);
+  const meshRef = useRef<Mesh | null>(null);
+  const setMeshRef = useCallback(
+    (node: Mesh | null) => {
+      meshRef.current = node;
+      panelMeshesRef.current[index] = node;
+    },
+    [panelMeshesRef, index]
+  );
   const exitCtx = useContext(RingExitContext);
-  const isHovered = hoveredIndex === index;
+  const isHovered =
+    hoveredIndex === index ||
+    (listDrivePanelIndex !== null && listDrivePanelIndex === index);
 
   useFrame(({ clock }, delta) => {
     const m = meshRef.current;
@@ -233,7 +279,7 @@ function RingPanel({
 
   return (
     <mesh
-      ref={meshRef}
+      ref={setMeshRef}
       position={[slot.x, 0, slot.z]}
       rotation={[0, slot.yaw, 0]}
       onPointerOver={(e) => {
@@ -274,30 +320,45 @@ export function HomePhotoRingPlaceholder({
   phase,
   caseStudySummaries,
   listDriveCaseStudyId,
+  highlightedCaseStudyId,
+  listFooterAnchorScreenRef,
   onRingHighlightEnter,
   onRingHighlightLeave,
   onRingPanelClick,
   exitTargetCaseStudyId = null,
   onExitAnimationComplete,
+  onExitSelectedFadeStart,
 }: {
   phase: HomePhotoRingPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
   /** Footer list hover only — when set, ring eases that panel forward */
   listDriveCaseStudyId: string | null;
+  /** Footer list or ring pane hover — drives connector line anchor */
+  highlightedCaseStudyId: string | null;
+  /** Screen coords for dot below highlighted panel + SVG connector line */
+  listFooterAnchorScreenRef?: MutableRefObject<{
+    x: number;
+    y: number;
+  } | null>;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
   onRingPanelClick?: (slug: string, caseStudyId: string) => void;
   exitTargetCaseStudyId?: string | null;
   onExitAnimationComplete?: () => void;
+  /** Fires once when the selected panel begins fading (after other panels have faded). */
+  onExitSelectedFadeStart?: () => void;
 }) {
-  const { gl } = useThree();
+  const { gl, camera, controls, size } = useThree();
+  const orbitTargetFallbackRef = useRef(new Vector3(0, 0, 0));
   const outerRef = useRef<Group>(null);
   const innerRef = useRef<Group>(null);
+  const panelMeshesRef = useRef<(Mesh | null)[]>([]);
   const tweenStartRef = useRef<number | null>(null);
   const scrollAngularVelocityRef = useRef(0);
   const hoverLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const exitSequenceStartRef = useRef<number | null>(null);
   const exitCompleteFiredRef = useRef(false);
+  const exitSelectedFadeStartFiredRef = useRef(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const atSplash = phase === 'splash';
 
@@ -341,6 +402,13 @@ export function HomePhotoRingPlaceholder({
     const idx = ringPanels.findIndex((p) => p.reactKey === id);
     return idx >= 0 ? idx : null;
   }, [listDriveCaseStudyId, ringPanels]);
+
+  const connectorPanelIndex = useMemo(() => {
+    const id = highlightedCaseStudyId;
+    if (id == null || ringPanels.length === 0) return null;
+    const idx = ringPanels.findIndex((p) => p.reactKey === id);
+    return idx >= 0 ? idx : null;
+  }, [highlightedCaseStudyId, ringPanels]);
 
   useEffect(() => {
     const el = gl.domElement;
@@ -403,6 +471,7 @@ export function HomePhotoRingPlaceholder({
     if (!exitTargetId) {
       exitSequenceStartRef.current = null;
       exitCompleteFiredRef.current = false;
+      exitSelectedFadeStartFiredRef.current = false;
     }
   }, [exitTargetId]);
 
@@ -422,6 +491,19 @@ export function HomePhotoRingPlaceholder({
     const g = outerRef.current;
     const inner = innerRef.current;
     if (!g) return;
+
+    const orbitTarget =
+      controls != null && 'target' in controls
+        ? (controls as OrbitControlsImpl).target
+        : orbitTargetFallbackRef.current;
+    const ringScale = ringViewportUniformScale(
+      camera,
+      orbitTarget,
+      HOME_PHOTO_RING_LAYOUT_HALF_SPAN,
+      HOME_PHOTO_RING_VIEWPORT_PADDING,
+      HOME_PHOTO_RING_VIEWPORT_MIN_SCALE
+    );
+    g.scale.setScalar(ringScale);
 
     if (inner) {
       const n = slots.length;
@@ -454,9 +536,13 @@ export function HomePhotoRingPlaceholder({
           !exitCompleteFiredRef.current
         ) {
           const elapsed = clock.elapsedTime - exitSequenceStartRef.current;
+          const othersSec = HOME_PHOTO_RING_EXIT_OTHERS_MS / 1000;
+          if (elapsed >= othersSec && !exitSelectedFadeStartFiredRef.current) {
+            exitSelectedFadeStartFiredRef.current = true;
+            onExitSelectedFadeStart?.();
+          }
           const exitTotalSec =
-            HOME_PHOTO_RING_EXIT_OTHERS_MS / 1000 +
-            HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000;
+            othersSec + HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000;
           if (elapsed >= exitTotalSec) {
             exitCompleteFiredRef.current = true;
             onExitAnimationComplete?.();
@@ -508,6 +594,34 @@ export function HomePhotoRingPlaceholder({
     if (rawT >= 1) {
       g.position.copy(endPos);
     }
+
+    if (listFooterAnchorScreenRef) {
+      if (highlightedCaseStudyId && connectorPanelIndex !== null) {
+        const mesh = panelMeshesRef.current[connectorPanelIndex];
+        if (mesh && camera instanceof PerspectiveCamera) {
+          mesh.updateWorldMatrix(true, true);
+          const geom = mesh.geometry;
+          if (!geom.boundingBox) geom.computeBoundingBox();
+          const bb = geom.boundingBox;
+          if (bb) {
+            _footerAnchorProj.set(
+              0,
+              bb.min.y - HOME_PHOTO_RING_CONNECTOR_BELOW_IMAGE,
+              0
+            );
+            _footerAnchorProj.applyMatrix4(mesh.matrixWorld);
+            _footerAnchorProj.project(camera);
+            const x = (_footerAnchorProj.x * 0.5 + 0.5) * size.width;
+            const y = (-_footerAnchorProj.y * 0.5 + 0.5) * size.height;
+            listFooterAnchorScreenRef.current = { x, y };
+          }
+        } else {
+          listFooterAnchorScreenRef.current = null;
+        }
+      } else {
+        listFooterAnchorScreenRef.current = null;
+      }
+    }
   });
 
   return (
@@ -535,6 +649,8 @@ export function HomePhotoRingPlaceholder({
               slot={slot}
               panel={ringPanels[i]}
               hoveredIndex={hoveredIndex}
+              listDrivePanelIndex={focusPanelIndex}
+              panelMeshesRef={panelMeshesRef}
               onPointerEnterPanel={handlePointerEnterPanel}
               onPointerLeavePanel={handlePointerLeavePanel}
               onPanelClick={handlePanelClick}

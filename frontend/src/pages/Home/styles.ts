@@ -139,6 +139,17 @@ export const CaseList = styled.ul`
   gap: clamp(0.15em, 0.08em + 0.45vw, 0.25em);
 `;
 
+/** Pink anchor — kept measurable for list ↔ ring connector line */
+export const CaseListDot = styled.span`
+  flex-shrink: 0;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 0;
+  background: #ec4899;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+`;
+
 export const CaseListItem = styled.li<{ $highlighted?: boolean }>`
   display: flex;
   flex-direction: row;
@@ -150,25 +161,14 @@ export const CaseListItem = styled.li<{ $highlighted?: boolean }>`
     align-self: center;
   }
 
-  &::before {
-    content: '';
-    flex-shrink: 0;
-    width: 0.375rem;
-    height: 0.375rem;
-    background: #ec4899;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  &:hover::before,
-  &:has(:focus-visible)::before {
+  &:hover > ${CaseListDot}, &:has(:focus-visible) > ${CaseListDot} {
     opacity: 1;
   }
 
   ${({ $highlighted }) =>
     $highlighted &&
     css`
-      &::before {
+      > ${CaseListDot} {
         opacity: 1;
       }
     `}

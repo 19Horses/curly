@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 import { Center, Environment, OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import type { MutableRefObject } from 'react';
 import {
   Suspense,
   useCallback,
@@ -182,22 +183,31 @@ function Scene({
   phase,
   caseStudySummaries,
   listDriveCaseStudyId,
+  highlightedCaseStudyId,
+  listFooterAnchorScreenRef,
   onHeroModelReady,
   onRingHighlightEnter,
   onRingHighlightLeave,
   onRingPanelClick,
   exitTargetCaseStudyId = null,
   onRingExitAnimationComplete,
+  onRingExitSelectedFadeStart,
 }: {
   phase: CanvasPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
   listDriveCaseStudyId: string | null;
+  highlightedCaseStudyId: string | null;
+  listFooterAnchorScreenRef?: MutableRefObject<{
+    x: number;
+    y: number;
+  } | null>;
   onHeroModelReady?: () => void;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
   onRingPanelClick?: (slug: string, caseStudyId: string) => void;
   exitTargetCaseStudyId?: string | null;
   onRingExitAnimationComplete?: () => void;
+  onRingExitSelectedFadeStart?: () => void;
 }) {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [introDone, setIntroDone] = useState(false);
@@ -226,11 +236,14 @@ function Scene({
           phase={phase}
           caseStudySummaries={caseStudySummaries}
           listDriveCaseStudyId={listDriveCaseStudyId}
+          highlightedCaseStudyId={highlightedCaseStudyId}
+          listFooterAnchorScreenRef={listFooterAnchorScreenRef}
           onRingHighlightEnter={onRingHighlightEnter}
           onRingHighlightLeave={onRingHighlightLeave}
           onRingPanelClick={onRingPanelClick}
           exitTargetCaseStudyId={exitTargetCaseStudyId}
           onExitAnimationComplete={onRingExitAnimationComplete}
+          onExitSelectedFadeStart={onRingExitSelectedFadeStart}
         />
       </Suspense>
       <directionalLight position={[5, 8, 12]} intensity={2.5} color="#ffffff" />
@@ -297,23 +310,35 @@ export type HomeSplashCanvasProps = {
   caseStudySummaries?: CaseStudySummary[];
   /** Footer list hover only — drives ring rotation toward that panel */
   listDriveCaseStudyId?: string | null;
+  /** List or ring pane hover — drives connector line (with listFooterAnchorScreenRef) */
+  highlightedCaseStudyId?: string | null;
+  /** Screen coords for connector dot below ring panel (written by WebGL) */
+  listFooterAnchorScreenRef?: MutableRefObject<{
+    x: number;
+    y: number;
+  } | null>;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
   onRingPanelClick?: (slug: string, caseStudyId: string) => void;
   /** Case study `_id` driving staged ring fade-out before navigation */
   exitTargetCaseStudyId?: string | null;
   onRingExitAnimationComplete?: () => void;
+  /** Ring begins fading the selected panel (others already faded) — e.g. footer out */
+  onRingExitSelectedFadeStart?: () => void;
 };
 
 const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   phase,
   caseStudySummaries,
   listDriveCaseStudyId = null,
+  highlightedCaseStudyId = null,
+  listFooterAnchorScreenRef,
   onRingHighlightEnter,
   onRingHighlightLeave,
   onRingPanelClick,
   exitTargetCaseStudyId = null,
   onRingExitAnimationComplete,
+  onRingExitSelectedFadeStart,
 }) => {
   const [sceneReveal, setSceneReveal] = useState(false);
 
@@ -346,12 +371,15 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
             phase={phase}
             caseStudySummaries={caseStudySummaries}
             listDriveCaseStudyId={listDriveCaseStudyId}
+            highlightedCaseStudyId={highlightedCaseStudyId}
+            listFooterAnchorScreenRef={listFooterAnchorScreenRef}
             onHeroModelReady={onHeroModelReady}
             onRingHighlightEnter={onRingHighlightEnter}
             onRingHighlightLeave={onRingHighlightLeave}
             onRingPanelClick={onRingPanelClick}
             exitTargetCaseStudyId={exitTargetCaseStudyId}
             onRingExitAnimationComplete={onRingExitAnimationComplete}
+            onRingExitSelectedFadeStart={onRingExitSelectedFadeStart}
           />
         </Canvas>
       </CanvasReveal>

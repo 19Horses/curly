@@ -37,8 +37,14 @@ export const HOME_PHOTO_RING_ENTER_OFFSET: [number, number, number] = [
   0, 0, 54,
 ];
 
-/** Vertical offset of the ring layout (world Y). */
-export const HOME_PHOTO_RING_Y = 0;
+/** Ring group Y — lifts the layout so the forward panel reads nearer screen center (camera looks slightly down at origin). */
+export const HOME_PHOTO_RING_Y = 1.35;
+
+/**
+ * Local −Y offset from the panel image bottom (bbox) to the list↔ring connector anchor in world space
+ * (square center sits this far below the image, not on the edge).
+ */
+export const HOME_PHOTO_RING_CONNECTOR_BELOW_IMAGE = 0.15;
 
 /** Continuous rotation of the ring about Y (radians per second). */
 export const HOME_PHOTO_RING_ROTATE_RAD_PER_SEC = 0.05;
@@ -58,6 +64,25 @@ export const HOME_PHOTO_RING_SCROLL_MAX_RAD_PER_SEC = 14;
 /** Uniform scale when a panel is hovered (slight pop-out). */
 export const HOME_PHOTO_RING_PANEL_HOVER_SCALE = 1.1;
 
+/**
+ * Horizontal half-span of the ring layout at scale 1 (world units): orbit radius plus worst-case
+ * half-panel reach with hover scale — used to fit the ring within the view frustum width.
+ */
+export const HOME_PHOTO_RING_LAYOUT_HALF_SPAN =
+  HOME_PHOTO_RING_RADIUS +
+  HOME_PHOTO_RING_GUIDE_THICKNESS +
+  HOME_PHOTO_RING_PANEL_OUTSET +
+  (HOME_PHOTO_RING_PANEL_WIDTH / 2) * HOME_PHOTO_RING_PANEL_HOVER_SCALE;
+
+/** Target fraction of visible half-width for the layout half-span (inset from horizontal edges). */
+export const HOME_PHOTO_RING_VIEWPORT_PADDING = 0.92;
+
+/**
+ * Floor for responsive ring scale (1 = reference desktop size). Below this, panels feel too small.
+ * Very narrow viewports may clip horizontally slightly instead of shrinking further.
+ */
+export const HOME_PHOTO_RING_VIEWPORT_MIN_SCALE = 0.62;
+
 /** Exponential smoothing for hover scale (higher = snappier). */
 export const HOME_PHOTO_RING_PANEL_HOVER_LERP = 14;
 
@@ -76,8 +101,9 @@ export const HOME_PHOTO_RING_EXIT_OTHERS_MS = 420;
 /** Exit: selected panel fades after stage 1, then navigation runs. */
 export const HOME_PHOTO_RING_EXIT_SELECTED_MS = 380;
 
-/** Footer fades out when leaving Home for a project (`motion` duration in seconds). */
-export const HOME_FOOTER_EXIT_FADE_DURATION_S = 0.48;
+/** Footer fades with the selected ring panel (same duration as {@link HOME_PHOTO_RING_EXIT_SELECTED_MS}). */
+export const HOME_FOOTER_EXIT_FADE_DURATION_S =
+  HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000;
 
 /** Exit: ring rotates until the chosen panel faces forward; then fades begin. */
 export const HOME_PHOTO_RING_EXIT_ALIGN_EPSILON_RAD = 0.022;
