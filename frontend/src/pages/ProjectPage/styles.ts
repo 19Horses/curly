@@ -1,4 +1,10 @@
 import styled from 'styled-components';
+import {
+  PROJECT_CONTENT_FADE_DURATION_S,
+  PROJECT_CONTENT_STAGGER_STEP_S,
+  PROJECT_IMAGE_BASE_DELAY_S,
+  PROJECT_TITLE_FADE_DELAY_S,
+} from '../../constants/projectPage';
 import { PROJECT_SURFACE_TIMING } from '../../constants/projectSurface';
 import { MetaBlock } from '../JobPage/styles';
 import { fadeIn } from '../../styles/animations';
@@ -16,11 +22,9 @@ export const ProjectRoot = styled.article<{ $surfaceActive: boolean }>`
   padding-inline: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
   padding-block: clamp(1rem, 2vw + 0.5rem, 2rem);
 
-  background-color: ${({ $surfaceActive }) =>
-    $surfaceActive ? '#000000' : '#ffffff'};
+  background-color: transparent;
   color: ${({ $surfaceActive }) => ($surfaceActive ? '#ffffff' : '#000000')};
-  transition: background-color ${PROJECT_SURFACE_TIMING},
-    color ${PROJECT_SURFACE_TIMING};
+  transition: color ${PROJECT_SURFACE_TIMING};
 
   p {
     margin: 0;
@@ -59,12 +63,23 @@ export const TitleColumn = styled.div`
   }
 `;
 
+export const ProjectTitleFade = styled.div`
+  animation: ${fadeIn} ${PROJECT_CONTENT_FADE_DURATION_S}s ease-out both;
+  animation-delay: ${PROJECT_TITLE_FADE_DELAY_S}s;
+`;
+
 export const ProjectTitle = styled.h1`
   margin: 0;
   font-size: clamp(0.9375rem, 1vw + 0.5rem, 1.375rem);
   font-weight: bold;
   line-height: 1.15;
   max-width: 22ch;
+`;
+
+/** Same easing as Job {@link FadeBox}, longer duration for project copy blocks */
+export const ProjectCopyFade = styled.div<{ $delay: number }>`
+  animation: ${fadeIn} ${PROJECT_CONTENT_FADE_DURATION_S}s ease-out both;
+  animation-delay: ${({ $delay }) => $delay}s;
 `;
 
 export const ImagesColumn = styled.div`
@@ -117,6 +132,7 @@ export const StaggerImage = styled.img<{ $index: number }>`
   display: block;
   width: 100%;
   height: auto;
-  animation: ${fadeIn} 0.55s ease-out both;
-  animation-delay: ${({ $index }) => $index * 0.12}s;
+  animation: ${fadeIn} ${PROJECT_CONTENT_FADE_DURATION_S}s ease-out both;
+  animation-delay: ${({ $index }) =>
+    PROJECT_IMAGE_BASE_DELAY_S + $index * PROJECT_CONTENT_STAGGER_STEP_S}s;
 `;

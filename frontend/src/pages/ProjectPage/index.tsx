@@ -1,16 +1,19 @@
 import { useParams } from 'react-router-dom';
 import { BlockParagraphs } from '../../sanity/BlockParagraphs';
+import { PROJECT_COPY_FADE_DELAYS_S } from '../../constants/projectPage';
 import { useSurfaceRevealTransition } from '../../hooks/useSurfaceRevealTransition';
 import { useGetCaseStudy } from '../../queries/useGetCaseStudy';
-import { FadeBox, SectionLabel } from '../JobPage/styles';
+import { SectionLabel } from '../JobPage/styles';
 import {
   AsideColumn,
   ImagesColumn,
+  ProjectCopyFade,
   ProjectCopyRow,
   ProjectGrid,
   ProjectMetaBlock,
   ProjectRoot,
   ProjectTitle,
+  ProjectTitleFade,
   StaggerImage,
   TitleColumn,
 } from './styles';
@@ -48,9 +51,11 @@ function ProjectPage() {
     <ProjectRoot $surfaceActive={surfaceActive}>
       <ProjectGrid>
         <TitleColumn>
-          <ProjectTitle>
-            {data.client} — {data.title}
-          </ProjectTitle>
+          <ProjectTitleFade>
+            <ProjectTitle>
+              {data.client} — {data.title}
+            </ProjectTitle>
+          </ProjectTitleFade>
         </TitleColumn>
         <ImagesColumn>
           {data.images.map((image, index) => (
@@ -64,24 +69,24 @@ function ProjectPage() {
             />
           ))}
           <ProjectCopyRow>
-            <FadeBox $delay={0.08}>
+            <ProjectCopyFade $delay={PROJECT_COPY_FADE_DELAYS_S[0]}>
               <ProjectMetaBlock>
                 <SectionLabel>Brief</SectionLabel>
                 <BlockParagraphs blocks={data.brief} />
               </ProjectMetaBlock>
-            </FadeBox>
-            <FadeBox $delay={0.14}>
+            </ProjectCopyFade>
+            <ProjectCopyFade $delay={PROJECT_COPY_FADE_DELAYS_S[1]}>
               <ProjectMetaBlock>
                 <SectionLabel>Approach</SectionLabel>
                 <BlockParagraphs blocks={data.approach} />
               </ProjectMetaBlock>
-            </FadeBox>
-            <FadeBox $delay={0.2}>
+            </ProjectCopyFade>
+            <ProjectCopyFade $delay={PROJECT_COPY_FADE_DELAYS_S[2]}>
               <ProjectMetaBlock>
                 <SectionLabel>Results</SectionLabel>
                 <BlockParagraphs blocks={data.results} />
               </ProjectMetaBlock>
-            </FadeBox>
+            </ProjectCopyFade>
           </ProjectCopyRow>
         </ImagesColumn>
         <AsideColumn />

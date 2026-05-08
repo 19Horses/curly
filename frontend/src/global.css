@@ -19,6 +19,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
+  /* Single surface transition — keep duration in sync with PROJECT_SURFACE_MS */
+  background-color: #ffffff;
+  transition: background-color 450ms ease-out;
+}
+
+body[data-surface='project'] {
+  background-color: #000000;
 }
 
 #root {

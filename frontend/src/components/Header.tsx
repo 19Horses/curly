@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { styled, css } from 'styled-components';
 import { PROJECT_SURFACE_TIMING } from '../constants/projectSurface';
-import { useSurfaceRevealTransition } from '../hooks/useSurfaceRevealTransition';
+import { useProjectChrome } from '../hooks/useProjectChrome';
 import HeaderLogoCanvas from './HeaderLogoCanvas';
 import { HeaderAudioTrack } from './HeaderAudioTrack';
 import { StaggerRow } from './StaggerRow';
@@ -49,13 +49,10 @@ const Shell = styled.header<{ $projectChrome: boolean }>`
   gap: clamp(0.5rem, 0.35rem + 0.8vw, 1rem);
   font-size: clamp(0.8125rem, 0.72rem + 0.45vw, 1.125rem);
   font-weight: bold;
-  background-color: ${({ $projectChrome }) =>
-    $projectChrome ? '#000000' : 'transparent'};
+  background-color: transparent;
   color: ${({ $projectChrome }) =>
     $projectChrome ? '#ffffff' : 'inherit'};
-  transition:
-    background-color ${PROJECT_SURFACE_TIMING},
-    color ${PROJECT_SURFACE_TIMING};
+  transition: color ${PROJECT_SURFACE_TIMING};
 `;
 
 const navItemStyles = css`
@@ -137,12 +134,7 @@ const JOBS_STACK_MQ = '(max-width: 42rem)';
 function Header() {
   const { pathname } = useLocation();
   const jobsBleed = pathname === '/jobs';
-  const projectRoute = /^\/projects\/[^/]+/.test(pathname);
-  const projectSurfaceRevealed = useSurfaceRevealTransition(
-    projectRoute,
-    pathname
-  );
-  const projectChrome = projectRoute && projectSurfaceRevealed;
+  const projectChrome = useProjectChrome();
   const [narrowStack, setNarrowStack] = useState(
     () =>
       typeof window !== 'undefined' && window.matchMedia(JOBS_STACK_MQ).matches
