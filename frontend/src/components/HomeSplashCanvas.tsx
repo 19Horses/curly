@@ -196,12 +196,14 @@ function Scene({
   listDriveCaseStudyId,
   onRingHighlightEnter,
   onRingHighlightLeave,
+  onRingPanelClick,
 }: {
   phase: CanvasPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
   listDriveCaseStudyId: string | null;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
+  onRingPanelClick?: (slug: string) => void;
 }) {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [introDone, setIntroDone] = useState(false);
@@ -226,6 +228,7 @@ function Scene({
           listDriveCaseStudyId={listDriveCaseStudyId}
           onRingHighlightEnter={onRingHighlightEnter}
           onRingHighlightLeave={onRingHighlightLeave}
+          onRingPanelClick={onRingPanelClick}
         />
       </Suspense>
       <directionalLight position={[5, 8, 12]} intensity={2.5} color="#ffffff" />
@@ -284,6 +287,7 @@ export type HomeSplashCanvasProps = {
   listDriveCaseStudyId?: string | null;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
+  onRingPanelClick?: (slug: string) => void;
 };
 
 const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
@@ -292,6 +296,7 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   listDriveCaseStudyId = null,
   onRingHighlightEnter,
   onRingHighlightLeave,
+  onRingPanelClick,
 }) => {
   return (
     <CanvasLayer aria-hidden>
@@ -313,6 +318,7 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
           listDriveCaseStudyId={listDriveCaseStudyId}
           onRingHighlightEnter={onRingHighlightEnter}
           onRingHighlightLeave={onRingHighlightLeave}
+          onRingPanelClick={onRingPanelClick}
         />
       </Canvas>
     </CanvasLayer>

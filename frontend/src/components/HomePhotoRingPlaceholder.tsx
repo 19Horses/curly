@@ -54,6 +54,7 @@ type Slot = { x: number; z: number; yaw: number };
 
 type RingPanelData = {
   reactKey: string;
+  slug: string;
   imageUrl: string | undefined;
 };
 
@@ -141,6 +142,7 @@ function RingPanel({
   panel,
   onPointerEnterPanel,
   onPointerLeavePanel,
+  onPanelClick,
 }: {
   slot: Slot;
   index: number;
@@ -148,6 +150,7 @@ function RingPanel({
   panel: RingPanelData;
   onPointerEnterPanel: (index: number) => void;
   onPointerLeavePanel: () => void;
+  onPanelClick: (slug: string) => void;
 }) {
   const meshRef = useRef<Mesh>(null);
   const isHovered = hoveredIndex === index;
@@ -175,6 +178,10 @@ function RingPanel({
       onPointerOut={(e) => {
         e.stopPropagation();
         onPointerLeavePanel();
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onPanelClick(panel.slug);
       }}
     >
       {hasUrl ? (
@@ -204,6 +211,7 @@ export function HomePhotoRingPlaceholder({
   listDriveCaseStudyId,
   onRingHighlightEnter,
   onRingHighlightLeave,
+  onRingPanelClick,
 }: {
   phase: HomePhotoRingPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
@@ -211,6 +219,7 @@ export function HomePhotoRingPlaceholder({
   listDriveCaseStudyId: string | null;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
+  onRingPanelClick?: (slug: string) => void;
 }) {
   const { gl } = useThree();
   const outerRef = useRef<Group>(null);
@@ -229,6 +238,7 @@ export function HomePhotoRingPlaceholder({
     }
     const panels: RingPanelData[] = list.map((s) => ({
       reactKey: s._id,
+      slug: s.slug,
       imageUrl: s.coverImage?.url,
     }));
     const panelR =
@@ -300,6 +310,13 @@ export function HomePhotoRingPlaceholder({
     }, HOME_PHOTO_RING_HOVER_LEAVE_MS);
     onRingHighlightLeave?.();
   }, [clearHoverLeaveTimer, onRingHighlightLeave]);
+
+  const handlePanelClick = useCallback(
+    (slug: string) => {
+      onRingPanelClick?.(slug);
+    },
+    [onRingPanelClick]
+  );
 
   const startOffset = useMemo(
     () => new Vector3(...HOME_PHOTO_RING_ENTER_OFFSET),
@@ -399,6 +416,7 @@ export function HomePhotoRingPlaceholder({
             hoveredIndex={hoveredIndex}
             onPointerEnterPanel={handlePointerEnterPanel}
             onPointerLeavePanel={handlePointerLeavePanel}
+            onPanelClick={handlePanelClick}
           />
         ))}
       </group>

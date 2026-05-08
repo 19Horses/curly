@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
 import HomeSplashCanvas from '../../components/HomeSplashCanvas';
 import { StaggerRow } from '../../components/StaggerRow';
@@ -36,6 +37,7 @@ import {
 type HomePhase = 'splash' | 'transitioning' | 'main';
 
 function Home() {
+  const navigate = useNavigate();
   const { data: caseStudies, isLoading, isError } = useGetCaseStudySummaries();
   const { setSuppressSiteHeader } = useHomeSplashChrome();
 
@@ -94,6 +96,14 @@ function Home() {
     }, HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS);
   }, [clearFocusLeaveTimer]);
 
+  const handleRingPanelClick = useCallback(
+    (slug: string) => {
+      if (phase !== 'main') return;
+      navigate(`/projects/${slug}`);
+    },
+    [navigate, phase]
+  );
+
   useLayoutEffect(() => {
     const hideHeader = phase === 'splash' || phase === 'transitioning';
     setSuppressSiteHeader(hideHeader);
@@ -136,6 +146,7 @@ function Home() {
         listDriveCaseStudyId={listDriveCaseStudyId}
         onRingHighlightEnter={handleRingHighlightEnter}
         onRingHighlightLeave={handleRingHighlightLeave}
+        onRingPanelClick={handleRingPanelClick}
       />
       <HomeUiStack>
         {phase === 'splash' ? (
