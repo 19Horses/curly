@@ -14,17 +14,11 @@ import {
 import { styled } from 'styled-components';
 import type { Group } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { MathUtils, Vector3 } from 'three';
-import {
-  HOME_CAMERA_ENTER_LERP_MS,
-  HOME_MODEL_REST_POSITION,
-  HOME_MODEL_REST_SCALE,
-  HOME_MODEL_TO_REST_LERP_MS,
-} from '../constants/homeScene';
+import { Vector3 } from 'three';
+import { CURLY_GLB_URL } from '../constants/curlyAsset';
+import { HOME_CAMERA_ENTER_LERP_MS } from '../constants/homeScene';
 import type { CaseStudySummary } from '../queries/useGetCaseStudySummaries';
 import { HomePhotoRingPlaceholder } from './HomePhotoRingPlaceholder';
-
-const CURLY_GLB = './curly.glb';
 
 const SPLASH_CAMERA_POSITION = new Vector3(0, 2.5, 28);
 const SPLASH_TARGET = new Vector3(0, 0, 0);
@@ -33,10 +27,13 @@ const INTRO_CAMERA_POSITION = new Vector3(0, 0, 0);
 const INTRO_TARGET = new Vector3(0, 0, -30);
 const INTRO_DURATION_SEC = 1;
 
-useGLTF.preload(CURLY_GLB);
+useGLTF.preload(CURLY_GLB_URL);
+
+/** World offset so the hero mesh leaves the frame while the camera eases to splash (Enter). */
+const HERO_MODEL_EXIT_END = new Vector3(0, 58, 70);
 
 function CurlyModel({ onLoaded }: { onLoaded: () => void }) {
-  const gltf = useGLTF(CURLY_GLB);
+  const gltf = useGLTF(CURLY_GLB_URL);
   useLayoutEffect(() => {
     onLoaded();
   }, [onLoaded]);
@@ -100,7 +97,7 @@ function CameraRig({
       camera.position.lerpVectors(
         INTRO_CAMERA_POSITION,
         SPLASH_CAMERA_POSITION,
-        t
+        t,
       );
       controls.target.lerpVectors(INTRO_TARGET, SPLASH_TARGET, t);
       controls.update();
@@ -116,14 +113,14 @@ function CameraRig({
     const enterSec = HOME_CAMERA_ENTER_LERP_MS / 1000;
     const rawT = Math.min(
       1,
-      (clock.elapsedTime - enterStartRef.current) / enterSec
+      (clock.elapsedTime - enterStartRef.current) / enterSec,
     );
     const t = easeFromT(rawT);
 
     camera.position.lerpVectors(
       enterFromPos.current,
       SPLASH_CAMERA_POSITION,
-      t
+      t,
     );
     controls.target.lerpVectors(enterFromTarget.current, SPLASH_TARGET, t);
     controls.update();
@@ -138,7 +135,7 @@ function CameraRig({
   return null;
 }
 
-function ModelRestGroup({
+function HeroModelExitGroup({
   phase,
   children,
 }: {
@@ -147,10 +144,7 @@ function ModelRestGroup({
 }) {
   const groupRef = useRef<Group>(null);
   const tweenStartRef = useRef<number | null>(null);
-
-  const startPos = useMemo(() => new Vector3(0, 0, 0), []);
-  const endPos = useMemo(() => new Vector3(...HOME_MODEL_REST_POSITION), []);
-
+  const start = useMemo(() => new Vector3(0, 0, 0), []);
   const atSplash = phase === 'splash';
 
   useLayoutEffect(() => {
@@ -164,8 +158,7 @@ function ModelRestGroup({
     if (!g) return;
 
     if (atSplash) {
-      g.position.copy(startPos);
-      g.scale.setScalar(1);
+      g.position.copy(start);
       return;
     }
 
@@ -173,17 +166,15 @@ function ModelRestGroup({
       tweenStartRef.current = clock.elapsedTime;
     }
 
-    const dur = HOME_MODEL_TO_REST_LERP_MS / 1000;
-    const rawT = Math.min(1, (clock.elapsedTime - tweenStartRef.current) / dur);
+    const dur = HOME_CAMERA_ENTER_LERP_MS / 1000;
+    const rawT = Math.min(
+      1,
+      (clock.elapsedTime - tweenStartRef.current) / dur,
+    );
     const t = easeFromT(rawT);
-
-    g.position.lerpVectors(startPos, endPos, t);
-    const s = MathUtils.lerp(1, HOME_MODEL_REST_SCALE, t);
-    g.scale.setScalar(s);
-
+    g.position.lerpVectors(start, HERO_MODEL_EXIT_END, t);
     if (rawT >= 1) {
-      g.position.copy(endPos);
-      g.scale.setScalar(HOME_MODEL_REST_SCALE);
+      g.position.copy(HERO_MODEL_EXIT_END);
     }
   });
 
@@ -194,6 +185,7 @@ function Scene({
   phase,
   caseStudySummaries,
   listDriveCaseStudyId,
+  onHeroModelReady,
   onRingHighlightEnter,
   onRingHighlightLeave,
   onRingPanelClick,
@@ -201,6 +193,7 @@ function Scene({
   phase: CanvasPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
   listDriveCaseStudyId: string | null;
+  onHeroModelReady?: () => void;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
   onRingPanelClick?: (slug: string) => void;
@@ -208,19 +201,25 @@ function Scene({
   const [modelLoaded, setModelLoaded] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const isSplash = phase === 'splash';
+  const showHeroModel = phase !== 'main';
 
-  const onModelLoaded = useCallback(() => setModelLoaded(true), []);
+  const onModelLoaded = useCallback(() => {
+    setModelLoaded(true);
+    onHeroModelReady?.();
+  }, [onHeroModelReady]);
   const onIntroDone = useCallback(() => setIntroDone(true), []);
 
   return (
     <>
-      <ModelRestGroup phase={phase}>
+      {showHeroModel ? (
         <Suspense fallback={null}>
-          <Center>
-            <CurlyModel onLoaded={onModelLoaded} />
-          </Center>
+          <HeroModelExitGroup phase={phase}>
+            <Center>
+              <CurlyModel onLoaded={onModelLoaded} />
+            </Center>
+          </HeroModelExitGroup>
         </Suspense>
-      </ModelRestGroup>
+      ) : null}
       <Suspense fallback={null}>
         <HomePhotoRingPlaceholder
           phase={phase}
@@ -245,6 +244,7 @@ function Scene({
       <Environment preset="studio" environmentIntensity={0.3} />
       <OrbitControls
         makeDefault
+        enabled={isSplash && introDone}
         enableDamping={false}
         target={[INTRO_TARGET.x, INTRO_TARGET.y, INTRO_TARGET.z]}
         autoRotate={isSplash && introDone}
@@ -280,6 +280,15 @@ const CanvasLayer = styled.div`
   }
 `;
 
+/** Fade entire WebGL layer in only after hero GLTF commits (avoids mesh popping ahead of CSS). */
+const CanvasReveal = styled.div<{ $visible: boolean }>`
+  position: absolute;
+  inset: 0;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  transition: opacity 0.45s ease-out;
+  pointer-events: ${({ $visible }) => ($visible ? 'auto' : 'none')};
+`;
+
 export type HomeSplashCanvasProps = {
   phase: CanvasPhase;
   caseStudySummaries?: CaseStudySummary[];
@@ -298,29 +307,44 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   onRingHighlightLeave,
   onRingPanelClick,
 }) => {
+  const [sceneReveal, setSceneReveal] = useState(false);
+
+  const onHeroModelReady = useCallback(() => {
+    setSceneReveal(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (phase === 'main') {
+      setSceneReveal(true);
+    }
+  }, [phase]);
+
   return (
     <CanvasLayer aria-hidden>
-      <Canvas
-        gl={{ antialias: true, alpha: false }}
-        camera={{
-          position: INTRO_CAMERA_POSITION.toArray(),
-          fov: 42,
-          near: 0.1,
-          far: 300,
-        }}
-        onCreated={({ gl }) => {
-          gl.setClearColor('#ffffff', 1);
-        }}
-      >
-        <Scene
-          phase={phase}
-          caseStudySummaries={caseStudySummaries}
-          listDriveCaseStudyId={listDriveCaseStudyId}
-          onRingHighlightEnter={onRingHighlightEnter}
-          onRingHighlightLeave={onRingHighlightLeave}
-          onRingPanelClick={onRingPanelClick}
-        />
-      </Canvas>
+      <CanvasReveal $visible={sceneReveal}>
+        <Canvas
+          gl={{ antialias: true, alpha: false }}
+          camera={{
+            position: INTRO_CAMERA_POSITION.toArray(),
+            fov: 42,
+            near: 0.1,
+            far: 300,
+          }}
+          onCreated={({ gl }) => {
+            gl.setClearColor('#ffffff', 1);
+          }}
+        >
+          <Scene
+            phase={phase}
+            caseStudySummaries={caseStudySummaries}
+            listDriveCaseStudyId={listDriveCaseStudyId}
+            onHeroModelReady={onHeroModelReady}
+            onRingHighlightEnter={onRingHighlightEnter}
+            onRingHighlightLeave={onRingHighlightLeave}
+            onRingPanelClick={onRingPanelClick}
+          />
+        </Canvas>
+      </CanvasReveal>
     </CanvasLayer>
   );
 };
