@@ -12,8 +12,15 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { Group, Material, Mesh } from 'three';
-import { DoubleSide, MathUtils, SRGBColorSpace, Vector3 } from 'three';
+import type { Camera, Group, Material, Mesh } from 'three';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import {
+  DoubleSide,
+  MathUtils,
+  PerspectiveCamera,
+  SRGBColorSpace,
+  Vector3,
+} from 'three';
 import type { CaseStudySummary } from '../queries/useGetCaseStudySummaries';
 import {
   HOME_MODEL_TO_REST_LERP_MS,
@@ -35,8 +42,28 @@ import {
   HOME_PHOTO_RING_EXIT_OTHERS_MS,
   HOME_PHOTO_RING_EXIT_SELECTED_MS,
   HOME_PHOTO_RING_EXIT_ALIGN_EPSILON_RAD,
+  HOME_PHOTO_RING_LAYOUT_HALF_SPAN,
+  HOME_PHOTO_RING_VIEWPORT_MIN_SCALE,
+  HOME_PHOTO_RING_VIEWPORT_PADDING,
   HOME_PHOTO_RING_Y,
 } from '../constants/homeScene';
+
+/** Uniform scale so the ring fits horizontally (caps at 1); floored so panels don’t shrink past readability. */
+function ringViewportUniformScale(
+  camera: Camera,
+  orbitTarget: Vector3,
+  layoutHalfSpan: number,
+  padding: number,
+  minScale: number
+): number {
+  if (!(camera instanceof PerspectiveCamera)) return 1;
+  const dist = camera.position.distanceTo(orbitTarget);
+  if (!(dist > 1e-6)) return 1;
+  const vFovRad = MathUtils.degToRad(camera.fov);
+  const visibleHalfWidth = Math.tan(vFovRad / 2) * dist * camera.aspect;
+  const fit = (visibleHalfWidth * padding) / layoutHalfSpan;
+  return Math.min(1, Math.max(minScale, fit));
+}
 
 function easeFromT(t: number): number {
   return 1 - (1 - Math.min(1, Math.max(0, t))) ** 3;
@@ -179,6 +206,7 @@ function RingPanel({
   slot,
   index,
   hoveredIndex,
+  listDrivePanelIndex,
   panel,
   onPointerEnterPanel,
   onPointerLeavePanel,
@@ -187,6 +215,8 @@ function RingPanel({
   slot: Slot;
   index: number;
   hoveredIndex: number | null;
+  /** Footer list hover — same panel scale as direct ring hover */
+  listDrivePanelIndex: number | null;
   panel: RingPanelData;
   onPointerEnterPanel: (index: number) => void;
   onPointerLeavePanel: () => void;
@@ -194,7 +224,9 @@ function RingPanel({
 }) {
   const meshRef = useRef<Mesh>(null);
   const exitCtx = useContext(RingExitContext);
-  const isHovered = hoveredIndex === index;
+  const isHovered =
+    hoveredIndex === index ||
+    (listDrivePanelIndex !== null && listDrivePanelIndex === index);
 
   useFrame(({ clock }, delta) => {
     const m = meshRef.current;
@@ -290,7 +322,8 @@ export function HomePhotoRingPlaceholder({
   exitTargetCaseStudyId?: string | null;
   onExitAnimationComplete?: () => void;
 }) {
-  const { gl } = useThree();
+  const { gl, camera, controls } = useThree();
+  const orbitTargetFallbackRef = useRef(new Vector3(0, 0, 0));
   const outerRef = useRef<Group>(null);
   const innerRef = useRef<Group>(null);
   const tweenStartRef = useRef<number | null>(null);
@@ -423,6 +456,19 @@ export function HomePhotoRingPlaceholder({
     const inner = innerRef.current;
     if (!g) return;
 
+    const orbitTarget =
+      controls != null && 'target' in controls
+        ? (controls as OrbitControlsImpl).target
+        : orbitTargetFallbackRef.current;
+    const ringScale = ringViewportUniformScale(
+      camera,
+      orbitTarget,
+      HOME_PHOTO_RING_LAYOUT_HALF_SPAN,
+      HOME_PHOTO_RING_VIEWPORT_PADDING,
+      HOME_PHOTO_RING_VIEWPORT_MIN_SCALE
+    );
+    g.scale.setScalar(ringScale);
+
     if (inner) {
       const n = slots.length;
 
@@ -535,6 +581,7 @@ export function HomePhotoRingPlaceholder({
               slot={slot}
               panel={ringPanels[i]}
               hoveredIndex={hoveredIndex}
+              listDrivePanelIndex={focusPanelIndex}
               onPointerEnterPanel={handlePointerEnterPanel}
               onPointerLeavePanel={handlePointerLeavePanel}
               onPanelClick={handlePanelClick}
