@@ -1,13 +1,22 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
 import HomeSplashCanvas from '../../components/HomeSplashCanvas';
 import { StaggerRow } from '../../components/StaggerRow';
-import { HOME_ENTER_SEQUENCE_MS } from '../../constants/homeScene';
+import {
+  HOME_ENTER_SEQUENCE_MS,
+  HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS,
+} from '../../constants/homeScene';
 import {
   HAS_SEEN_SPLASH_STORAGE_KEY,
   readHasSeenSplashFromStorage,
 } from '../../constants/splash';
-import { useGetCaseStudies } from '../../queries/useGetCaseStudies';
+import { useGetCaseStudySummaries } from '../../queries/useGetCaseStudySummaries';
 import {
   CaseLink,
   CaseList,
@@ -26,12 +35,39 @@ import {
 type HomePhase = 'splash' | 'transitioning' | 'main';
 
 function Home() {
-  const { data: caseStudies, isLoading, isError } = useGetCaseStudies();
+  const { data: caseStudies, isLoading, isError } = useGetCaseStudySummaries();
   const { setSuppressSiteHeader } = useHomeSplashChrome();
 
   const [phase, setPhase] = useState<HomePhase>(() =>
     readHasSeenSplashFromStorage() ? 'main' : 'splash'
   );
+  const [listFocusCaseStudyId, setListFocusCaseStudyId] = useState<string | null>(
+    null
+  );
+  const listFocusLeaveTimerRef = useRef<number | null>(null);
+
+  const clearListFocusLeaveTimer = useCallback(() => {
+    if (listFocusLeaveTimerRef.current !== null) {
+      clearTimeout(listFocusLeaveTimerRef.current);
+      listFocusLeaveTimerRef.current = null;
+    }
+  }, []);
+
+  const handleCaseLinkEnter = useCallback(
+    (caseStudyId: string) => {
+      clearListFocusLeaveTimer();
+      setListFocusCaseStudyId(caseStudyId);
+    },
+    [clearListFocusLeaveTimer]
+  );
+
+  const handleCaseLinkLeave = useCallback(() => {
+    clearListFocusLeaveTimer();
+    listFocusLeaveTimerRef.current = window.setTimeout(() => {
+      setListFocusCaseStudyId(null);
+      listFocusLeaveTimerRef.current = null;
+    }, HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS);
+  }, [clearListFocusLeaveTimer]);
 
   useLayoutEffect(() => {
     const hideHeader = phase === 'splash' || phase === 'transitioning';
@@ -63,9 +99,17 @@ function Home() {
     return () => window.clearTimeout(id);
   }, [phase, persistSeenAndShowFooter]);
 
+  useEffect(() => {
+    return () => clearListFocusLeaveTimer();
+  }, [clearListFocusLeaveTimer]);
+
   return (
     <HomeRoot>
-      <HomeSplashCanvas phase={phase} />
+      <HomeSplashCanvas
+        phase={phase}
+        caseStudySummaries={caseStudies}
+        listFocusedCaseStudyId={listFocusCaseStudyId}
+      />
       <HomeUiStack>
         {phase === 'splash' ? (
           <SplashChrome>
@@ -102,7 +146,13 @@ function Home() {
                     {caseStudies.map((study, index) => (
                       <li key={study._id}>
                         <StaggerRow $staggerIndex={index + 1} $align="end">
-                          <CaseLink to={`/projects/${study.slug}`}>
+                          <CaseLink
+                            to={`/projects/${study.slug}`}
+                            onMouseEnter={() =>
+                              handleCaseLinkEnter(study._id)
+                            }
+                            onMouseLeave={handleCaseLinkLeave}
+                          >
                             {study.client} – {study.title}
                           </CaseLink>
                         </StaggerRow>

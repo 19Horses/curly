@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { getApiUrl } from '../sanityIntegration';
 import type { CaseStudyType } from './useGetCaseStudies';
@@ -27,21 +27,10 @@ const getCaseStudyBySlug = async (
 };
 
 export const useGetCaseStudy = (slug: string | undefined) => {
-  const queryClient = useQueryClient();
-
   return useQuery({
     queryKey: ['caseStudy', slug],
     queryFn: () => getCaseStudyBySlug(slug as string),
     enabled: Boolean(slug),
-    initialData: () => {
-      if (!slug) return undefined;
-      const list = queryClient.getQueryData<CaseStudyType[]>(['caseStudies']);
-      if (!list) return undefined;
-      const hit = list.find((cs) => cs.slug === slug);
-      return hit ? { result: hit } : undefined;
-    },
-    initialDataUpdatedAt: () =>
-      queryClient.getQueryState(['caseStudies'])?.dataUpdatedAt,
     select: (res) => res.result,
   });
 };
