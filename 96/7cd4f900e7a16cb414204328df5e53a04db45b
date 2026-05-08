@@ -1,0 +1,63 @@
+frontend/src/hooks/useProjectChrome.ts
+  aaf68ad2346b2c67 1-13
+frontend/src/hooks/useSurfaceRevealTransition.ts
+  aaf68ad2346b2c67 3-6
+frontend/src/global.css
+  aaf68ad2346b2c67 22-28
+frontend/src/pages/ProjectPage/index.tsx
+  aaf68ad2346b2c67 3,6,10,16,54-58,72,77-78,83-84,89
+frontend/src/constants/projectPage.ts
+  aaf68ad2346b2c67 1-8
+frontend/src/pages/Layout/index.tsx
+  aaf68ad2346b2c67 1,5,10-18
+frontend/src/components/Header.tsx
+  aaf68ad2346b2c67 5,52,55,137
+frontend/src/pages/ProjectPage/styles.ts
+  aaf68ad2346b2c67 2-7,25,27,66-70,79-84,135-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.1",
+  "base_commit_sha": "967cd4f900e7a16cb414204328df5e53a04db45b",
+  "prompts": {
+    "512296bbc144dfc7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f6cf1629-b9bf-41a6-9531-785d50fc3b6c",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    },
+    "6c670b5acdd15606": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f0980039-dffd-4e0e-a1a9-cfca9caab1d9",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 339,
+      "overriden_lines": 0
+    },
+    "aaf68ad2346b2c67": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "2a040187-ff04-451f-9571-64490456a655",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 181,
+      "total_deletions": 113,
+      "accepted_lines": 100,
+      "overriden_lines": 2
+    }
+  }
+}
