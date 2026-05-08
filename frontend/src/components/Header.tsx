@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { styled, css } from 'styled-components';
+import logoSrc from '../assets/logo.png';
 import { PROJECT_SURFACE_TIMING } from '../constants/projectSurface';
 import { useProjectChrome } from '../hooks/useProjectChrome';
-import HeaderLogoCanvas from './HeaderLogoCanvas';
 import { HeaderAudioTrack } from './HeaderAudioTrack';
 import { StaggerRow } from './StaggerRow';
 import { fadeIn, fadeInAbsoluteCenter } from '../styles/animations';
@@ -95,14 +95,15 @@ const LogoLink = styled(Link)`
   animation: ${fadeInAbsoluteCenter} 0.5s ease-out both;
   animation-delay: 0.1s;
   display: block;
-  width: clamp(168px, 34vw, 300px);
-  height: clamp(52px, 12vw, 96px);
+  width: clamp(140px, 28vw, 252px);
+  height: clamp(44px, 10vw, 80px);
 `;
 
-const LogoCanvasInner = styled.span`
+const LogoImg = styled.img`
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: contain;
 `;
 
 const Nav = styled.nav<{ $navLight: boolean }>`
@@ -161,9 +162,7 @@ function Header() {
         <HeaderAudioTrack lightOnDark={lightOnDark} />
       </LeftCluster>
       <LogoLink to="/" aria-label="Curly home">
-        <LogoCanvasInner>
-          <HeaderLogoCanvas />
-        </LogoCanvasInner>
+        <LogoImg src={logoSrc} alt="" decoding="async" />
       </LogoLink>
       <Nav aria-label="Main" $navLight={navLight}>
         <StaggerRow $staggerIndex={0} $align="end" $delayOffset={2}>
