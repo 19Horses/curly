@@ -11,6 +11,7 @@ import HomeSplashCanvas from '../../components/HomeSplashCanvas';
 import { StaggerRow } from '../../components/StaggerRow';
 import {
   HOME_ENTER_SEQUENCE_MS,
+  HOME_FOOTER_EXIT_FADE_DURATION_S,
   HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS,
 } from '../../constants/homeScene';
 import {
@@ -52,6 +53,15 @@ function Home() {
   const [listDriveCaseStudyId, setListDriveCaseStudyId] = useState<
     string | null
   >(null);
+  /** Staged ring fade then navigate to `/projects/:slug` */
+  const [pendingExit, setPendingExit] = useState<{
+    slug: string;
+    caseStudyId: string;
+  } | null>(null);
+  /** Once true, footer stays faded until Home unmounts (avoids flash when clearing pending exit). */
+  const [isLeavingHome, setIsLeavingHome] = useState(false);
+  const exitSlugRef = useRef<string | null>(null);
+  const exitInProgressRef = useRef(false);
   const focusLeaveTimerRef = useRef<number | null>(null);
 
   const clearFocusLeaveTimer = useCallback(() => {
@@ -96,12 +106,34 @@ function Home() {
     }, HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS);
   }, [clearFocusLeaveTimer]);
 
-  const handleRingPanelClick = useCallback(
-    (slug: string) => {
+  const beginProjectExit = useCallback(
+    (slug: string, caseStudyId: string) => {
       if (phase !== 'main') return;
-      navigate(`/projects/${slug}`);
+      if (exitInProgressRef.current) return;
+      exitInProgressRef.current = true;
+      exitSlugRef.current = slug;
+      clearFocusLeaveTimer();
+      setHighlightedCaseStudyId(caseStudyId);
+      setListDriveCaseStudyId(caseStudyId);
+      setIsLeavingHome(true);
+      setPendingExit({ slug, caseStudyId });
     },
-    [navigate, phase]
+    [phase, clearFocusLeaveTimer]
+  );
+
+  const handleRingExitAnimationComplete = useCallback(() => {
+    const slug = exitSlugRef.current;
+    exitSlugRef.current = null;
+    exitInProgressRef.current = false;
+    setPendingExit(null);
+    if (slug) navigate(`/projects/${slug}`);
+  }, [navigate]);
+
+  const handleRingPanelClick = useCallback(
+    (slug: string, caseStudyId: string) => {
+      beginProjectExit(slug, caseStudyId);
+    },
+    [beginProjectExit]
   );
 
   useLayoutEffect(() => {
@@ -147,6 +179,8 @@ function Home() {
         onRingHighlightEnter={handleRingHighlightEnter}
         onRingHighlightLeave={handleRingHighlightLeave}
         onRingPanelClick={handleRingPanelClick}
+        exitTargetCaseStudyId={pendingExit?.caseStudyId ?? null}
+        onRingExitAnimationComplete={handleRingExitAnimationComplete}
       />
       <HomeUiStack>
         {phase === 'splash' ? (
@@ -157,7 +191,14 @@ function Home() {
           </SplashChrome>
         ) : null}
         {phase === 'main' ? (
-          <HomeFooter>
+          <HomeFooter
+            initial={false}
+            animate={{ opacity: isLeavingHome ? 0 : 1 }}
+            transition={{
+              duration: HOME_FOOTER_EXIT_FADE_DURATION_S,
+              ease: [0.33, 1, 0.68, 1],
+            }}
+          >
             <FooterLeft>
               <FooterLeftStagger $staggerIndex={0} $align="start">
                 <FooterLine>
@@ -197,6 +238,18 @@ function Home() {
                                 handleCaseLinkEnter(study._id)
                               }
                               onMouseLeave={handleCaseLinkLeave}
+                              onClick={(e) => {
+                                if (
+                                  e.ctrlKey ||
+                                  e.metaKey ||
+                                  e.shiftKey ||
+                                  e.altKey
+                                ) {
+                                  return;
+                                }
+                                e.preventDefault();
+                                beginProjectExit(study.slug, study._id);
+                              }}
                             >
                               {study.client} – {study.title}
                             </CaseLink>

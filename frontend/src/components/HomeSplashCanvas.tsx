@@ -186,6 +186,8 @@ function Scene({
   onRingHighlightEnter,
   onRingHighlightLeave,
   onRingPanelClick,
+  exitTargetCaseStudyId = null,
+  onRingExitAnimationComplete,
 }: {
   phase: CanvasPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
@@ -193,7 +195,9 @@ function Scene({
   onHeroModelReady?: () => void;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
-  onRingPanelClick?: (slug: string) => void;
+  onRingPanelClick?: (slug: string, caseStudyId: string) => void;
+  exitTargetCaseStudyId?: string | null;
+  onRingExitAnimationComplete?: () => void;
 }) {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [introDone, setIntroDone] = useState(false);
@@ -225,6 +229,8 @@ function Scene({
           onRingHighlightEnter={onRingHighlightEnter}
           onRingHighlightLeave={onRingHighlightLeave}
           onRingPanelClick={onRingPanelClick}
+          exitTargetCaseStudyId={exitTargetCaseStudyId}
+          onExitAnimationComplete={onRingExitAnimationComplete}
         />
       </Suspense>
       <directionalLight position={[5, 8, 12]} intensity={2.5} color="#ffffff" />
@@ -293,7 +299,10 @@ export type HomeSplashCanvasProps = {
   listDriveCaseStudyId?: string | null;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
-  onRingPanelClick?: (slug: string) => void;
+  onRingPanelClick?: (slug: string, caseStudyId: string) => void;
+  /** Case study `_id` driving staged ring fade-out before navigation */
+  exitTargetCaseStudyId?: string | null;
+  onRingExitAnimationComplete?: () => void;
 };
 
 const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
@@ -303,6 +312,8 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   onRingHighlightEnter,
   onRingHighlightLeave,
   onRingPanelClick,
+  exitTargetCaseStudyId = null,
+  onRingExitAnimationComplete,
 }) => {
   const [sceneReveal, setSceneReveal] = useState(false);
 
@@ -339,6 +350,8 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
             onRingHighlightEnter={onRingHighlightEnter}
             onRingHighlightLeave={onRingHighlightLeave}
             onRingPanelClick={onRingPanelClick}
+            exitTargetCaseStudyId={exitTargetCaseStudyId}
+            onRingExitAnimationComplete={onRingExitAnimationComplete}
           />
         </Canvas>
       </CanvasReveal>

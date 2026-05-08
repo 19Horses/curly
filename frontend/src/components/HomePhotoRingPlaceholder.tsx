@@ -3,14 +3,16 @@ import { useTexture } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import {
   Suspense,
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import type { Group, Mesh } from 'three';
+import type { Group, Material, Mesh } from 'three';
 import { DoubleSide, MathUtils, SRGBColorSpace, Vector3 } from 'three';
 import type { CaseStudySummary } from '../queries/useGetCaseStudySummaries';
 import {
@@ -30,11 +32,44 @@ import {
   HOME_PHOTO_RING_SCROLL_MAX_RAD_PER_SEC,
   HOME_PHOTO_RING_HOVER_LEAVE_MS,
   HOME_PHOTO_RING_LIST_FOCUS_LERP,
+  HOME_PHOTO_RING_EXIT_OTHERS_MS,
+  HOME_PHOTO_RING_EXIT_SELECTED_MS,
+  HOME_PHOTO_RING_EXIT_ALIGN_EPSILON_RAD,
   HOME_PHOTO_RING_Y,
 } from '../constants/homeScene';
 
 function easeFromT(t: number): number {
   return 1 - (1 - Math.min(1, Math.max(0, t))) ** 3;
+}
+
+type RingExitContextValue = {
+  exitTargetCaseStudyId: string | null;
+  /** Clock time when alignment finished — fades run from here */
+  exitSequenceStartRef: React.MutableRefObject<number | null>;
+};
+
+const RingExitContext = createContext<RingExitContextValue | null>(null);
+
+function ringPanelOpacity(
+  elapsedSinceSequenceStart: number,
+  panelCaseStudyId: string,
+  exitTargetCaseStudyId: string,
+  othersSec: number,
+  selectedSec: number
+): number {
+  const isSelected = panelCaseStudyId === exitTargetCaseStudyId;
+  if (!isSelected) {
+    const rawT = Math.min(1, elapsedSinceSequenceStart / othersSec);
+    return 1 - easeFromT(rawT);
+  }
+  if (elapsedSinceSequenceStart < othersSec) {
+    return 1;
+  }
+  const rawT = Math.min(
+    1,
+    (elapsedSinceSequenceStart - othersSec) / selectedSec
+  );
+  return 1 - easeFromT(rawT);
 }
 
 function nearestYawToBringPanelForward(
@@ -46,6 +81,11 @@ function nearestYawToBringPanelForward(
   const base = -θ;
   const k = Math.round((currentYaw - base) / (2 * Math.PI));
   return base + k * 2 * Math.PI;
+}
+
+/** Shortest signed angle from `yaw` to `targetYaw` (radians). */
+function shortestYawDelta(yaw: number, targetYaw: number): number {
+  return Math.atan2(Math.sin(targetYaw - yaw), Math.cos(targetYaw - yaw));
 }
 
 export type HomePhotoRingPhase = 'splash' | 'transitioning' | 'main';
@@ -150,17 +190,42 @@ function RingPanel({
   panel: RingPanelData;
   onPointerEnterPanel: (index: number) => void;
   onPointerLeavePanel: () => void;
-  onPanelClick: (slug: string) => void;
+  onPanelClick: (slug: string, caseStudyId: string) => void;
 }) {
   const meshRef = useRef<Mesh>(null);
+  const exitCtx = useContext(RingExitContext);
   const isHovered = hoveredIndex === index;
 
-  useFrame((_, delta) => {
+  useFrame(({ clock }, delta) => {
     const m = meshRef.current;
     if (!m) return;
-    const target = isHovered ? HOME_PHOTO_RING_PANEL_HOVER_SCALE : 1;
+
+    let opacity = 1;
+    const seqStart = exitCtx?.exitSequenceStartRef.current;
+    if (exitCtx?.exitTargetCaseStudyId && seqStart != null) {
+      const elapsed = clock.elapsedTime - seqStart;
+      opacity = ringPanelOpacity(
+        elapsed,
+        panel.reactKey,
+        exitCtx.exitTargetCaseStudyId,
+        HOME_PHOTO_RING_EXIT_OTHERS_MS / 1000,
+        HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000
+      );
+    }
+
+    const mats = m.material;
+    const list = Array.isArray(mats) ? mats : [mats];
+    for (const mat of list) {
+      const mm = mat as Material;
+      mm.opacity = opacity;
+      mm.transparent = opacity < 1;
+      mm.depthWrite = opacity >= 0.999;
+      mm.needsUpdate = true;
+    }
+
+    const scaleTarget = isHovered ? HOME_PHOTO_RING_PANEL_HOVER_SCALE : 1;
     const k = 1 - Math.exp(-delta * HOME_PHOTO_RING_PANEL_HOVER_LERP);
-    const next = MathUtils.lerp(m.scale.x, target, k);
+    const next = MathUtils.lerp(m.scale.x, scaleTarget, k);
     m.scale.setScalar(next);
   });
 
@@ -181,7 +246,7 @@ function RingPanel({
       }}
       onClick={(e) => {
         e.stopPropagation();
-        onPanelClick(panel.slug);
+        onPanelClick(panel.slug, panel.reactKey);
       }}
     >
       {hasUrl ? (
@@ -212,6 +277,8 @@ export function HomePhotoRingPlaceholder({
   onRingHighlightEnter,
   onRingHighlightLeave,
   onRingPanelClick,
+  exitTargetCaseStudyId = null,
+  onExitAnimationComplete,
 }: {
   phase: HomePhotoRingPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
@@ -219,7 +286,9 @@ export function HomePhotoRingPlaceholder({
   listDriveCaseStudyId: string | null;
   onRingHighlightEnter?: (caseStudyId: string) => void;
   onRingHighlightLeave?: () => void;
-  onRingPanelClick?: (slug: string) => void;
+  onRingPanelClick?: (slug: string, caseStudyId: string) => void;
+  exitTargetCaseStudyId?: string | null;
+  onExitAnimationComplete?: () => void;
 }) {
   const { gl } = useThree();
   const outerRef = useRef<Group>(null);
@@ -227,8 +296,20 @@ export function HomePhotoRingPlaceholder({
   const tweenStartRef = useRef<number | null>(null);
   const scrollAngularVelocityRef = useRef(0);
   const hoverLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const exitSequenceStartRef = useRef<number | null>(null);
+  const exitCompleteFiredRef = useRef(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const atSplash = phase === 'splash';
+
+  const exitTargetId = exitTargetCaseStudyId ?? null;
+
+  const ringExitCtx = useMemo<RingExitContextValue>(
+    () => ({
+      exitTargetCaseStudyId: exitTargetId,
+      exitSequenceStartRef,
+    }),
+    [exitTargetId]
+  );
 
   const { panels: ringPanels, slots } = useMemo(() => {
     const list = caseStudySummaries ?? [];
@@ -312,11 +393,18 @@ export function HomePhotoRingPlaceholder({
   }, [clearHoverLeaveTimer, onRingHighlightLeave]);
 
   const handlePanelClick = useCallback(
-    (slug: string) => {
-      onRingPanelClick?.(slug);
+    (slug: string, caseStudyId: string) => {
+      onRingPanelClick?.(slug, caseStudyId);
     },
     [onRingPanelClick]
   );
+
+  useLayoutEffect(() => {
+    if (!exitTargetId) {
+      exitSequenceStartRef.current = null;
+      exitCompleteFiredRef.current = false;
+    }
+  }, [exitTargetId]);
 
   const startOffset = useMemo(
     () => new Vector3(...HOME_PHOTO_RING_ENTER_OFFSET),
@@ -337,28 +425,67 @@ export function HomePhotoRingPlaceholder({
 
     if (inner) {
       const n = slots.length;
-      const listDriving = focusPanelIndex !== null && n > 0;
 
-      if (listDriving) {
-        scrollAngularVelocityRef.current *= Math.exp(-delta * 14);
-        if (Math.abs(scrollAngularVelocityRef.current) < 1e-4) {
-          scrollAngularVelocityRef.current = 0;
+      if (exitTargetId && n > 0) {
+        scrollAngularVelocityRef.current = 0;
+        const exitIdx = ringPanels.findIndex(
+          (p) => p.reactKey === exitTargetId
+        );
+        if (exitIdx >= 0 && exitSequenceStartRef.current === null) {
+          const targetYaw = nearestYawToBringPanelForward(
+            exitIdx,
+            n,
+            inner.rotation.y
+          );
+          const alignErr = Math.abs(
+            shortestYawDelta(inner.rotation.y, targetYaw)
+          );
+          if (alignErr > HOME_PHOTO_RING_EXIT_ALIGN_EPSILON_RAD) {
+            const lk = 1 - Math.exp(-delta * HOME_PHOTO_RING_LIST_FOCUS_LERP);
+            inner.rotation.y = MathUtils.lerp(inner.rotation.y, targetYaw, lk);
+          } else {
+            /* Stay at the current eased angle — no snap to targetYaw (avoids a visible jerk). */
+            exitSequenceStartRef.current = clock.elapsedTime;
+          }
         }
-        const targetYaw = nearestYawToBringPanelForward(
-          focusPanelIndex,
-          n,
-          inner.rotation.y
-        );
-        const lk = 1 - Math.exp(-delta * HOME_PHOTO_RING_LIST_FOCUS_LERP);
-        inner.rotation.y = MathUtils.lerp(inner.rotation.y, targetYaw, lk);
-      } else {
-        inner.rotation.y += delta * HOME_PHOTO_RING_ROTATE_RAD_PER_SEC;
-        inner.rotation.y += scrollAngularVelocityRef.current * delta;
-        scrollAngularVelocityRef.current *= Math.exp(
-          -delta * HOME_PHOTO_RING_SCROLL_FRICTION
-        );
-        if (Math.abs(scrollAngularVelocityRef.current) < 1e-4) {
-          scrollAngularVelocityRef.current = 0;
+
+        if (
+          exitSequenceStartRef.current !== null &&
+          !exitCompleteFiredRef.current
+        ) {
+          const elapsed = clock.elapsedTime - exitSequenceStartRef.current;
+          const exitTotalSec =
+            HOME_PHOTO_RING_EXIT_OTHERS_MS / 1000 +
+            HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000;
+          if (elapsed >= exitTotalSec) {
+            exitCompleteFiredRef.current = true;
+            onExitAnimationComplete?.();
+          }
+        }
+      } else if (!exitTargetId) {
+        const listDriving = focusPanelIndex !== null && n > 0;
+
+        if (listDriving && focusPanelIndex !== null) {
+          scrollAngularVelocityRef.current *= Math.exp(-delta * 14);
+          if (Math.abs(scrollAngularVelocityRef.current) < 1e-4) {
+            scrollAngularVelocityRef.current = 0;
+          }
+          const targetYaw = nearestYawToBringPanelForward(
+            focusPanelIndex,
+            n,
+            inner.rotation.y
+          );
+          const lk = 1 - Math.exp(-delta * HOME_PHOTO_RING_LIST_FOCUS_LERP);
+          inner.rotation.y = MathUtils.lerp(inner.rotation.y, targetYaw, lk);
+        } else {
+          inner.rotation.y += delta * HOME_PHOTO_RING_ROTATE_RAD_PER_SEC;
+          inner.rotation.y += scrollAngularVelocityRef.current * delta;
+          scrollAngularVelocityRef.current *= Math.exp(
+            -delta * HOME_PHOTO_RING_SCROLL_FRICTION
+          );
+          if (Math.abs(scrollAngularVelocityRef.current) < 1e-4) {
+            scrollAngularVelocityRef.current = 0;
+          }
         }
       }
     }
@@ -400,18 +527,20 @@ export function HomePhotoRingPlaceholder({
             toneMapped={false}
           />
         </mesh>
-        {slots.map((slot, i) => (
-          <RingPanel
-            key={ringPanels[i].reactKey}
-            index={i}
-            slot={slot}
-            panel={ringPanels[i]}
-            hoveredIndex={hoveredIndex}
-            onPointerEnterPanel={handlePointerEnterPanel}
-            onPointerLeavePanel={handlePointerLeavePanel}
-            onPanelClick={handlePanelClick}
-          />
-        ))}
+        <RingExitContext.Provider value={ringExitCtx}>
+          {slots.map((slot, i) => (
+            <RingPanel
+              key={ringPanels[i].reactKey}
+              index={i}
+              slot={slot}
+              panel={ringPanels[i]}
+              hoveredIndex={hoveredIndex}
+              onPointerEnterPanel={handlePointerEnterPanel}
+              onPointerLeavePanel={handlePointerLeavePanel}
+              onPanelClick={handlePanelClick}
+            />
+          ))}
+        </RingExitContext.Provider>
       </group>
     </group>
   );
