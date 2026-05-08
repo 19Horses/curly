@@ -101,8 +101,9 @@ export const HOME_PHOTO_RING_EXIT_OTHERS_MS = 420;
 /** Exit: selected panel fades after stage 1, then navigation runs. */
 export const HOME_PHOTO_RING_EXIT_SELECTED_MS = 380;
 
-/** Footer fades out when leaving Home for a project (`motion` duration in seconds). */
-export const HOME_FOOTER_EXIT_FADE_DURATION_S = 0.48;
+/** Footer fades with the selected ring panel (same duration as {@link HOME_PHOTO_RING_EXIT_SELECTED_MS}). */
+export const HOME_FOOTER_EXIT_FADE_DURATION_S =
+  HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000;
 
 /** Exit: ring rotates until the chosen panel faces forward; then fades begin. */
 export const HOME_PHOTO_RING_EXIT_ALIGN_EPSILON_RAD = 0.022;

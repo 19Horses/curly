@@ -1,13 +1,19 @@
 import type { MutableRefObject } from 'react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { styled } from 'styled-components';
+import { HOME_FOOTER_EXIT_FADE_DURATION_S } from '../constants/homeScene';
 
-const ConnectorSvg = styled.svg`
+/** Matches `HomeFooter` motion easing when leaving for a project */
+const CONNECTOR_EXIT_EASE = 'cubic-bezier(0.33, 1, 0.68, 1)';
+
+const ConnectorSvg = styled.svg<{ $isLeavingHome: boolean }>`
   position: fixed;
   inset: 0;
   z-index: 50;
   pointer-events: none;
   overflow: visible;
+  opacity: ${({ $isLeavingHome }) => ($isLeavingHome ? 0 : 1)};
+  transition: opacity ${HOME_FOOTER_EXIT_FADE_DURATION_S}s ${CONNECTOR_EXIT_EASE};
 `;
 
 const CONNECTOR_STROKE = '#ec4899';
@@ -21,12 +27,15 @@ export type HomeListRingConnectorProps = {
   listDotRefs: MutableRefObject<Map<string, HTMLSpanElement>>;
   /** Screen-space point below the ring panel (written by WebGL each frame) */
   ringAnchorScreenRef: MutableRefObject<{ x: number; y: number } | null>;
+  /** Fade connector with footer when navigating to a project */
+  isLeavingHome?: boolean;
 };
 
 export function HomeListRingConnector({
   highlightedCaseStudyId,
   listDotRefs,
   ringAnchorScreenRef,
+  isLeavingHome = false,
 }: HomeListRingConnectorProps) {
   const lineRef = useRef<SVGLineElement>(null);
   const ringMarkerRef = useRef<SVGRectElement>(null);
@@ -87,6 +96,7 @@ export function HomeListRingConnector({
   return (
     <ConnectorSvg
       aria-hidden
+      $isLeavingHome={isLeavingHome}
       width={vw}
       height={vh}
       viewBox={`0 0 ${vw} ${vh}`}

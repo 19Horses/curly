@@ -137,7 +137,6 @@ function Home() {
       clearFocusLeaveTimer();
       setHighlightedCaseStudyId(caseStudyId);
       setListDriveCaseStudyId(caseStudyId);
-      setIsLeavingHome(true);
       setPendingExit({ slug, caseStudyId });
     },
     [phase, clearFocusLeaveTimer]
@@ -157,6 +156,10 @@ function Home() {
     },
     [beginProjectExit]
   );
+
+  const handleRingExitSelectedFadeStart = useCallback(() => {
+    setIsLeavingHome(true);
+  }, []);
 
   useLayoutEffect(() => {
     const hideHeader = phase === 'splash' || phase === 'transitioning';
@@ -205,11 +208,13 @@ function Home() {
         onRingPanelClick={handleRingPanelClick}
         exitTargetCaseStudyId={pendingExit?.caseStudyId ?? null}
         onRingExitAnimationComplete={handleRingExitAnimationComplete}
+        onRingExitSelectedFadeStart={handleRingExitSelectedFadeStart}
       />
       <HomeListRingConnector
         highlightedCaseStudyId={highlightedCaseStudyId}
         listDotRefs={listDotElementRefs}
         ringAnchorScreenRef={listFooterAnchorScreenRef}
+        isLeavingHome={isLeavingHome}
       />
       <HomeUiStack>
         {phase === 'splash' ? (

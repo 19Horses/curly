@@ -191,6 +191,7 @@ function Scene({
   onRingPanelClick,
   exitTargetCaseStudyId = null,
   onRingExitAnimationComplete,
+  onRingExitSelectedFadeStart,
 }: {
   phase: CanvasPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
@@ -206,6 +207,7 @@ function Scene({
   onRingPanelClick?: (slug: string, caseStudyId: string) => void;
   exitTargetCaseStudyId?: string | null;
   onRingExitAnimationComplete?: () => void;
+  onRingExitSelectedFadeStart?: () => void;
 }) {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [introDone, setIntroDone] = useState(false);
@@ -241,6 +243,7 @@ function Scene({
           onRingPanelClick={onRingPanelClick}
           exitTargetCaseStudyId={exitTargetCaseStudyId}
           onExitAnimationComplete={onRingExitAnimationComplete}
+          onExitSelectedFadeStart={onRingExitSelectedFadeStart}
         />
       </Suspense>
       <directionalLight position={[5, 8, 12]} intensity={2.5} color="#ffffff" />
@@ -320,6 +323,8 @@ export type HomeSplashCanvasProps = {
   /** Case study `_id` driving staged ring fade-out before navigation */
   exitTargetCaseStudyId?: string | null;
   onRingExitAnimationComplete?: () => void;
+  /** Ring begins fading the selected panel (others already faded) — e.g. footer out */
+  onRingExitSelectedFadeStart?: () => void;
 };
 
 const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
@@ -333,6 +338,7 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   onRingPanelClick,
   exitTargetCaseStudyId = null,
   onRingExitAnimationComplete,
+  onRingExitSelectedFadeStart,
 }) => {
   const [sceneReveal, setSceneReveal] = useState(false);
 
@@ -373,6 +379,7 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
             onRingPanelClick={onRingPanelClick}
             exitTargetCaseStudyId={exitTargetCaseStudyId}
             onRingExitAnimationComplete={onRingExitAnimationComplete}
+            onRingExitSelectedFadeStart={onRingExitSelectedFadeStart}
           />
         </Canvas>
       </CanvasReveal>

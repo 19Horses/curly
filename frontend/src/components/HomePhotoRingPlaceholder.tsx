@@ -327,6 +327,7 @@ export function HomePhotoRingPlaceholder({
   onRingPanelClick,
   exitTargetCaseStudyId = null,
   onExitAnimationComplete,
+  onExitSelectedFadeStart,
 }: {
   phase: HomePhotoRingPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
@@ -344,6 +345,8 @@ export function HomePhotoRingPlaceholder({
   onRingPanelClick?: (slug: string, caseStudyId: string) => void;
   exitTargetCaseStudyId?: string | null;
   onExitAnimationComplete?: () => void;
+  /** Fires once when the selected panel begins fading (after other panels have faded). */
+  onExitSelectedFadeStart?: () => void;
 }) {
   const { gl, camera, controls, size } = useThree();
   const orbitTargetFallbackRef = useRef(new Vector3(0, 0, 0));
@@ -355,6 +358,7 @@ export function HomePhotoRingPlaceholder({
   const hoverLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const exitSequenceStartRef = useRef<number | null>(null);
   const exitCompleteFiredRef = useRef(false);
+  const exitSelectedFadeStartFiredRef = useRef(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const atSplash = phase === 'splash';
 
@@ -467,6 +471,7 @@ export function HomePhotoRingPlaceholder({
     if (!exitTargetId) {
       exitSequenceStartRef.current = null;
       exitCompleteFiredRef.current = false;
+      exitSelectedFadeStartFiredRef.current = false;
     }
   }, [exitTargetId]);
 
@@ -531,9 +536,16 @@ export function HomePhotoRingPlaceholder({
           !exitCompleteFiredRef.current
         ) {
           const elapsed = clock.elapsedTime - exitSequenceStartRef.current;
+          const othersSec = HOME_PHOTO_RING_EXIT_OTHERS_MS / 1000;
+          if (
+            elapsed >= othersSec &&
+            !exitSelectedFadeStartFiredRef.current
+          ) {
+            exitSelectedFadeStartFiredRef.current = true;
+            onExitSelectedFadeStart?.();
+          }
           const exitTotalSec =
-            HOME_PHOTO_RING_EXIT_OTHERS_MS / 1000 +
-            HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000;
+            othersSec + HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000;
           if (elapsed >= exitTotalSec) {
             exitCompleteFiredRef.current = true;
             onExitAnimationComplete?.();
