@@ -29,6 +29,11 @@ export const ProjectRoot = styled.article<{ $surfaceActive: boolean }>`
   p {
     margin: 0;
   }
+
+  ${stackBp} {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 `;
 
 export const ProjectGrid = styled.div`
@@ -42,8 +47,11 @@ export const ProjectGrid = styled.div`
   align-items: stretch;
 
   ${stackBp} {
-    grid-template-columns: 1fr;
-    grid-auto-rows: auto;
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    min-height: min-content;
+    gap: clamp(1.25rem, 4vw, 2rem);
   }
 `;
 
@@ -57,9 +65,11 @@ export const TitleColumn = styled.div`
   padding-inline: clamp(0.125rem, 0.5vw, 0.5rem);
 
   ${stackBp} {
+    flex: 0 0 auto;
     justify-content: flex-start;
     min-height: auto;
-    padding-block: 0 0.5rem;
+    padding-inline: 0;
+    padding-block: 0;
   }
 `;
 
@@ -74,6 +84,10 @@ export const ProjectTitle = styled.h1`
   font-weight: bold;
   line-height: 1.15;
   max-width: 22ch;
+
+  ${stackBp} {
+    max-width: none;
+  }
 `;
 
 /** Same easing as Job {@link FadeBox}, longer duration for project copy blocks */
@@ -99,13 +113,21 @@ export const ImagesColumn = styled.div`
   gap: 0;
 
   ${stackBp} {
-    max-height: min(70vh, 32rem);
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: visible;
+    max-height: none;
   }
 `;
 
 export const AsideColumn = styled.div`
   min-height: 0;
   min-width: 0;
+
+  ${stackBp} {
+    display: none;
+  }
 `;
 
 export const ProjectCopyRow = styled.div`
@@ -119,13 +141,20 @@ export const ProjectCopyRow = styled.div`
   align-items: start;
 
   ${stackBp} {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    padding-top: clamp(0.75rem, 2vw, 1.25rem);
   }
 `;
 
 export const ProjectMetaBlock = styled(MetaBlock)`
   gap: clamp(0.45rem, 1.15vw, 0.85rem);
   max-width: min(100%, 28ch);
+
+  ${stackBp} {
+    max-width: none;
+  }
 `;
 
 export const StaggerImage = styled.img<{ $index: number }>`
