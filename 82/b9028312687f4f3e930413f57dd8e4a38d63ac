@@ -1,0 +1,65 @@
+frontend/src/components/HomePhotoRingPlaceholder.tsx
+  2969eebc61cbc728 4,28,53-55,80,215,226,232-239,282,323-324,335-341,348,352,402-408,588-615,644
+frontend/src/constants/homeScene.ts
+  2969eebc61cbc728 43-46,48
+  h_86d8924a44fb42 47
+frontend/src/pages/Home/styles.ts
+  2969eebc61cbc728 142-152,164-165,172
+frontend/src/pages/Home/index.tsx
+  2969eebc61cbc728 10,26,68-87,201-202,209-213,262
+frontend/src/components/HomeListRingConnector.tsx
+  2969eebc61cbc728 1-117
+frontend/src/components/HomeSplashCanvas.tsx
+  2969eebc61cbc728 4,186-187,198-202,237-238,310-316,329-330,368-369
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.1",
+  "base_commit_sha": "82b9028312687f4f3e930413f57dd8e4a38d63ac",
+  "prompts": {
+    "2969eebc61cbc728": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "38223c17-4bd7-44dd-82dc-9a3679bd8651",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 300,
+      "total_deletions": 65,
+      "accepted_lines": 251,
+      "overriden_lines": 1
+    },
+    "512296bbc144dfc7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f6cf1629-b9bf-41a6-9531-785d50fc3b6c",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    },
+    "6c670b5acdd15606": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f0980039-dffd-4e0e-a1a9-cfca9caab1d9",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 367,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_86d8924a44fb42": {
+      "author": "Cammy Docherty"
+    }
+  }
+}
