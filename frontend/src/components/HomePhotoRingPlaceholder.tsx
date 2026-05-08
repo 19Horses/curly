@@ -85,10 +85,7 @@ function nearestYawToBringPanelForward(
 
 /** Shortest signed angle from `yaw` to `targetYaw` (radians). */
 function shortestYawDelta(yaw: number, targetYaw: number): number {
-  return Math.atan2(
-    Math.sin(targetYaw - yaw),
-    Math.cos(targetYaw - yaw)
-  );
+  return Math.atan2(Math.sin(targetYaw - yaw), Math.cos(targetYaw - yaw));
 }
 
 export type HomePhotoRingPhase = 'splash' | 'transitioning' | 'main';
@@ -205,10 +202,7 @@ function RingPanel({
 
     let opacity = 1;
     const seqStart = exitCtx?.exitSequenceStartRef.current;
-    if (
-      exitCtx?.exitTargetCaseStudyId &&
-      seqStart != null
-    ) {
+    if (exitCtx?.exitTargetCaseStudyId && seqStart != null) {
       const elapsed = clock.elapsedTime - seqStart;
       opacity = ringPanelOpacity(
         elapsed,
@@ -434,7 +428,9 @@ export function HomePhotoRingPlaceholder({
 
       if (exitTargetId && n > 0) {
         scrollAngularVelocityRef.current = 0;
-        const exitIdx = ringPanels.findIndex((p) => p.reactKey === exitTargetId);
+        const exitIdx = ringPanels.findIndex(
+          (p) => p.reactKey === exitTargetId
+        );
         if (exitIdx >= 0 && exitSequenceStartRef.current === null) {
           const targetYaw = nearestYawToBringPanelForward(
             exitIdx,
@@ -446,11 +442,7 @@ export function HomePhotoRingPlaceholder({
           );
           if (alignErr > HOME_PHOTO_RING_EXIT_ALIGN_EPSILON_RAD) {
             const lk = 1 - Math.exp(-delta * HOME_PHOTO_RING_LIST_FOCUS_LERP);
-            inner.rotation.y = MathUtils.lerp(
-              inner.rotation.y,
-              targetYaw,
-              lk
-            );
+            inner.rotation.y = MathUtils.lerp(inner.rotation.y, targetYaw, lk);
           } else {
             /* Stay at the current eased angle — no snap to targetYaw (avoids a visible jerk). */
             exitSequenceStartRef.current = clock.elapsedTime;
@@ -461,8 +453,7 @@ export function HomePhotoRingPlaceholder({
           exitSequenceStartRef.current !== null &&
           !exitCompleteFiredRef.current
         ) {
-          const elapsed =
-            clock.elapsedTime - exitSequenceStartRef.current;
+          const elapsed = clock.elapsedTime - exitSequenceStartRef.current;
           const exitTotalSec =
             HOME_PHOTO_RING_EXIT_OTHERS_MS / 1000 +
             HOME_PHOTO_RING_EXIT_SELECTED_MS / 1000;
