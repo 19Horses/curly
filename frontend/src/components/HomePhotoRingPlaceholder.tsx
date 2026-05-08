@@ -537,10 +537,7 @@ export function HomePhotoRingPlaceholder({
         ) {
           const elapsed = clock.elapsedTime - exitSequenceStartRef.current;
           const othersSec = HOME_PHOTO_RING_EXIT_OTHERS_MS / 1000;
-          if (
-            elapsed >= othersSec &&
-            !exitSelectedFadeStartFiredRef.current
-          ) {
+          if (elapsed >= othersSec && !exitSelectedFadeStartFiredRef.current) {
             exitSelectedFadeStartFiredRef.current = true;
             onExitSelectedFadeStart?.();
           }

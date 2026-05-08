@@ -161,8 +161,7 @@ export const CaseListItem = styled.li<{ $highlighted?: boolean }>`
     align-self: center;
   }
 
-  &:hover > ${CaseListDot},
-  &:has(:focus-visible) > ${CaseListDot} {
+  &:hover > ${CaseListDot}, &:has(:focus-visible) > ${CaseListDot} {
     opacity: 1;
   }
 

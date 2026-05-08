@@ -13,7 +13,8 @@ const ConnectorSvg = styled.svg<{ $isLeavingHome: boolean }>`
   pointer-events: none;
   overflow: visible;
   opacity: ${({ $isLeavingHome }) => ($isLeavingHome ? 0 : 1)};
-  transition: opacity ${HOME_FOOTER_EXIT_FADE_DURATION_S}s ${CONNECTOR_EXIT_EASE};
+  transition: opacity ${HOME_FOOTER_EXIT_FADE_DURATION_S}s
+    ${CONNECTOR_EXIT_EASE};
 `;
 
 const CONNECTOR_STROKE = '#ec4899';
@@ -45,8 +46,7 @@ export function HomeListRingConnector({
   ]);
 
   useLayoutEffect(() => {
-    const onResize = () =>
-      setVwVh([window.innerWidth, window.innerHeight]);
+    const onResize = () => setVwVh([window.innerWidth, window.innerHeight]);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
