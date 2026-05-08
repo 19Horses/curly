@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { styled, css } from 'styled-components';
 import { StaggerRow } from '../../components/StaggerRow';
 
@@ -80,7 +81,7 @@ export const footerLinkStyles = css`
   }
 `;
 
-export const HomeFooter = styled.footer`
+export const HomeFooter = styled(motion.footer)`
   margin-top: auto;
   display: flex;
   flex-direction: row;

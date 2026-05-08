@@ -11,6 +11,7 @@ import HomeSplashCanvas from '../../components/HomeSplashCanvas';
 import { StaggerRow } from '../../components/StaggerRow';
 import {
   HOME_ENTER_SEQUENCE_MS,
+  HOME_FOOTER_EXIT_FADE_DURATION_S,
   HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS,
 } from '../../constants/homeScene';
 import {
@@ -57,6 +58,8 @@ function Home() {
     slug: string;
     caseStudyId: string;
   } | null>(null);
+  /** Once true, footer stays faded until Home unmounts (avoids flash when clearing pending exit). */
+  const [isLeavingHome, setIsLeavingHome] = useState(false);
   const exitSlugRef = useRef<string | null>(null);
   const exitInProgressRef = useRef(false);
   const focusLeaveTimerRef = useRef<number | null>(null);
@@ -112,6 +115,7 @@ function Home() {
       clearFocusLeaveTimer();
       setHighlightedCaseStudyId(caseStudyId);
       setListDriveCaseStudyId(caseStudyId);
+      setIsLeavingHome(true);
       setPendingExit({ slug, caseStudyId });
     },
     [phase, clearFocusLeaveTimer]
@@ -187,7 +191,14 @@ function Home() {
           </SplashChrome>
         ) : null}
         {phase === 'main' ? (
-          <HomeFooter>
+          <HomeFooter
+            initial={false}
+            animate={{ opacity: isLeavingHome ? 0 : 1 }}
+            transition={{
+              duration: HOME_FOOTER_EXIT_FADE_DURATION_S,
+              ease: [0.33, 1, 0.68, 1],
+            }}
+          >
             <FooterLeft>
               <FooterLeftStagger $staggerIndex={0} $align="start">
                 <FooterLine>
