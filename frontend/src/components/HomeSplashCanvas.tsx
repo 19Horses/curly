@@ -97,7 +97,7 @@ function CameraRig({
       camera.position.lerpVectors(
         INTRO_CAMERA_POSITION,
         SPLASH_CAMERA_POSITION,
-        t,
+        t
       );
       controls.target.lerpVectors(INTRO_TARGET, SPLASH_TARGET, t);
       controls.update();
@@ -113,14 +113,14 @@ function CameraRig({
     const enterSec = HOME_CAMERA_ENTER_LERP_MS / 1000;
     const rawT = Math.min(
       1,
-      (clock.elapsedTime - enterStartRef.current) / enterSec,
+      (clock.elapsedTime - enterStartRef.current) / enterSec
     );
     const t = easeFromT(rawT);
 
     camera.position.lerpVectors(
       enterFromPos.current,
       SPLASH_CAMERA_POSITION,
-      t,
+      t
     );
     controls.target.lerpVectors(enterFromTarget.current, SPLASH_TARGET, t);
     controls.update();
@@ -167,10 +167,7 @@ function HeroModelExitGroup({
     }
 
     const dur = HOME_CAMERA_ENTER_LERP_MS / 1000;
-    const rawT = Math.min(
-      1,
-      (clock.elapsedTime - tweenStartRef.current) / dur,
-    );
+    const rawT = Math.min(1, (clock.elapsedTime - tweenStartRef.current) / dur);
     const t = easeFromT(rawT);
     g.position.lerpVectors(start, HERO_MODEL_EXIT_END, t);
     if (rawT >= 1) {

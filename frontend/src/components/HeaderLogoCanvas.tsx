@@ -20,7 +20,11 @@ function HeaderLogoScene() {
   return (
     <>
       <ambientLight intensity={0.55} />
-      <directionalLight position={[5, 8, 10]} intensity={1.35} color="#ffffff" />
+      <directionalLight
+        position={[5, 8, 10]}
+        intensity={1.35}
+        color="#ffffff"
+      />
       <directionalLight
         position={[-8, 4, 6]}
         intensity={0.85}
