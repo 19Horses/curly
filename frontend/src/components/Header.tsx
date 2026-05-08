@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { styled, css } from 'styled-components';
+import { PROJECT_SURFACE_TIMING } from '../constants/projectSurface';
+import { useSurfaceRevealTransition } from '../hooks/useSurfaceRevealTransition';
 import HeaderLogoCanvas from './HeaderLogoCanvas';
 import { HeaderAudioTrack } from './HeaderAudioTrack';
 import { StaggerRow } from './StaggerRow';
@@ -35,7 +37,7 @@ function formatHeaderDate(date: Date): string {
   return `${weekday} ${day} ${month} ${year}`;
 }
 
-const Shell = styled.header`
+const Shell = styled.header<{ $projectChrome: boolean }>`
   position: relative;
   z-index: 2;
   --header-pad: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
@@ -47,6 +49,13 @@ const Shell = styled.header`
   gap: clamp(0.5rem, 0.35rem + 0.8vw, 1rem);
   font-size: clamp(0.8125rem, 0.72rem + 0.45vw, 1.125rem);
   font-weight: bold;
+  background-color: ${({ $projectChrome }) =>
+    $projectChrome ? '#000000' : 'transparent'};
+  color: ${({ $projectChrome }) =>
+    $projectChrome ? '#ffffff' : 'inherit'};
+  transition:
+    background-color ${PROJECT_SURFACE_TIMING},
+    color ${PROJECT_SURFACE_TIMING};
 `;
 
 const navItemStyles = css`
@@ -73,11 +82,11 @@ const LeftCluster = styled.div`
   gap: clamp(0.35rem, 0.22rem + 0.45vw, 0.55rem);
 `;
 
-const DateDisplay = styled.time<{ $jobsBleed: boolean }>`
+const DateDisplay = styled.time<{ $lightOnDark: boolean }>`
   text-align: left;
   animation: ${fadeIn} 0.5s ease-out both;
-  color: ${({ $jobsBleed }) => ($jobsBleed ? '#fff' : 'inherit')};
-  transition: color 0.4s ease;
+  color: ${({ $lightOnDark }) => ($lightOnDark ? '#ffffff' : 'inherit')};
+  transition: color ${PROJECT_SURFACE_TIMING};
 `;
 
 const LogoLink = styled(Link)`
@@ -100,7 +109,7 @@ const LogoCanvasInner = styled.span`
   height: 100%;
 `;
 
-const Nav = styled.nav<{ $jobsLight: boolean }>`
+const Nav = styled.nav<{ $navLight: boolean }>`
   flex: 1 1 0;
   min-width: 0;
   display: flex;
@@ -109,8 +118,8 @@ const Nav = styled.nav<{ $jobsLight: boolean }>`
   gap: clamp(1px, 0.1rem + 0.15vw, 2px);
   line-height: 1.25;
   text-transform: lowercase;
-  color: ${({ $jobsLight }) => ($jobsLight ? '#fff' : 'inherit')};
-  transition: color 0.4s ease;
+  color: ${({ $navLight }) => ($navLight ? '#ffffff' : 'inherit')};
+  transition: color ${PROJECT_SURFACE_TIMING};
 `;
 
 const NavLink = styled(Link)`
@@ -128,6 +137,12 @@ const JOBS_STACK_MQ = '(max-width: 42rem)';
 function Header() {
   const { pathname } = useLocation();
   const jobsBleed = pathname === '/jobs';
+  const projectRoute = /^\/projects\/[^/]+/.test(pathname);
+  const projectSurfaceRevealed = useSurfaceRevealTransition(
+    projectRoute,
+    pathname
+  );
+  const projectChrome = projectRoute && projectSurfaceRevealed;
   const [narrowStack, setNarrowStack] = useState(
     () =>
       typeof window !== 'undefined' && window.matchMedia(JOBS_STACK_MQ).matches
@@ -141,24 +156,25 @@ function Header() {
     return () => mq.removeEventListener('change', sync);
   }, []);
 
-  const jobsNavLight = jobsBleed && narrowStack;
+  const lightOnDark = jobsBleed || projectChrome;
+  const navLight = (jobsBleed && narrowStack) || projectChrome;
   const formattedDate = formatHeaderDate(new Date());
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <Shell>
+    <Shell $projectChrome={projectChrome}>
       <LeftCluster>
-        <DateDisplay dateTime={today} $jobsBleed={jobsBleed}>
+        <DateDisplay dateTime={today} $lightOnDark={lightOnDark}>
           {formattedDate}
         </DateDisplay>
-        <HeaderAudioTrack jobsBleed={jobsBleed} />
+        <HeaderAudioTrack lightOnDark={lightOnDark} />
       </LeftCluster>
       <LogoLink to="/" aria-label="Curly home">
         <LogoCanvasInner>
           <HeaderLogoCanvas />
         </LogoCanvasInner>
       </LogoLink>
-      <Nav aria-label="Main" $jobsLight={jobsNavLight}>
+      <Nav aria-label="Main" $navLight={navLight}>
         <StaggerRow $staggerIndex={0} $align="end" $delayOffset={2}>
           <NavPlaceholder>other stuff</NavPlaceholder>
         </StaggerRow>

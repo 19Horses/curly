@@ -42,6 +42,7 @@ type HomePhase = 'splash' | 'transitioning' | 'main';
 function Home() {
   const navigate = useNavigate();
   const { data: caseStudies, isLoading, isError } = useGetCaseStudySummaries();
+  console.log('caseStudies', caseStudies);
   const { setSuppressSiteHeader } = useHomeSplashChrome();
 
   const [phase, setPhase] = useState<HomePhase>(() =>
