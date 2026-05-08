@@ -1,0 +1,58 @@
+frontend/src/constants/homeScene.ts
+  cddbf322c4caa7c1 79-81
+frontend/src/pages/Home/index.tsx
+  cddbf322c4caa7c1 14,61-62,118,194-201
+frontend/src/pages/Home/styles.ts
+  cddbf322c4caa7c1 2,84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.1",
+  "base_commit_sha": "d17a4206756cb8ef68dbcb27d79c21c3624ddff5",
+  "prompts": {
+    "512296bbc144dfc7": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f6cf1629-b9bf-41a6-9531-785d50fc3b6c",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    },
+    "6c670b5acdd15606": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f0980039-dffd-4e0e-a1a9-cfca9caab1d9",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 367,
+      "overriden_lines": 0
+    },
+    "cddbf322c4caa7c1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "11628e1c-8e08-48bc-b81b-82595d10080f",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 17,
+      "total_deletions": 2,
+      "accepted_lines": 17,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_86d8924a44fb42": {
+      "author": "Cammy Docherty"
+    }
+  }
+}
