@@ -1,7 +1,19 @@
 import { useParams } from 'react-router-dom';
+import { BlockParagraphs } from '../../sanity/BlockParagraphs';
 import { useSurfaceRevealTransition } from '../../hooks/useSurfaceRevealTransition';
 import { useGetCaseStudy } from '../../queries/useGetCaseStudy';
-import { ProjectRoot } from './styles';
+import { FadeBox, SectionLabel } from '../JobPage/styles';
+import {
+  AsideColumn,
+  ImagesColumn,
+  ProjectCopyRow,
+  ProjectGrid,
+  ProjectMetaBlock,
+  ProjectRoot,
+  ProjectTitle,
+  StaggerImage,
+  TitleColumn,
+} from './styles';
 
 function ProjectPage() {
   const { slug } = useParams();
@@ -34,7 +46,46 @@ function ProjectPage() {
 
   return (
     <ProjectRoot $surfaceActive={surfaceActive}>
-      <h1>{data.client} -{data.title}</h1>
+      <ProjectGrid>
+        <TitleColumn>
+          <ProjectTitle>
+            {data.client} — {data.title}
+          </ProjectTitle>
+        </TitleColumn>
+        <ImagesColumn>
+          {data.images.map((image, index) => (
+            <StaggerImage
+              key={`${image.url}-${index}`}
+              src={image.url}
+              alt={image.alt}
+              $index={index}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+            />
+          ))}
+          <ProjectCopyRow>
+            <FadeBox $delay={0.08}>
+              <ProjectMetaBlock>
+                <SectionLabel>Brief</SectionLabel>
+                <BlockParagraphs blocks={data.brief} />
+              </ProjectMetaBlock>
+            </FadeBox>
+            <FadeBox $delay={0.14}>
+              <ProjectMetaBlock>
+                <SectionLabel>Approach</SectionLabel>
+                <BlockParagraphs blocks={data.approach} />
+              </ProjectMetaBlock>
+            </FadeBox>
+            <FadeBox $delay={0.2}>
+              <ProjectMetaBlock>
+                <SectionLabel>Results</SectionLabel>
+                <BlockParagraphs blocks={data.results} />
+              </ProjectMetaBlock>
+            </FadeBox>
+          </ProjectCopyRow>
+        </ImagesColumn>
+        <AsideColumn />
+      </ProjectGrid>
     </ProjectRoot>
   );
 }
