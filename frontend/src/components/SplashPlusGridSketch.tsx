@@ -6,11 +6,11 @@ const PINK: [number, number, number] = [236, 72, 153];
 
 const GRID_SPACING = 20;
 const BASE_HALF_LEN = 2;
-const MAX_EXTRA_HALF = 2.5;
+const MAX_EXTRA_HALF = 2;
 const INFLUENCE_RADIUS = 340;
-/** Lower = slower ease / longer linger after the cursor moves away. */
+
 const SIZE_LERP = 0.034;
-/** Extra margin around measured Enter button so no plus arms clip into the control. */
+
 const ENTER_EXCLUDE_PADDING = 16;
 
 export type SplashPlusExcludeRect = {
@@ -171,9 +171,9 @@ export const SplashPlusGridSketch = forwardRef<HTMLDivElement, Props>(
               const expandT =
                 MAX_EXTRA_HALF > 0
                   ? Math.min(
-                      1,
-                      Math.max(0, (half - BASE_HALF_LEN) / MAX_EXTRA_HALF)
-                    )
+                    1,
+                    Math.max(0, (half - BASE_HALF_LEN) / MAX_EXTRA_HALF)
+                  )
                   : 0;
               p.strokeWeight(0.65 + expandT * 0.85);
 
