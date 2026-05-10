@@ -11,7 +11,11 @@ const INFLUENCE_RADIUS = 340;
 /** Lower = slower ease / longer linger after the cursor moves away. */
 const SIZE_LERP = 0.034;
 
-function countAxisCells(span: number, halfStep: number, spacing: number): number {
+function countAxisCells(
+  span: number,
+  halfStep: number,
+  spacing: number
+): number {
   let n = 0;
   for (let u = halfStep; u < span + spacing; u += spacing) n++;
   return n;
@@ -57,12 +61,23 @@ export function SplashPlusGridSketch({ active }: Props) {
 
     const sketch = (p: p5) => {
       p.setup = () => {
-        p.createCanvas(host.clientWidth || p.windowWidth, host.clientHeight || p.windowHeight);
-        p.pixelDensity(Math.min(2, typeof window !== 'undefined' ? window.devicePixelRatio : 1));
+        p.createCanvas(
+          host.clientWidth || p.windowWidth,
+          host.clientHeight || p.windowHeight
+        );
+        p.pixelDensity(
+          Math.min(
+            2,
+            typeof window !== 'undefined' ? window.devicePixelRatio : 1
+          )
+        );
       };
 
       p.windowResized = () => {
-        p.resizeCanvas(host.clientWidth || p.windowWidth, host.clientHeight || p.windowHeight);
+        p.resizeCanvas(
+          host.clientWidth || p.windowWidth,
+          host.clientHeight || p.windowHeight
+        );
       };
 
       p.draw = () => {
@@ -102,9 +117,9 @@ export function SplashPlusGridSketch({ active }: Props) {
             const expandT =
               MAX_EXTRA_HALF > 0
                 ? Math.min(
-                  1,
-                  Math.max(0, (half - BASE_HALF_LEN) / MAX_EXTRA_HALF)
-                )
+                    1,
+                    Math.max(0, (half - BASE_HALF_LEN) / MAX_EXTRA_HALF)
+                  )
                 : 0;
             p.strokeWeight(0.65 + expandT * 0.85);
 
