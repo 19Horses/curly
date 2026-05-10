@@ -21,6 +21,13 @@
     }
   },
   "rules": {
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    // p5@2 ships only package "exports" (no "main"); eslint-import-resolver-node cannot resolve it.
+    "import/no-unresolved": [
+      "error",
+      {
+        "ignore": ["^p5$"]
+      }
+    ]
   }
 }
