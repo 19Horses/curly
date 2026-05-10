@@ -28,7 +28,7 @@ const query = `
   }
 `;
 
-const getJobs = async (): Promise<{ result: JobType[] }> => {
+export const getJobs = async (): Promise<{ result: JobType[] }> => {
   const response = await axios.get(getApiUrl(query));
   return response.data;
 };

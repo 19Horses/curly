@@ -5,7 +5,7 @@ import { getApiUrl } from '../sanityIntegration';
 import { toCaseStudyImageList } from '../sanityImageUrl';
 import type { CaseStudyType } from './useGetCaseStudies';
 
-const getCaseStudyBySlug = async (
+export const getCaseStudyBySlug = async (
   slug: string
 ): Promise<{ result: CaseStudyType | null }> => {
   const query = `
