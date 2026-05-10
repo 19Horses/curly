@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
 import { HomeListRingConnector } from '../../components/HomeListRingConnector';
 import HomeSplashCanvas from '../../components/HomeSplashCanvas';
+import { SplashPlusGridSketch } from '../../components/SplashPlusGridSketch';
 import CaseStudiesList from '../../components/CaseStudiesList';
 import {
   HOME_ENTER_SEQUENCE_MS,
@@ -192,6 +193,7 @@ function Home() {
 
   return (
     <HomeRoot>
+      <SplashPlusGridSketch active={phase === 'splash'} />
       <HomeSplashCanvas
         phase={phase}
         caseStudySummaries={caseStudies}

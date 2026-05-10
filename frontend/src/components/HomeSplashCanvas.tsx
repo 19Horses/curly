@@ -43,6 +43,17 @@ function CurlyModel({ onLoaded }: { onLoaded: () => void }) {
 
 type CanvasPhase = 'splash' | 'transitioning' | 'main';
 
+/** Splash shows p5 behind this layer; transparent clear lets pixels composite over the sketch. */
+function SplashClearColor({ phase }: { phase: CanvasPhase }) {
+  const gl = useThree((s) => s.gl);
+  useLayoutEffect(() => {
+    const splash = phase === 'splash';
+    gl.setClearColor(0xffffff, splash ? 0 : 1);
+    gl.domElement.style.background = splash ? 'transparent' : '';
+  }, [phase, gl]);
+  return null;
+}
+
 function easeFromT(t: number): number {
   return 1 - (1 - Math.min(1, Math.max(0, t))) ** 3;
 }
@@ -231,21 +242,23 @@ function Scene({
           </HeroModelExitGroup>
         </Suspense>
       ) : null}
-      <Suspense fallback={null}>
-        <HomePhotoRingPlaceholder
-          phase={phase}
-          caseStudySummaries={caseStudySummaries}
-          listDriveCaseStudyId={listDriveCaseStudyId}
-          highlightedCaseStudyId={highlightedCaseStudyId}
-          listFooterAnchorScreenRef={listFooterAnchorScreenRef}
-          onRingHighlightEnter={onRingHighlightEnter}
-          onRingHighlightLeave={onRingHighlightLeave}
-          onRingPanelClick={onRingPanelClick}
-          exitTargetCaseStudyId={exitTargetCaseStudyId}
-          onExitAnimationComplete={onRingExitAnimationComplete}
-          onExitSelectedFadeStart={onRingExitSelectedFadeStart}
-        />
-      </Suspense>
+      {phase !== 'splash' ? (
+        <Suspense fallback={null}>
+          <HomePhotoRingPlaceholder
+            phase={phase}
+            caseStudySummaries={caseStudySummaries}
+            listDriveCaseStudyId={listDriveCaseStudyId}
+            highlightedCaseStudyId={highlightedCaseStudyId}
+            listFooterAnchorScreenRef={listFooterAnchorScreenRef}
+            onRingHighlightEnter={onRingHighlightEnter}
+            onRingHighlightLeave={onRingHighlightLeave}
+            onRingPanelClick={onRingPanelClick}
+            exitTargetCaseStudyId={exitTargetCaseStudyId}
+            onExitAnimationComplete={onRingExitAnimationComplete}
+            onExitSelectedFadeStart={onRingExitSelectedFadeStart}
+          />
+        </Suspense>
+      ) : null}
       <directionalLight position={[5, 8, 12]} intensity={2.5} color="#ffffff" />
       <directionalLight
         position={[-10, 5, 6]}
@@ -278,7 +291,7 @@ function Scene({
   );
 }
 
-const CanvasLayer = styled.div`
+const CanvasLayer = styled.div<{ $opaqueBackdrop: boolean }>`
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -286,7 +299,8 @@ const CanvasLayer = styled.div`
   height: 100%;
   touch-action: none;
   pointer-events: auto;
-  background: #ffffff;
+  background: ${({ $opaqueBackdrop }) =>
+    $opaqueBackdrop ? '#ffffff' : 'transparent'};
 
   canvas {
     display: block;
@@ -353,20 +367,18 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   }, [phase]);
 
   return (
-    <CanvasLayer aria-hidden>
+    <CanvasLayer $opaqueBackdrop={phase !== 'splash'} aria-hidden>
       <CanvasReveal $visible={sceneReveal}>
         <Canvas
-          gl={{ antialias: true, alpha: false }}
+          gl={{ antialias: true, alpha: true }}
           camera={{
             position: INTRO_CAMERA_POSITION.toArray(),
             fov: 42,
             near: 0.1,
             far: 300,
           }}
-          onCreated={({ gl }) => {
-            gl.setClearColor('#ffffff', 1);
-          }}
         >
+          <SplashClearColor phase={phase} />
           <Scene
             phase={phase}
             caseStudySummaries={caseStudySummaries}
