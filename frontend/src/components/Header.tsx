@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { styled, css } from 'styled-components';
 import logoSrc from '../assets/logo.png';
 import { PROJECT_SURFACE_TIMING } from '../constants/projectSurface';
+import { SITE_HEADER_HEIGHT_VAR } from '../constants/siteHeader';
 import { useProjectChrome } from '../hooks/useProjectChrome';
 import { ListHeading } from './CaseStudiesList/styles';
 import { HeaderAudioTrack } from './HeaderAudioTrack';
@@ -51,6 +52,8 @@ const Shell = styled.header<{ $projectChrome: boolean }>`
   font-size: clamp(0.8125rem, 0.72rem + 0.45vw, 1.125rem);
   font-weight: bold;
   background-color: transparent;
+  background-image: none;
+  box-shadow: none;
   color: ${({ $projectChrome }) => ($projectChrome ? '#ffffff' : 'inherit')};
   transition: color ${PROJECT_SURFACE_TIMING};
 `;
@@ -134,6 +137,7 @@ const NavLink = styled(Link)`
 const JOBS_STACK_MQ = '(max-width: 42rem)';
 
 function Header() {
+  const shellRef = useRef<HTMLElement | null>(null);
   const { pathname } = useLocation();
   const jobsBleed = pathname === '/jobs';
   const projectChrome = useProjectChrome();
@@ -150,13 +154,35 @@ function Header() {
     return () => mq.removeEventListener('change', sync);
   }, []);
 
+  useLayoutEffect(() => {
+    const el = shellRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const publish = () => {
+      document.documentElement.style.setProperty(
+        SITE_HEADER_HEIGHT_VAR,
+        `${el.offsetHeight}px`
+      );
+    };
+
+    publish();
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.removeProperty(SITE_HEADER_HEIGHT_VAR);
+    };
+  }, []);
+
   const lightOnDark = jobsBleed || projectChrome;
   const navLight = (jobsBleed && narrowStack) || projectChrome;
   const formattedDate = formatHeaderDate(new Date());
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <Shell $projectChrome={projectChrome}>
+    <Shell ref={shellRef} $projectChrome={projectChrome}>
       <LeftCluster>
         <DateDisplay dateTime={today} $lightOnDark={lightOnDark}>
           {formattedDate}

@@ -1,13 +1,17 @@
 import { useLayoutEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../../components/Header';
 import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
 import { useProjectChrome } from '../../hooks/useProjectChrome';
 import { Main, Root } from './styles';
 
+const PROJECT_PATH_RE = /^\/projects\/[^/]+/;
+
 function Layout() {
+  const { pathname } = useLocation();
   const { suppressSiteHeader } = useHomeSplashChrome();
   const projectChrome = useProjectChrome();
+  const projectBleed = PROJECT_PATH_RE.test(pathname);
 
   useLayoutEffect(() => {
     if (projectChrome) {
@@ -18,9 +22,9 @@ function Layout() {
   }, [projectChrome]);
 
   return (
-    <Root>
+    <Root $projectBleed={projectBleed}>
       {!suppressSiteHeader ? <Header /> : null}
-      <Main>
+      <Main $projectBleed={projectBleed}>
         <Outlet />
       </Main>
     </Root>
