@@ -171,9 +171,9 @@ export const SplashPlusGridSketch = forwardRef<HTMLDivElement, Props>(
               const expandT =
                 MAX_EXTRA_HALF > 0
                   ? Math.min(
-                    1,
-                    Math.max(0, (half - BASE_HALF_LEN) / MAX_EXTRA_HALF)
-                  )
+                      1,
+                      Math.max(0, (half - BASE_HALF_LEN) / MAX_EXTRA_HALF)
+                    )
                   : 0;
               p.strokeWeight(0.65 + expandT * 0.85);
 
