@@ -23,6 +23,7 @@ import {
   HAS_SEEN_SPLASH_STORAGE_KEY,
   readHasSeenSplashFromStorage,
 } from '../../constants/splash';
+import { usePrefetchData } from '../../hooks/usePrefetchData';
 import { useGetCaseStudySummaries } from '../../queries/useGetCaseStudySummaries';
 import {
   EnterButton,
@@ -41,6 +42,7 @@ type HomePhase = 'splash' | 'transitioning' | 'main';
 function Home() {
   const navigate = useNavigate();
   const { data: caseStudies, isLoading, isError } = useGetCaseStudySummaries();
+  usePrefetchData(caseStudies);
   const { setSuppressSiteHeader } = useHomeSplashChrome();
 
   const [phase, setPhase] = useState<HomePhase>(() =>

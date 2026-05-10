@@ -24,7 +24,9 @@ const query = `
   }
 `;
 
-const getContact = async (): Promise<{ result: ContactType | null }> => {
+export const getContact = async (): Promise<{
+  result: ContactType | null;
+}> => {
   const response = await axios.get(getApiUrl(query));
   return response.data;
 };
