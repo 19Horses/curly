@@ -12,6 +12,7 @@ import { fadeIn } from '../../styles/animations';
 const stackBp = '@media (max-width: 52rem)';
 
 export const ProjectRoot = styled.article<{ $surfaceActive: boolean }>`
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -34,6 +35,54 @@ export const ProjectRoot = styled.article<{ $surfaceActive: boolean }>`
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+`;
+
+export const ProjectVersionToggle = styled.div`
+  position: absolute;
+  bottom: clamp(0.5rem, 1.25vw, 1rem);
+  left: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const ProjectVersionToggleButton = styled.button<{ $active: boolean }>`
+  margin: 0;
+  padding: 0.35em 0.65em;
+  font: inherit;
+  font-size: clamp(0.6875rem, 0.62rem + 0.28vw, 0.8125rem);
+  font-weight: ${({ $active }) => ($active ? 600 : 400)};
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  opacity: ${({ $active }) => ($active ? 1 : 0.72)};
+  cursor: pointer;
+  appearance: none;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+`;
+
+export const ProjectVersion2Placeholder = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: min(45vh, 24rem);
+  text-align: center;
+  font-size: clamp(0.8125rem, 0.72rem + 0.45vw, 1rem);
+  opacity: 0.88;
 `;
 
 export const ProjectGrid = styled.div`
