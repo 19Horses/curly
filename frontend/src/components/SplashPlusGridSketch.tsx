@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { forwardRef, useCallback, useEffect, useRef } from 'react';
 import { styled } from 'styled-components';
 import p5 from 'p5';
 
@@ -6,10 +6,34 @@ const PINK: [number, number, number] = [236, 72, 153];
 
 const GRID_SPACING = 20;
 const BASE_HALF_LEN = 2;
-const MAX_EXTRA_HALF = 4;
+const MAX_EXTRA_HALF = 2.5;
 const INFLUENCE_RADIUS = 340;
 /** Lower = slower ease / longer linger after the cursor moves away. */
 const SIZE_LERP = 0.034;
+/** Extra margin around measured Enter button so no plus arms clip into the control. */
+const ENTER_EXCLUDE_PADDING = 16;
+
+export type SplashPlusExcludeRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+function cellCenterInExcludeZone(
+  cx: number,
+  cy: number,
+  rect: SplashPlusExcludeRect | null,
+  pad: number
+): boolean {
+  if (!rect) return false;
+  return (
+    cx >= rect.x - pad &&
+    cx <= rect.x + rect.width + pad &&
+    cy >= rect.y - pad &&
+    cy <= rect.y + rect.height + pad
+  );
+}
 
 function countAxisCells(
   span: number,
@@ -37,115 +61,145 @@ const Layer = styled.div`
 
 type Props = {
   active: boolean;
+  /** Layer-local rectangle around the Enter control; grid cells whose center falls inside (with padding) are not drawn. */
+  excludeRect: SplashPlusExcludeRect | null;
 };
 
-export function SplashPlusGridSketch({ active }: Props) {
-  const hostRef = useRef<HTMLDivElement>(null);
+export const SplashPlusGridSketch = forwardRef<HTMLDivElement, Props>(
+  function SplashPlusGridSketch({ active, excludeRect }, ref) {
+    const hostRef = useRef<HTMLDivElement>(null);
+    const excludeRectRef = useRef(excludeRect);
+    excludeRectRef.current = excludeRect;
 
-  useEffect(() => {
-    if (!active) return;
-    const host = hostRef.current;
-    if (!host) return;
+    const setHostRef = useCallback(
+      (node: HTMLDivElement | null) => {
+        hostRef.current = node;
+        if (typeof ref === 'function') ref(node);
+        else if (ref) ref.current = node;
+      },
+      [ref]
+    );
 
-    const mouse = { x: -99999, y: -99999 };
+    useEffect(() => {
+      if (!active) return;
+      const host = hostRef.current;
+      if (!host) return;
 
-    const syncMouse = (e: MouseEvent) => {
-      const r = host.getBoundingClientRect();
-      mouse.x = e.clientX - r.left;
-      mouse.y = e.clientY - r.top;
-    };
+      const mouse = { x: -99999, y: -99999 };
 
-    window.addEventListener('mousemove', syncMouse, { passive: true });
-
-    let smoothHalfLens = new Float32Array(0);
-
-    const sketch = (p: p5) => {
-      p.setup = () => {
-        p.createCanvas(
-          host.clientWidth || p.windowWidth,
-          host.clientHeight || p.windowHeight
-        );
-        p.pixelDensity(
-          Math.min(
-            2,
-            typeof window !== 'undefined' ? window.devicePixelRatio : 1
-          )
-        );
+      const syncMouse = (e: MouseEvent) => {
+        const r = host.getBoundingClientRect();
+        mouse.x = e.clientX - r.left;
+        mouse.y = e.clientY - r.top;
       };
 
-      p.windowResized = () => {
-        p.resizeCanvas(
-          host.clientWidth || p.windowWidth,
-          host.clientHeight || p.windowHeight
-        );
-      };
+      window.addEventListener('mousemove', syncMouse, { passive: true });
 
-      p.draw = () => {
-        p.clear();
-        p.stroke(...PINK);
-        p.strokeCap(p.PROJECT);
-        p.noFill();
+      let smoothHalfLens = new Float32Array(0);
 
-        const mx = mouse.x;
-        const my = mouse.y;
-        const r = INFLUENCE_RADIUS;
-        const rSq = r * r;
-        const halfStep = GRID_SPACING / 2;
+      const sketch = (p: p5) => {
+        p.setup = () => {
+          p.createCanvas(
+            host.clientWidth || p.windowWidth,
+            host.clientHeight || p.windowHeight
+          );
+          p.pixelDensity(
+            Math.min(
+              2,
+              typeof window !== 'undefined' ? window.devicePixelRatio : 1
+            )
+          );
+        };
 
-        const cols = countAxisCells(p.width, halfStep, GRID_SPACING);
-        const rows = countAxisCells(p.height, halfStep, GRID_SPACING);
-        const cellCount = cols * rows;
-        if (smoothHalfLens.length !== cellCount) {
-          smoothHalfLens = new Float32Array(cellCount);
-        }
+        p.windowResized = () => {
+          p.resizeCanvas(
+            host.clientWidth || p.windowWidth,
+            host.clientHeight || p.windowHeight
+          );
+        };
 
-        let idx = 0;
-        for (let j = 0; j < rows; j++) {
-          const cy = halfStep + j * GRID_SPACING;
-          for (let i = 0; i < cols; i++) {
-            const cx = halfStep + i * GRID_SPACING;
-            const dx = mx - cx;
-            const dy = my - cy;
-            const dSq = dx * dx + dy * dy;
-            const falloff = dSq >= rSq ? 0 : (1 - dSq / rSq) ** 2;
-            const targetHalf = BASE_HALF_LEN + falloff * MAX_EXTRA_HALF;
+        p.draw = () => {
+          p.clear();
+          p.stroke(...PINK);
+          p.strokeCap(p.PROJECT);
+          p.noFill();
 
-            smoothHalfLens[idx] +=
-              (targetHalf - smoothHalfLens[idx]) * SIZE_LERP;
-            const half = smoothHalfLens[idx];
+          const mx = mouse.x;
+          const my = mouse.y;
+          const inflR = INFLUENCE_RADIUS;
+          const rSq = inflR * inflR;
+          const halfStep = GRID_SPACING / 2;
+          const rect = excludeRectRef.current;
+          const excludePad = ENTER_EXCLUDE_PADDING;
 
-            const expandT =
-              MAX_EXTRA_HALF > 0
-                ? Math.min(
+          const cols = countAxisCells(p.width, halfStep, GRID_SPACING);
+          const rows = countAxisCells(p.height, halfStep, GRID_SPACING);
+          const cellCount = cols * rows;
+          if (smoothHalfLens.length !== cellCount) {
+            smoothHalfLens = new Float32Array(cellCount);
+          }
+
+          let idx = 0;
+          for (let j = 0; j < rows; j++) {
+            const cy = halfStep + j * GRID_SPACING;
+            for (let i = 0; i < cols; i++) {
+              const cx = halfStep + i * GRID_SPACING;
+              const inExclude = cellCenterInExcludeZone(
+                cx,
+                cy,
+                rect,
+                excludePad
+              );
+
+              const dx = mx - cx;
+              const dy = my - cy;
+              const dSq = dx * dx + dy * dy;
+              const falloff = dSq >= rSq ? 0 : (1 - dSq / rSq) ** 2;
+              const targetHalf =
+                inExclude || falloff <= 0
+                  ? BASE_HALF_LEN
+                  : BASE_HALF_LEN + falloff * MAX_EXTRA_HALF;
+
+              smoothHalfLens[idx] +=
+                (targetHalf - smoothHalfLens[idx]) * SIZE_LERP;
+              const half = smoothHalfLens[idx];
+
+              idx++;
+
+              if (inExclude) continue;
+
+              const expandT =
+                MAX_EXTRA_HALF > 0
+                  ? Math.min(
                     1,
                     Math.max(0, (half - BASE_HALF_LEN) / MAX_EXTRA_HALF)
                   )
-                : 0;
-            p.strokeWeight(0.65 + expandT * 0.85);
+                  : 0;
+              p.strokeWeight(0.65 + expandT * 0.85);
 
-            p.line(cx - half, cy, cx + half, cy);
-            p.line(cx, cy - half, cx, cy + half);
-            idx++;
+              p.line(cx - half, cy, cx + half, cy);
+              p.line(cx, cy - half, cx, cy + half);
+            }
           }
-        }
+        };
       };
-    };
 
-    const instance = new p5(sketch, host);
+      const instance = new p5(sketch, host);
 
-    const onResize = () => {
-      instance.windowResized();
-    };
-    window.addEventListener('resize', onResize);
+      const onResize = () => {
+        instance.windowResized();
+      };
+      window.addEventListener('resize', onResize);
 
-    return () => {
-      window.removeEventListener('mousemove', syncMouse);
-      window.removeEventListener('resize', onResize);
-      instance.remove();
-    };
-  }, [active]);
+      return () => {
+        window.removeEventListener('mousemove', syncMouse);
+        window.removeEventListener('resize', onResize);
+        instance.remove();
+      };
+    }, [active]);
 
-  if (!active) return null;
+    if (!active) return null;
 
-  return <Layer ref={hostRef} aria-hidden />;
-}
+    return <Layer ref={setHostRef} aria-hidden />;
+  }
+);

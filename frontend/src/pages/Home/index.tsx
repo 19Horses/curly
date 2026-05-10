@@ -9,7 +9,10 @@ import { useNavigate } from 'react-router-dom';
 import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
 import { HomeListRingConnector } from '../../components/HomeListRingConnector';
 import HomeSplashCanvas from '../../components/HomeSplashCanvas';
-import { SplashPlusGridSketch } from '../../components/SplashPlusGridSketch';
+import {
+  SplashPlusGridSketch,
+  type SplashPlusExcludeRect,
+} from '../../components/SplashPlusGridSketch';
 import CaseStudiesList from '../../components/CaseStudiesList';
 import {
   HOME_ENTER_SEQUENCE_MS,
@@ -68,6 +71,41 @@ function Home() {
   const listDotRefCallbackCache = useRef<
     Map<string, (el: HTMLSpanElement | null) => void>
   >(new Map());
+  const splashPlusLayerRef = useRef<HTMLDivElement>(null);
+  const enterButtonRef = useRef<HTMLButtonElement>(null);
+  const [splashEnterExcludeRect, setSplashEnterExcludeRect] =
+    useState<SplashPlusExcludeRect | null>(null);
+
+  const measureSplashEnterExclude = useCallback(() => {
+    const layer = splashPlusLayerRef.current;
+    const btn = enterButtonRef.current;
+    if (!layer || !btn) return;
+    const lr = layer.getBoundingClientRect();
+    const br = btn.getBoundingClientRect();
+    setSplashEnterExcludeRect({
+      x: br.left - lr.left,
+      y: br.top - lr.top,
+      width: br.width,
+      height: br.height,
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (phase !== 'splash') {
+      setSplashEnterExcludeRect(null);
+      return;
+    }
+    measureSplashEnterExclude();
+    const ro = new ResizeObserver(measureSplashEnterExclude);
+    ro.observe(document.documentElement);
+    const btn = enterButtonRef.current;
+    if (btn) ro.observe(btn);
+    window.addEventListener('resize', measureSplashEnterExclude);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measureSplashEnterExclude);
+    };
+  }, [phase, measureSplashEnterExclude]);
 
   const getListDotRefCallback = useCallback((caseStudyId: string) => {
     let cb = listDotRefCallbackCache.current.get(caseStudyId);
@@ -193,7 +231,11 @@ function Home() {
 
   return (
     <HomeRoot>
-      <SplashPlusGridSketch active={phase === 'splash'} />
+      <SplashPlusGridSketch
+        ref={splashPlusLayerRef}
+        active={phase === 'splash'}
+        excludeRect={splashEnterExcludeRect}
+      />
       <HomeSplashCanvas
         phase={phase}
         caseStudySummaries={caseStudies}
@@ -216,7 +258,11 @@ function Home() {
       <HomeUiStack>
         {phase === 'splash' ? (
           <SplashChrome>
-            <EnterButton type="button" onClick={handleEnter}>
+            <EnterButton
+              ref={enterButtonRef}
+              type="button"
+              onClick={handleEnter}
+            >
               Enter
             </EnterButton>
           </SplashChrome>
