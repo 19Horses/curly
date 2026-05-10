@@ -4,6 +4,7 @@ import { styled, css } from 'styled-components';
 import logoSrc from '../assets/logo.png';
 import { PROJECT_SURFACE_TIMING } from '../constants/projectSurface';
 import { useProjectChrome } from '../hooks/useProjectChrome';
+import { ListHeading } from './CaseStudiesList/styles';
 import { HeaderAudioTrack } from './HeaderAudioTrack';
 import { StaggerRow } from './StaggerRow';
 import { fadeIn, fadeInAbsoluteCenter } from '../styles/animations';
@@ -119,13 +120,14 @@ const Nav = styled.nav<{ $navLight: boolean }>`
   transition: color ${PROJECT_SURFACE_TIMING};
 `;
 
-const NavLink = styled(Link)`
-  ${navItemStyles}
+/** Same look as footer ListHeading, without its extra margin (nav uses column gap instead). */
+const NavSectionHeading = styled(ListHeading)`
+  margin-bottom: 0;
 `;
 
-const NavPlaceholder = styled.span`
+const NavLink = styled(Link)`
   ${navItemStyles}
-  cursor: default;
+  font-weight: normal;
 `;
 
 /** Matches JobsPage narrow stacking breakpoint */
@@ -166,7 +168,7 @@ function Header() {
       </LogoLink>
       <Nav aria-label="Main" $navLight={navLight}>
         <StaggerRow $staggerIndex={0} $align="end" $delayOffset={2}>
-          <NavPlaceholder>other stuff</NavPlaceholder>
+          <NavSectionHeading>other stuff</NavSectionHeading>
         </StaggerRow>
         <StaggerRow $staggerIndex={1} $align="end" $delayOffset={2}>
           <NavLink to="/contact">contact</NavLink>
