@@ -15,10 +15,21 @@ import {
   ProjectCopyRow,
   ProjectGrid,
   ProjectMetaBlock,
+  ProjectVersion2BlockWrap,
+  ProjectVersion2MetaBlock,
   ProjectRoot,
   ProjectTitle,
   ProjectTitleFade,
-  ProjectVersion2Placeholder,
+  ProjectVersion2CaseStudiesDock,
+  ProjectVersion2CopyRow,
+  ProjectVersion2CopySection,
+  ProjectVersion2Scroll,
+  ProjectVersion2Shell,
+  ProjectVersion2Slide,
+  ProjectVersion2SlideImage,
+  ProjectVersion2Title,
+  ProjectVersion2TitleOverlay,
+  ProjectVersion2SectionLabel,
   ProjectVersionToggle,
   ProjectVersionToggleButton,
   StaggerImage,
@@ -93,6 +104,85 @@ function ProjectPageVersion1({
   );
 }
 
+function ProjectPageVersion2({
+  data,
+  slug,
+  caseStudies,
+  caseStudiesLoading,
+  caseStudiesError,
+}: {
+  data: CaseStudyType;
+  slug: string;
+  caseStudies: ReturnType<typeof useGetCaseStudySummaries>['data'];
+  caseStudiesLoading: boolean;
+  caseStudiesError: boolean;
+}) {
+  return (
+    <ProjectVersion2Shell>
+      <ProjectVersion2Scroll>
+        {data.images.map((image, index) => (
+          <ProjectVersion2Slide key={`${image.url}-${index}`}>
+            <ProjectVersion2SlideImage
+              src={image.url}
+              alt={image.alt}
+              $index={index}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+            />
+            {index === 0 ? (
+              <ProjectVersion2TitleOverlay>
+                <ProjectVersion2Title>
+                  {data.client} — {data.title}
+                </ProjectVersion2Title>
+              </ProjectVersion2TitleOverlay>
+            ) : null}
+          </ProjectVersion2Slide>
+        ))}
+        <ProjectVersion2CopySection>
+          <ProjectVersion2CopyRow>
+            <ProjectCopyFade $delay={PROJECT_COPY_FADE_DELAYS_S[0]}>
+              <ProjectVersion2MetaBlock>
+                <ProjectVersion2SectionLabel>Brief</ProjectVersion2SectionLabel>
+                <ProjectVersion2BlockWrap>
+                  <BlockParagraphs blocks={data.brief} />
+                </ProjectVersion2BlockWrap>
+              </ProjectVersion2MetaBlock>
+            </ProjectCopyFade>
+            <ProjectCopyFade $delay={PROJECT_COPY_FADE_DELAYS_S[1]}>
+              <ProjectVersion2MetaBlock>
+                <ProjectVersion2SectionLabel>
+                  Approach
+                </ProjectVersion2SectionLabel>
+                <ProjectVersion2BlockWrap>
+                  <BlockParagraphs blocks={data.approach} />
+                </ProjectVersion2BlockWrap>
+              </ProjectVersion2MetaBlock>
+            </ProjectCopyFade>
+            <ProjectCopyFade $delay={PROJECT_COPY_FADE_DELAYS_S[2]}>
+              <ProjectVersion2MetaBlock>
+                <ProjectVersion2SectionLabel>
+                  Results
+                </ProjectVersion2SectionLabel>
+                <ProjectVersion2BlockWrap>
+                  <BlockParagraphs blocks={data.results} />
+                </ProjectVersion2BlockWrap>
+              </ProjectVersion2MetaBlock>
+            </ProjectCopyFade>
+          </ProjectVersion2CopyRow>
+        </ProjectVersion2CopySection>
+      </ProjectVersion2Scroll>
+      <ProjectVersion2CaseStudiesDock>
+        <CaseStudiesList
+          summaries={caseStudies}
+          isLoading={caseStudiesLoading}
+          isError={caseStudiesError}
+          currentSlug={slug}
+        />
+      </ProjectVersion2CaseStudiesDock>
+    </ProjectVersion2Shell>
+  );
+}
+
 function ProjectPage() {
   const { slug } = useParams();
   const [layoutVersion, setLayoutVersion] =
@@ -130,7 +220,10 @@ function ProjectPage() {
   }
 
   return (
-    <ProjectRoot $surfaceActive={surfaceActive}>
+    <ProjectRoot
+      $surfaceActive={surfaceActive}
+      $layoutV2={layoutVersion === 'v2'}
+    >
       <ProjectVersionToggle role="group" aria-label="Project layout version">
         <ProjectVersionToggleButton
           type="button"
@@ -158,9 +251,13 @@ function ProjectPage() {
           caseStudiesError={caseStudiesError}
         />
       ) : (
-        <ProjectVersion2Placeholder>
-          <p>Version 2 — alternate layout (preview placeholder).</p>
-        </ProjectVersion2Placeholder>
+        <ProjectPageVersion2
+          data={data}
+          slug={slug}
+          caseStudies={caseStudies}
+          caseStudiesLoading={caseStudiesLoading}
+          caseStudiesError={caseStudiesError}
+        />
       )}
     </ProjectRoot>
   );
