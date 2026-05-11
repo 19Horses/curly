@@ -4,6 +4,7 @@ import { getCaseStudyBySlug } from '../queries/useGetCaseStudy';
 import type { CaseStudySummary } from '../queries/useGetCaseStudySummaries';
 import { getContact } from '../queries/useGetContact';
 import { getJobs } from '../queries/useGetJobs';
+import { getSong } from '../queries/useGetSong';
 
 export function usePrefetchData(
   caseStudySummaries: CaseStudySummary[] | undefined
@@ -18,6 +19,10 @@ export function usePrefetchData(
     void queryClient.prefetchQuery({
       queryKey: ['contact'],
       queryFn: getContact,
+    });
+    void queryClient.prefetchQuery({
+      queryKey: ['song'],
+      queryFn: getSong,
     });
   }, [queryClient]);
 
