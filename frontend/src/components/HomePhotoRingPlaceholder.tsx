@@ -328,6 +328,7 @@ export function HomePhotoRingPlaceholder({
   exitTargetCaseStudyId = null,
   onExitAnimationComplete,
   onExitSelectedFadeStart,
+  showPinkGuide = true,
 }: {
   phase: HomePhotoRingPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
@@ -347,6 +348,8 @@ export function HomePhotoRingPlaceholder({
   onExitAnimationComplete?: () => void;
   /** Fires once when the selected panel begins fading (after other panels have faded). */
   onExitSelectedFadeStart?: () => void;
+  /** When false, panels stay — only the pink torus guide ({@link HOME_PHOTO_RING_GUIDE_COLOR}) is omitted */
+  showPinkGuide?: boolean;
 }) {
   const { gl, camera, controls, size } = useThree();
   const orbitTargetFallbackRef = useRef(new Vector3(0, 0, 0));
@@ -627,20 +630,22 @@ export function HomePhotoRingPlaceholder({
   return (
     <group ref={outerRef}>
       <group ref={innerRef} position={[0, HOME_PHOTO_RING_Y, 0]}>
-        <mesh rotation={[Math.PI / 2, 0, 0]} raycast={() => null}>
-          <torusGeometry
-            args={[
-              HOME_PHOTO_RING_RADIUS,
-              HOME_PHOTO_RING_GUIDE_THICKNESS,
-              12,
-              96,
-            ]}
-          />
-          <meshBasicMaterial
-            color={HOME_PHOTO_RING_GUIDE_COLOR}
-            toneMapped={false}
-          />
-        </mesh>
+        {showPinkGuide ? (
+          <mesh rotation={[Math.PI / 2, 0, 0]} raycast={() => null}>
+            <torusGeometry
+              args={[
+                HOME_PHOTO_RING_RADIUS,
+                HOME_PHOTO_RING_GUIDE_THICKNESS,
+                12,
+                96,
+              ]}
+            />
+            <meshBasicMaterial
+              color={HOME_PHOTO_RING_GUIDE_COLOR}
+              toneMapped={false}
+            />
+          </mesh>
+        ) : null}
         <RingExitContext.Provider value={ringExitCtx}>
           {slots.map((slot, i) => (
             <RingPanel
