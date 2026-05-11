@@ -6,6 +6,18 @@ export const song = defineType({
   type: 'document',
   fields: [
     defineField({
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'artist',
+      title: 'Artist',
+      type: 'string',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
       name: 'audio',
       title: 'Audio',
       type: 'file',
@@ -16,8 +28,9 @@ export const song = defineType({
     }),
   ],
   preview: {
-    prepare() {
-      return {title: 'Song'}
+    select: {
+      title: 'title',
+      subtitle: 'artist',
     },
   },
 })
