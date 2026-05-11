@@ -20,7 +20,7 @@ import {
   HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS,
 } from '../../constants/homeScene';
 import {
-  HAS_SEEN_SPLASH_STORAGE_KEY,
+  persistSplashDismissedAtNow,
   readHasSeenSplashFromStorage,
 } from '../../constants/splash';
 import { usePrefetchData } from '../../hooks/usePrefetchData';
@@ -210,11 +210,7 @@ function Home() {
   }, [phase, setSuppressSiteHeader]);
 
   const persistSeenAndShowFooter = useCallback(() => {
-    try {
-      localStorage.setItem(HAS_SEEN_SPLASH_STORAGE_KEY, 'true');
-    } catch {
-      /* ignore */
-    }
+    persistSplashDismissedAtNow();
     setPhase('main');
   }, []);
 
