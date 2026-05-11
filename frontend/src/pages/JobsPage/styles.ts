@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 import { StaggerRow } from '../../components/StaggerRow';
-import { fadeIn } from '../../styles/animations';
+import { fadeIn, fadeInOpacity } from '../../styles/animations';
 
 export const narrowScreen = '@media (max-width: 42rem)';
 
@@ -29,7 +29,7 @@ export const JobsRoot = styled.div`
   }
 `;
 
-export const LeftPanel = styled.div`
+export const LeftPanel = styled.div<{ $showPlaceholder: boolean }>`
   position: fixed;
   left: 0;
   top: 0;
@@ -37,11 +37,9 @@ export const LeftPanel = styled.div`
   height: 100vh;
   height: 100dvh;
   z-index: 0;
-  background: #2a2a2a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(1rem, 3vw, 2rem);
+  overflow: hidden;
+  background: ${({ $showPlaceholder }) =>
+    $showPlaceholder ? '#2a2a2a' : 'transparent'};
   box-sizing: border-box;
 
   ${narrowScreen} {
@@ -52,6 +50,50 @@ export const LeftPanel = styled.div`
     height: var(--jobs-stack-hero);
     z-index: 0;
   }
+`;
+
+/** Image + scrim fade in together (opacity-only so full-bleed photo does not shift). */
+export const JobsHeroVisual = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  animation: ${fadeInOpacity} 0.65s ease-out both;
+`;
+
+export const JobsHeroMedia = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+`;
+
+export const JobsHeroImage = styled.img`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+`;
+
+export const JobsHeroScrim = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.42);
+  pointer-events: none;
+`;
+
+export const LeftPanelSurface = styled.div`
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: clamp(1rem, 3vw, 2rem);
+  box-sizing: border-box;
 `;
 
 export const HeroTitle = styled.h1`
