@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import { styled, css } from 'styled-components';
 import { StaggerRow } from '../../components/StaggerRow';
 import { fadeIn } from '../../styles/animations';
 

@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { HomeSplashChromeProvider } from './context/HomeSplashChromeContext';
 import { router } from './router';
 

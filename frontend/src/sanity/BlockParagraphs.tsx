@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const Para = styled.p`
   margin: 0;

@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { StaggerRow } from '../../components/StaggerRow';
 import { AddressLine, narrowScreen } from './styles';
 

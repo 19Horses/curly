@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { PROJECT_SURFACE_TIMING } from '../constants/projectSurface';
 import pauseSrc from '../assets/pause.svg';
 import playSrc from '../assets/play.svg';
