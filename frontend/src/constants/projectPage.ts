@@ -1,3 +1,6 @@
+/** Route change: previous project exits, then next enters (AnimatePresence `wait`) */
+export const PROJECT_PAGE_ROUTE_TRANSITION_S = 0.38;
+
 /** Fade-in for title, gallery images, and copy — independent of surface colour transition */
 export const PROJECT_CONTENT_FADE_DURATION_S = 0.88;
 export const PROJECT_CONTENT_STAGGER_STEP_S = 0.2;
