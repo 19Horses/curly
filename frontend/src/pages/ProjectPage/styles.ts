@@ -1,3 +1,4 @@
+import { motion } from 'motion/react';
 import styled from 'styled-components';
 import {
   PROJECT_CONTENT_FADE_DURATION_S,
@@ -10,6 +11,47 @@ import { MetaBlock } from '../JobPage/styles';
 import { fadeIn } from '../../styles/animations';
 
 const stackBp = '@media (max-width: 52rem)';
+
+/** Occupies grid cols 1–2; wraps AnimatePresence so exit/enter nodes stay in one cell */
+export const ProjectMainSlot = styled.div`
+  grid-column: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+
+  ${stackBp} {
+    grid-column: auto;
+    flex: 0 1 auto;
+    width: 100%;
+    min-height: min-content;
+  }
+`;
+
+/** Title + images column pair for each route key */
+export const ProjectPageTransition = styled(motion.div)`
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  min-height: 0;
+  min-width: 0;
+  align-items: stretch;
+
+  ${stackBp} {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    width: 100%;
+    min-height: min-content;
+    gap: clamp(1.25rem, 4vw, 2rem);
+  }
+`;
+
+/** Loading / error / missing copy spans both main columns */
+export const ProjectMainMessage = styled.div`
+  grid-column: 1 / -1;
+`;
 
 export const ProjectRoot = styled.article<{ $surfaceActive: boolean }>`
   position: relative;
@@ -123,6 +165,7 @@ export const ImagesColumn = styled.div`
 `;
 
 export const AsideColumn = styled.div`
+  grid-column: 3;
   min-height: 0;
   min-width: 0;
   display: flex;

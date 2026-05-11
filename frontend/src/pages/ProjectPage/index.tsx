@@ -1,7 +1,12 @@
+import { AnimatePresence } from 'motion/react';
+import type { ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import CaseStudiesList from '../../components/CaseStudiesList';
 import { BlockParagraphs } from '../../sanity/BlockParagraphs';
-import { PROJECT_COPY_FADE_DELAYS_S } from '../../constants/projectPage';
+import {
+  PROJECT_COPY_FADE_DELAYS_S,
+  PROJECT_PAGE_ROUTE_TRANSITION_S,
+} from '../../constants/projectPage';
 import { useSurfaceRevealTransition } from '../../hooks/useSurfaceRevealTransition';
 import { useGetCaseStudy } from '../../queries/useGetCaseStudy';
 import { useGetCaseStudySummaries } from '../../queries/useGetCaseStudySummaries';
@@ -12,7 +17,10 @@ import {
   ProjectCopyFade,
   ProjectCopyRow,
   ProjectGrid,
+  ProjectMainMessage,
+  ProjectMainSlot,
   ProjectMetaBlock,
+  ProjectPageTransition,
   ProjectRoot,
   ProjectTitle,
   ProjectTitleFade,
@@ -29,34 +37,30 @@ function ProjectPage() {
     isError: caseStudiesError,
   } = useGetCaseStudySummaries();
   const surfaceActive = useSurfaceRevealTransition(true, slug ?? '');
+  const routeKey = slug ?? '__missing__';
 
+  let body: ReactNode;
   if (!slug) {
-    return (
-      <ProjectRoot $surfaceActive={surfaceActive}>
+    body = (
+      <ProjectMainMessage>
         <p>Missing project.</p>
-      </ProjectRoot>
+      </ProjectMainMessage>
     );
-  }
-
-  if (isLoading) {
-    return (
-      <ProjectRoot $surfaceActive={surfaceActive}>
+  } else if (isLoading) {
+    body = (
+      <ProjectMainMessage>
         <p>Loading...</p>
-      </ProjectRoot>
+      </ProjectMainMessage>
     );
-  }
-
-  if (isError || !data) {
-    return (
-      <ProjectRoot $surfaceActive={surfaceActive}>
+  } else if (isError || !data) {
+    body = (
+      <ProjectMainMessage>
         <p>Project not found.</p>
-      </ProjectRoot>
+      </ProjectMainMessage>
     );
-  }
-
-  return (
-    <ProjectRoot $surfaceActive={surfaceActive}>
-      <ProjectGrid>
+  } else {
+    body = (
+      <>
         <TitleColumn>
           <ProjectTitleFade>
             <ProjectTitle>
@@ -96,6 +100,29 @@ function ProjectPage() {
             </ProjectCopyFade>
           </ProjectCopyRow>
         </ImagesColumn>
+      </>
+    );
+  }
+
+  return (
+    <ProjectRoot $surfaceActive={surfaceActive}>
+      <ProjectGrid>
+        <ProjectMainSlot>
+          <AnimatePresence mode="wait">
+            <ProjectPageTransition
+              key={routeKey}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{
+                duration: PROJECT_PAGE_ROUTE_TRANSITION_S,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
+              {body}
+            </ProjectPageTransition>
+          </AnimatePresence>
+        </ProjectMainSlot>
         <AsideColumn>
           <CaseStudiesList
             summaries={caseStudies}
