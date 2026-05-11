@@ -69,10 +69,9 @@ export const caseStudy = defineType({
       validation: (Rule) => Rule.required().min(1),
     }),
     defineField({
-      name: 'videoLink',
-      title: 'Video link',
-      type: 'url',
-      validation: (Rule) => Rule.required(),
+      name: 'video',
+      title: 'Video',
+      type: 'mux.video',
     }),
   ],
   preview: {

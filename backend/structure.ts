@@ -1,6 +1,8 @@
 import type {StructureResolver} from 'sanity/structure'
 
 const CONTACT_SINGLETON_ID = 'contact'
+const JOBS_IMAGE_SINGLETON_ID = 'jobsImage'
+const SONG_SINGLETON_ID = 'song'
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -15,6 +17,14 @@ export const structure: StructureResolver = (S) =>
               S.listItem()
                 .title('Contact')
                 .child(S.document().schemaType('contact').documentId(CONTACT_SINGLETON_ID)),
+              S.listItem()
+                .title('Jobs image')
+                .child(
+                  S.document().schemaType('jobsImage').documentId(JOBS_IMAGE_SINGLETON_ID),
+                ),
+              S.listItem()
+                .title('Song')
+                .child(S.document().schemaType('song').documentId(SONG_SINGLETON_ID)),
             ]),
         ),
 
