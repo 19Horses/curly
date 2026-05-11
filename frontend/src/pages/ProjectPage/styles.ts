@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import {
   PROJECT_CONTENT_FADE_DURATION_S,
   PROJECT_CONTENT_STAGGER_STEP_S,

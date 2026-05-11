@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
-import binzSrc from '../assets/binz.mp3';
+import { styled } from 'styled-components';
 import { PROJECT_SURFACE_TIMING } from '../constants/projectSurface';
 import pauseSrc from '../assets/pause.svg';
 import playSrc from '../assets/play.svg';
+import { useGetSong, type SongType } from '../queries/useGetSong';
 import { fadeIn } from '../styles/animations';
 
 const progressPink = '#ec4899';
@@ -131,11 +131,25 @@ const VisuallyHiddenAudio = styled.audio`
 `;
 
 export type HeaderAudioTrackProps = {
-  /** White/inverted chrome (jobs list bleed or project page). */
   lightOnDark: boolean;
 };
 
+function isCompleteSong(song: SongType | null | undefined): song is SongType & {
+  title: string;
+  artist: string;
+  audioUrl: string;
+} {
+  if (!song) return false;
+  const title = typeof song.title === 'string' ? song.title.trim() : '';
+  const artist = typeof song.artist === 'string' ? song.artist.trim() : '';
+  const url = typeof song.audioUrl === 'string' ? song.audioUrl.trim() : '';
+  return Boolean(title && artist && url);
+}
+
 export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
+  const { data: song, isPending } = useGetSong();
+  const completeSong = !isPending && isCompleteSong(song) ? song : null;
+
   const audioRef = useRef<HTMLAudioElement>(null);
   const [trackProgress, setTrackProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -151,6 +165,7 @@ export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
   }, []);
 
   useEffect(() => {
+    if (!completeSong) return;
     const el = audioRef.current;
     if (!el) return;
 
@@ -183,9 +198,10 @@ export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
       el.removeEventListener('loadedmetadata', sync);
       el.removeEventListener('ended', onEnded);
     };
-  }, []);
+  }, [completeSong]);
 
   useEffect(() => {
+    if (!completeSong) return;
     const el = audioRef.current;
     if (!el) return;
 
@@ -207,7 +223,7 @@ export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
         /* e.g. jsdom */
       }
     };
-  }, []);
+  }, [completeSong]);
 
   const seekFromClientX = useCallback(
     (clientX: number, currentTarget: HTMLDivElement) => {
@@ -234,6 +250,13 @@ export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
     [seekFromClientX]
   );
 
+  if (!completeSong) {
+    return null;
+  }
+
+  const trackLabel = `${completeSong.artist} - ${completeSong.title}`;
+  const audioSrc = completeSong.audioUrl;
+
   return (
     <>
       <TrackBlock>
@@ -244,7 +267,7 @@ export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
             aria-label={isPlaying ? 'Pause track' : 'Play track'}
             onClick={togglePlayback}
           >
-            <TrackMetaLabel>Solange - Binz</TrackMetaLabel>
+            <TrackMetaLabel>{trackLabel}</TrackMetaLabel>
             <TrackIconSlot aria-hidden>
               {isPlaying ? (
                 <TrackIcon src={pauseSrc} alt="" $lightOnDark={lightOnDark} />
@@ -264,9 +287,10 @@ export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
         </TrackTitleStack>
       </TrackBlock>
       <VisuallyHiddenAudio
+        key={audioSrc}
         ref={audioRef}
-        src={binzSrc}
-        preload="auto"
+        src={audioSrc}
+        preload="metadata"
         playsInline
         autoPlay
       />

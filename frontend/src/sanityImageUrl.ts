@@ -28,7 +28,9 @@ export function sanityImageUrl(
 }
 
 const LIST_COVER_WIDTH = 800;
-const DETAIL_GALLERY_WIDTH = 1600;
+
+/** Same max width as {@link toCaseStudyImageList} defaults — detail gallery / large in-layout photos. */
+export const CASE_STUDY_DETAIL_IMAGE_WIDTH = 1600;
 
 export type CoverImageFields = { alt: string; url: string };
 
@@ -50,7 +52,7 @@ export function toCoverImageFields(
 
 export function toCaseStudyImageList(
   images: SanityImageSource[] | null | undefined,
-  width: number = DETAIL_GALLERY_WIDTH
+  width: number = CASE_STUDY_DETAIL_IMAGE_WIDTH
 ): CoverImageFields[] {
   if (!images?.length) return [];
   const out: CoverImageFields[] = [];
