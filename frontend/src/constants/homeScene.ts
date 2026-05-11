@@ -92,6 +92,12 @@ export const HOME_PHOTO_RING_HOVER_LEAVE_MS = 45;
 /** How fast the ring spins when a footer list item is hovered (higher = snappier). */
 export const HOME_PHOTO_RING_LIST_FOCUS_LERP = 5;
 
+/**
+ * After list hover ends, excess angular velocity (above idle spin) decays exponentially with this
+ * rate per second — higher settles back to idle sooner.
+ */
+export const HOME_PHOTO_RING_LIST_LEAVE_SPIN_DECAY = 3.2;
+
 /** Delay before clearing list-driven focus when leaving a link (matches ring hover feel). */
 export const HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS = 45;
 

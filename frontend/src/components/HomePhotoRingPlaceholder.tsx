@@ -41,6 +41,7 @@ import {
   HOME_PHOTO_RING_SCROLL_MAX_RAD_PER_SEC,
   HOME_PHOTO_RING_HOVER_LEAVE_MS,
   HOME_PHOTO_RING_LIST_FOCUS_LERP,
+  HOME_PHOTO_RING_LIST_LEAVE_SPIN_DECAY,
   HOME_PHOTO_RING_EXIT_OTHERS_MS,
   HOME_PHOTO_RING_EXIT_SELECTED_MS,
   HOME_PHOTO_RING_EXIT_ALIGN_EPSILON_RAD,
@@ -358,6 +359,12 @@ export function HomePhotoRingPlaceholder({
   const panelMeshesRef = useRef<(Mesh | null)[]>([]);
   const tweenStartRef = useRef<number | null>(null);
   const scrollAngularVelocityRef = useRef(0);
+  /** Instantaneous Y angular velocity (rad/s) from last frame's yaw delta — used when list focus ends. */
+  const lastYawOmegaRef = useRef(0);
+  const prevYawForOmegaRef = useRef<number | null>(null);
+  const prevListDrivingRef = useRef(false);
+  /** Idle spin + this offset per sec; decays after leaving list hover so momentum eases down. */
+  const listLeaveSpinOffsetRef = useRef(0);
   const hoverLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const exitSequenceStartRef = useRef<number | null>(null);
   const exitCompleteFiredRef = useRef(false);
@@ -513,6 +520,7 @@ export function HomePhotoRingPlaceholder({
 
       if (exitTargetId && n > 0) {
         scrollAngularVelocityRef.current = 0;
+        listLeaveSpinOffsetRef.current = 0;
         const exitIdx = ringPanels.findIndex(
           (p) => p.reactKey === exitTargetId
         );
@@ -555,6 +563,7 @@ export function HomePhotoRingPlaceholder({
         const listDriving = focusPanelIndex !== null && n > 0;
 
         if (listDriving && focusPanelIndex !== null) {
+          listLeaveSpinOffsetRef.current = 0;
           scrollAngularVelocityRef.current *= Math.exp(-delta * 14);
           if (Math.abs(scrollAngularVelocityRef.current) < 1e-4) {
             scrollAngularVelocityRef.current = 0;
@@ -567,7 +576,14 @@ export function HomePhotoRingPlaceholder({
           const lk = 1 - Math.exp(-delta * HOME_PHOTO_RING_LIST_FOCUS_LERP);
           inner.rotation.y = MathUtils.lerp(inner.rotation.y, targetYaw, lk);
         } else {
-          inner.rotation.y += delta * HOME_PHOTO_RING_ROTATE_RAD_PER_SEC;
+          const wasListDriving = prevListDrivingRef.current;
+          if (wasListDriving) {
+            listLeaveSpinOffsetRef.current =
+              lastYawOmegaRef.current - HOME_PHOTO_RING_ROTATE_RAD_PER_SEC;
+          }
+          const omega =
+            HOME_PHOTO_RING_ROTATE_RAD_PER_SEC + listLeaveSpinOffsetRef.current;
+          inner.rotation.y += omega * delta;
           inner.rotation.y += scrollAngularVelocityRef.current * delta;
           scrollAngularVelocityRef.current *= Math.exp(
             -delta * HOME_PHOTO_RING_SCROLL_FRICTION
@@ -575,7 +591,25 @@ export function HomePhotoRingPlaceholder({
           if (Math.abs(scrollAngularVelocityRef.current) < 1e-4) {
             scrollAngularVelocityRef.current = 0;
           }
+          listLeaveSpinOffsetRef.current *= Math.exp(
+            -delta * HOME_PHOTO_RING_LIST_LEAVE_SPIN_DECAY
+          );
+          if (Math.abs(listLeaveSpinOffsetRef.current) < 1e-5) {
+            listLeaveSpinOffsetRef.current = 0;
+          }
         }
+
+        prevListDrivingRef.current = Boolean(listDriving);
+
+        const yNow = inner.rotation.y;
+        if (prevYawForOmegaRef.current !== null && delta > 1e-8) {
+          const dy = Math.atan2(
+            Math.sin(yNow - prevYawForOmegaRef.current),
+            Math.cos(yNow - prevYawForOmegaRef.current)
+          );
+          lastYawOmegaRef.current = dy / delta;
+        }
+        prevYawForOmegaRef.current = yNow;
       }
     }
 
