@@ -56,17 +56,12 @@ function JobsPage() {
   const { data, isLoading, isError } = useGetJobs();
 
   if (isLoading) {
-    return (
-      <JobsLayout heroImage={jobsImage} right={<p>Loading…</p>} />
-    );
+    return <JobsLayout heroImage={jobsImage} right={<p>Loading…</p>} />;
   }
 
   if (isError || !data) {
     return (
-      <JobsLayout
-        heroImage={jobsImage}
-        right={<p>Could not load jobs.</p>}
-      />
+      <JobsLayout heroImage={jobsImage} right={<p>Could not load jobs.</p>} />
     );
   }
 

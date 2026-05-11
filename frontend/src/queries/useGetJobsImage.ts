@@ -17,14 +17,16 @@ export type JobsImageType = {
 };
 
 const query = `
-  *[_type == "jobsImage" && _id == ${JSON.stringify(JOBS_IMAGE_SINGLETON_ID)}][0]{
+  *[_type == "jobsImage" && _id == ${JSON.stringify(
+    JOBS_IMAGE_SINGLETON_ID
+  )}][0]{
     _id,
     image
   }
 `;
 
 export const getJobsImage = async (): Promise<{
-  result: {_id: string; image?: SanityImageSource} | null;
+  result: { _id: string; image?: SanityImageSource } | null;
 }> => {
   const response = await axios.get(getApiUrl(query));
   return response.data;
@@ -42,7 +44,11 @@ export const useGetJobsImage = () => {
         CASE_STUDY_DETAIL_IMAGE_WIDTH
       );
       if (!cover) return null;
-      return {_id: doc._id, url: cover.url, alt: cover.alt} satisfies JobsImageType;
+      return {
+        _id: doc._id,
+        url: cover.url,
+        alt: cover.alt,
+      } satisfies JobsImageType;
     },
   });
 };
