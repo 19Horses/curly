@@ -11,6 +11,44 @@ export const HomeRoot = styled.div`
   min-width: 0;
 `;
 
+/** Bottom-left layout toggle — aligned with site chrome padding */
+export const HomeVersionToggle = styled.div`
+  position: absolute;
+  bottom: clamp(0.5rem, 1.25vw, 1rem);
+  left: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const HomeVersionToggleButton = styled.button<{ $active: boolean }>`
+  margin: 0;
+  padding: 0.35em 0.65em;
+  font: inherit;
+  font-size: clamp(0.6875rem, 0.62rem + 0.28vw, 0.8125rem);
+  font-weight: ${({ $active }) => ($active ? 600 : 400)};
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  opacity: ${({ $active }) => ($active ? 1 : 0.72)};
+  cursor: pointer;
+  appearance: none;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+`;
+
 export const HomeUiStack = styled.div`
   position: relative;
   z-index: 1;
