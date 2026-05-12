@@ -2330,7 +2330,7 @@
   dependencies:
     mux-embed "5.18.1"
 
-"@mux/mux-player-react@^3.10.2", "@mux/mux-player-react@^3.8.0":
+"@mux/mux-player-react@^3.10.2", "@mux/mux-player-react@^3.13.0", "@mux/mux-player-react@^3.8.0":
   version "3.13.0"
   resolved "https://registry.yarnpkg.com/@mux/mux-player-react/-/mux-player-react-3.13.0.tgz#4b3f01690bef52904d0a010965d96be9be32e3d9"
   integrity sha512-7IkImo1H3rUYeuWHI/L0L7sGUqBvZCvptx3+4igc+P/V3WgqNFjOyQlcyxzxgXNtNNhGmkn5NaF3TU9DPbOmAQ==

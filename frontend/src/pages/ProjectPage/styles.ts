@@ -215,3 +215,24 @@ export const StaggerImage = styled.img<{ $index: number }>`
   animation-delay: ${({ $index }) =>
     PROJECT_IMAGE_BASE_DELAY_S + $index * PROJECT_CONTENT_STAGGER_STEP_S}s;
 `;
+
+export const CaseStudyMuxDock = styled.div`
+  position: fixed;
+  left: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
+  bottom: clamp(1rem, 2vw + 0.5rem, 2rem);
+  z-index: 30;
+  width: min(
+    calc(100% - 2 * clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem)),
+    clamp(14rem, 38vw, 24rem)
+  );
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 14px 42px rgba(0, 0, 0, 0.35);
+  background: #0a0a0a;
+
+  mux-player {
+    display: block;
+    width: 100%;
+    max-height: min(42vh, 22rem);
+  }
+`;

@@ -18,7 +18,7 @@ export const getCaseStudyBySlug = async (
       approach,
       results,
       images[],
-      videoLink
+      "videoPlaybackId": video.asset->playbackId
     }
   `;
   const response = await axios.get(getApiUrl(query));
