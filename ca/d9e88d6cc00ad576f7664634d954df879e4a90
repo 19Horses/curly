@@ -1,0 +1,28 @@
+frontend/src/components/CaseStudiesList/styles.ts
+  h_86d8924a44fb42 56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.1",
+  "base_commit_sha": "cad9e88d6cc00ad576f7664634d954df879e4a90",
+  "prompts": {
+    "703504d8c296522e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d88fb5e1-8197-4c17-90fd-f9e5023be6e4",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 55,
+      "total_deletions": 53,
+      "accepted_lines": 23,
+      "overriden_lines": 4
+    }
+  },
+  "humans": {
+    "h_86d8924a44fb42": {
+      "author": "Cammy Docherty"
+    }
+  }
+}
