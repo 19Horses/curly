@@ -142,6 +142,7 @@ Please change the parent <Route path="${b}"> to <Route path="${b==="/"?"*":`${b}
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
+  text-align: right;
   gap: 0.45em;
 
   & > ${qd} {
