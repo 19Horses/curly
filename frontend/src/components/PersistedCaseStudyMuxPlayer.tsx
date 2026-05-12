@@ -1,11 +1,5 @@
 import MuxPlayer from '@mux/mux-player-react';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   CaseStudyMuxDock,
