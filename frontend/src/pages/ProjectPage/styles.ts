@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 import {
   PROJECT_CONTENT_FADE_DURATION_S,
   PROJECT_CONTENT_STAGGER_STEP_S,
@@ -11,6 +11,8 @@ import { MetaBlock } from '../JobPage/styles';
 import { fadeIn, muxDockRevealFromLeft } from '../../styles/animations';
 
 const stackBp = '@media (max-width: 52rem)';
+
+export const MUX_DOCK_GRAB_PX = 12;
 
 export const ProjectMainSlot = styled.div`
   grid-column: 1 / 3;
@@ -215,7 +217,7 @@ export const StaggerImage = styled.img<{ $index: number }>`
     PROJECT_IMAGE_BASE_DELAY_S + $index * PROJECT_CONTENT_STAGGER_STEP_S}s;
 `;
 
-export const CaseStudyMuxDock = styled.div`
+export const CaseStudyMuxDockAnchor = styled.div`
   position: fixed;
   left: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
   bottom: clamp(1rem, 2vw + 0.5rem, 2rem);
@@ -224,21 +226,78 @@ export const CaseStudyMuxDock = styled.div`
     calc(100% - 2 * clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem)),
     clamp(14rem, 38vw, 24rem)
   );
+`;
+
+/** Visual frame + entrance animation (transform here stays independent of drag offset). */
+export const CaseStudyMuxDockPanel = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   border-radius: 0.5rem;
   overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 14px 42px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.94),
+    0 12px 32px rgba(0, 0, 0, 0.3);
   background: #0a0a0a;
   animation: ${muxDockRevealFromLeft} 0.5s ease-out both;
+`;
 
-  /* sizing lives on CaseStudyMuxPlayerShell so aspect ratio is stable before Mux lays out */
+/** Invisible strips on each edge — whole frame is grabbable without blocking the player centre. */
+export const CaseStudyMuxGrabEdge = styled.div<{
+  $edge: 'top' | 'right' | 'bottom' | 'left';
+}>`
+  position: absolute;
+  z-index: 2;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  ${({ $edge }) => {
+    const g = MUX_DOCK_GRAB_PX;
+    switch ($edge) {
+      case 'top':
+        return css`
+          top: 0;
+          left: 0;
+          right: 0;
+          height: ${g}px;
+        `;
+      case 'bottom':
+        return css`
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: ${g}px;
+        `;
+      case 'left':
+        return css`
+          top: 0;
+          bottom: 0;
+          left: 0;
+          width: ${g}px;
+        `;
+      case 'right':
+        return css`
+          top: 0;
+          bottom: 0;
+          right: 0;
+          width: ${g}px;
+        `;
+    }
+  }}
 `;
 
 export const CaseStudyMuxPlayerShell = styled.div<{ $aspectRatio: string }>`
+  position: relative;
+  z-index: 0;
   width: 100%;
   max-height: min(42vh, 22rem);
   aspect-ratio: ${({ $aspectRatio }) => $aspectRatio};
   margin-inline: auto;
-  position: relative;
   overflow: hidden;
 
   mux-player {
