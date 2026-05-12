@@ -1,0 +1,31 @@
+frontend/src/components/PersistedCaseStudyMuxPlayer.tsx
+  3d2589b04e711ba5 2-8,11-13,30-67,90-100,123-173,181-219
+frontend/src/pages/ProjectPage/styles.ts
+  h_86d8924a44fb42 15,239
+  3d2589b04e711ba5 2,16,220,229-236,240,243-257,259-291,295-296
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.1",
+  "base_commit_sha": "742de55e5b66571f5744052e675e53e3a8b1c003",
+  "prompts": {
+    "3d2589b04e711ba5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7ee5f066-903b-4751-ba66-ae6dc123148e",
+        "model": "default"
+      },
+      "human_author": "Cammy Docherty",
+      "messages": [],
+      "total_additions": 242,
+      "total_deletions": 52,
+      "accepted_lines": 211,
+      "overriden_lines": 2
+    }
+  },
+  "humans": {
+    "h_86d8924a44fb42": {
+      "author": "Cammy Docherty"
+    }
+  }
+}
