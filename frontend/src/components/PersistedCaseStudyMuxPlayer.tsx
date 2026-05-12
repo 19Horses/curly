@@ -1,8 +1,29 @@
 import MuxPlayer from '@mux/mux-player-react';
-import { useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useLocation } from 'react-router-dom';
-import { CaseStudyMuxDock } from '../pages/ProjectPage/styles';
+import {
+  CaseStudyMuxDock,
+  CaseStudyMuxPlayerShell,
+} from '../pages/ProjectPage/styles';
 import { useGetCaseStudy } from '../queries/useGetCaseStudy';
+
+function cssAspectRatioFromMux(value: string | null | undefined): string {
+  if (value == null || typeof value !== 'string') return '16 / 9';
+  const parts = value.split(':').map((s) => s.trim());
+  if (parts.length !== 2) return '16 / 9';
+  const w = Number(parts[0]);
+  const h = Number(parts[1]);
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) {
+    return '16 / 9';
+  }
+  return `${w} / ${h}`;
+}
 
 export function PersistedCaseStudyMuxPlayer() {
   const { pathname } = useLocation();
@@ -26,21 +47,52 @@ export function PersistedCaseStudyMuxPlayer() {
       ? data.videoPlaybackId
       : null;
 
+  const [mediaVisible, setMediaVisible] = useState(false);
+  const revealedRef = useRef(false);
+
+  useEffect(() => {
+    revealedRef.current = false;
+    setMediaVisible(false);
+  }, [muxPlaybackId]);
+
+  const revealMedia = useCallback(() => {
+    if (revealedRef.current) return;
+    revealedRef.current = true;
+    setMediaVisible(true);
+  }, []);
+
+  useEffect(() => {
+    if (!muxPlaybackId) return;
+    const t = window.setTimeout(() => {
+      revealMedia();
+    }, 4000);
+    return () => window.clearTimeout(t);
+  }, [muxPlaybackId, revealMedia]);
+
   if (!muxPlaybackId || !data) {
     return null;
   }
 
+  const aspectCss = cssAspectRatioFromMux(data.videoAspectRatio);
+
   return (
-    <CaseStudyMuxDock>
-      <MuxPlayer
-        key={muxPlaybackId}
-        playbackId={muxPlaybackId}
-        streamType="on-demand"
-        accentColor="#ec4899"
-        metadata={{
-          video_title: `${data.client} — ${data.title}`,
-        }}
-      />
+    <CaseStudyMuxDock key={muxPlaybackId}>
+      <CaseStudyMuxPlayerShell $aspectRatio={aspectCss}>
+        <MuxPlayer
+          playbackId={muxPlaybackId}
+          streamType="on-demand"
+          accentColor="#ec4899"
+          metadata={{
+            video_title: `${data.client} — ${data.title}`,
+          }}
+          onLoadedMetadata={revealMedia}
+          onCanPlay={revealMedia}
+          style={{
+            opacity: mediaVisible ? 1 : 0,
+            transition: 'opacity 0.2s ease-out',
+          }}
+        />
+      </CaseStudyMuxPlayerShell>
     </CaseStudyMuxDock>
   );
 }

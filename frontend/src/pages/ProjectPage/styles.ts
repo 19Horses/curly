@@ -8,11 +8,10 @@ import {
 } from '../../constants/projectPage';
 import { PROJECT_SURFACE_TIMING } from '../../constants/projectSurface';
 import { MetaBlock } from '../JobPage/styles';
-import { fadeIn } from '../../styles/animations';
+import { fadeIn, muxDockRevealFromLeft } from '../../styles/animations';
 
 const stackBp = '@media (max-width: 52rem)';
 
-/** Occupies grid cols 1–2; wraps AnimatePresence so exit/enter nodes stay in one cell */
 export const ProjectMainSlot = styled.div`
   grid-column: 1 / 3;
   display: flex;
@@ -229,10 +228,22 @@ export const CaseStudyMuxDock = styled.div`
   overflow: hidden;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 14px 42px rgba(0, 0, 0, 0.35);
   background: #0a0a0a;
+  animation: ${muxDockRevealFromLeft} 0.5s ease-out both;
+
+  /* sizing lives on CaseStudyMuxPlayerShell so aspect ratio is stable before Mux lays out */
+`;
+
+export const CaseStudyMuxPlayerShell = styled.div<{ $aspectRatio: string }>`
+  width: 100%;
+  max-height: min(42vh, 22rem);
+  aspect-ratio: ${({ $aspectRatio }) => $aspectRatio};
+  margin-inline: auto;
+  position: relative;
+  overflow: hidden;
 
   mux-player {
     display: block;
     width: 100%;
-    max-height: min(42vh, 22rem);
+    height: 100%;
   }
 `;

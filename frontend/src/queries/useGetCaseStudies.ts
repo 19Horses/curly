@@ -16,4 +16,5 @@ export type CaseStudyType = {
   results: unknown[];
   images: CaseStudyImage[];
   videoPlaybackId: string | null;
+  videoAspectRatio: string | null;
 };
