@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../../components/Header';
+import { PersistedCaseStudyMuxPlayer } from '../../components/PersistedCaseStudyMuxPlayer';
 import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
 import { useProjectChrome } from '../../hooks/useProjectChrome';
 import { Main, Root } from './styles';
@@ -23,6 +24,7 @@ function Layout() {
       <Main>
         <Outlet />
       </Main>
+      <PersistedCaseStudyMuxPlayer />
     </Root>
   );
 }

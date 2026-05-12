@@ -18,7 +18,8 @@ export const getCaseStudyBySlug = async (
       approach,
       results,
       images[],
-      videoLink
+      "videoPlaybackId": video.asset->playbackId,
+      "videoAspectRatio": video.asset->data.aspect_ratio
     }
   `;
   const response = await axios.get(getApiUrl(query));

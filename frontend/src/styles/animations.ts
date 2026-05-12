@@ -24,7 +24,18 @@ export const fadeInAbsoluteCenter = keyframes`
   }
 `;
 
-/** Opacity-only (no transform) — pairs well with WebGL canvases inside animated parents */
+export const muxDockRevealFromLeft = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-1.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
 export const fadeInOpacity = keyframes`
   from {
     opacity: 0;

@@ -8,11 +8,10 @@ import {
 } from '../../constants/projectPage';
 import { PROJECT_SURFACE_TIMING } from '../../constants/projectSurface';
 import { MetaBlock } from '../JobPage/styles';
-import { fadeIn } from '../../styles/animations';
+import { fadeIn, muxDockRevealFromLeft } from '../../styles/animations';
 
 const stackBp = '@media (max-width: 52rem)';
 
-/** Occupies grid cols 1–2; wraps AnimatePresence so exit/enter nodes stay in one cell */
 export const ProjectMainSlot = styled.div`
   grid-column: 1 / 3;
   display: flex;
@@ -214,4 +213,37 @@ export const StaggerImage = styled.img<{ $index: number }>`
   animation: ${fadeIn} ${PROJECT_CONTENT_FADE_DURATION_S}s ease-out both;
   animation-delay: ${({ $index }) =>
     PROJECT_IMAGE_BASE_DELAY_S + $index * PROJECT_CONTENT_STAGGER_STEP_S}s;
+`;
+
+export const CaseStudyMuxDock = styled.div`
+  position: fixed;
+  left: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
+  bottom: clamp(1rem, 2vw + 0.5rem, 2rem);
+  z-index: 30;
+  width: min(
+    calc(100% - 2 * clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem)),
+    clamp(14rem, 38vw, 24rem)
+  );
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 14px 42px rgba(0, 0, 0, 0.35);
+  background: #0a0a0a;
+  animation: ${muxDockRevealFromLeft} 0.5s ease-out both;
+
+  /* sizing lives on CaseStudyMuxPlayerShell so aspect ratio is stable before Mux lays out */
+`;
+
+export const CaseStudyMuxPlayerShell = styled.div<{ $aspectRatio: string }>`
+  width: 100%;
+  max-height: min(42vh, 22rem);
+  aspect-ratio: ${({ $aspectRatio }) => $aspectRatio};
+  margin-inline: auto;
+  position: relative;
+  overflow: hidden;
+
+  mux-player {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 `;
