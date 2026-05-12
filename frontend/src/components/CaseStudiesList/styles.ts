@@ -53,6 +53,7 @@ export const CaseListItem = styled.li<{
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
+  text-align: right;
   gap: 0.45em;
 
   & > ${StaggerRow} {
