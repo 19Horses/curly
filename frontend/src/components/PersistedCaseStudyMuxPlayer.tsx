@@ -1,11 +1,5 @@
 import MuxPlayer from '@mux/mux-player-react';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   CaseStudyMuxDockAnchor,
@@ -138,38 +132,36 @@ export function PersistedCaseStudyMuxPlayer() {
     []
   );
 
-  const handleDragPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const session = dragSessionRef.current;
-    if (!session || e.pointerId !== session.pointerId) return;
-    e.preventDefault();
-    const nx =
-      session.translateAtStartX + (e.clientX - session.originClientX);
-    const ny =
-      session.translateAtStartY + (e.clientY - session.originClientY);
-    setTranslate({ x: nx, y: ny });
-  }, []);
-
-  const endDrag = useCallback(
+  const handleDragPointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       const session = dragSessionRef.current;
       if (!session || e.pointerId !== session.pointerId) return;
-      dragSessionRef.current = null;
-      try {
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      } catch {
-        /* already released */
-      }
-      const el = anchorRef.current;
-      if (!el) return;
+      e.preventDefault();
       const nx =
         session.translateAtStartX + (e.clientX - session.originClientX);
       const ny =
         session.translateAtStartY + (e.clientY - session.originClientY);
-      const clamped = clampDockTranslate(el, nx, ny, 8);
-      setTranslate(clamped);
+      setTranslate({ x: nx, y: ny });
     },
     []
   );
+
+  const endDrag = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const session = dragSessionRef.current;
+    if (!session || e.pointerId !== session.pointerId) return;
+    dragSessionRef.current = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* already released */
+    }
+    const el = anchorRef.current;
+    if (!el) return;
+    const nx = session.translateAtStartX + (e.clientX - session.originClientX);
+    const ny = session.translateAtStartY + (e.clientY - session.originClientY);
+    const clamped = clampDockTranslate(el, nx, ny, 8);
+    setTranslate(clamped);
+  }, []);
 
   if (!muxPlaybackId || !data) {
     return null;
