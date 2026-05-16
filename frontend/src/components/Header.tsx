@@ -400,6 +400,7 @@ const MobileMenuBottom = styled.div<{ $open: boolean; $delayMs: number }>`
   align-items: flex-end;
   text-align: right;
   min-width: 0;
+  font-weight: 400;
   max-height: min(58dvh, 100%);
   overflow-y: auto;
   overflow-x: hidden;

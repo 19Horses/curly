@@ -15,6 +15,10 @@ const ConnectorSvg = styled.svg<{ $isLeavingHome: boolean }>`
   opacity: ${({ $isLeavingHome }) => ($isLeavingHome ? 0 : 1)};
   transition: opacity ${HOME_FOOTER_EXIT_FADE_DURATION_S}s
     ${CONNECTOR_EXIT_EASE};
+
+  @media (max-width: 48rem) {
+    display: none;
+  }
 `;
 
 const CONNECTOR_STROKE = '#ec4899';
