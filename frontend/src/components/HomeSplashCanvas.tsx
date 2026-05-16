@@ -1,7 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 import { Center, Environment, OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import type { MutableRefObject } from 'react';
 import {
   Suspense,
   useCallback,
@@ -10,6 +9,7 @@ import {
   useRef,
   useState,
   type FC,
+  type MutableRefObject,
   type ReactNode,
 } from 'react';
 import { styled } from 'styled-components';
@@ -27,6 +27,8 @@ const SPLASH_TARGET = new Vector3(0, 0, 0);
 const INTRO_CAMERA_POSITION = new Vector3(0, 0, 0);
 const INTRO_TARGET = new Vector3(0, 0, -30);
 const INTRO_DURATION_SEC = 1;
+const MOBILE_CAMERA_FOV = 52;
+const DESKTOP_CAMERA_FOV = 42;
 
 useGLTF.preload(CURLY_GLB_URL);
 
@@ -227,6 +229,25 @@ function Scene({
   const [introDone, setIntroDone] = useState(false);
   const isSplash = phase === 'splash';
   const showHeroModel = phase !== 'main';
+  const camera = useThree((s) => s.camera);
+  const viewportWidth = useThree((s) => s.size.width);
+  const heroScale = useMemo(() => {
+    if (viewportWidth <= 420) return 0.42;
+    if (viewportWidth <= 600) return 0.52;
+    if (viewportWidth <= 768) return 0.66;
+    if (viewportWidth <= 1024) return 0.82;
+    return 1;
+  }, [viewportWidth]);
+
+  useLayoutEffect(() => {
+    if (!('fov' in camera)) return;
+    const targetFov =
+      viewportWidth <= 768 ? MOBILE_CAMERA_FOV : DESKTOP_CAMERA_FOV;
+    if (camera.fov !== targetFov) {
+      camera.fov = targetFov;
+      camera.updateProjectionMatrix();
+    }
+  }, [camera, viewportWidth]);
 
   const onModelLoaded = useCallback(() => {
     setModelLoaded(true);
@@ -239,9 +260,11 @@ function Scene({
       {showHeroModel ? (
         <Suspense fallback={null}>
           <HeroModelExitGroup phase={phase}>
-            <Center>
-              <CurlyModel onLoaded={onModelLoaded} />
-            </Center>
+            <group scale={[heroScale, heroScale, heroScale]}>
+              <Center>
+                <CurlyModel onLoaded={onModelLoaded} />
+              </Center>
+            </group>
           </HeroModelExitGroup>
         </Suspense>
       ) : null}
