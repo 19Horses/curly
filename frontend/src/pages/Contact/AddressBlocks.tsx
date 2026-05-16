@@ -4,7 +4,7 @@ import { AddressLine, narrowScreen } from './styles';
 
 const AddressStaggerRow = styled(StaggerRow)`
   ${narrowScreen} {
-    align-self: flex-start;
+    align-self: center;
   }
 `;
 

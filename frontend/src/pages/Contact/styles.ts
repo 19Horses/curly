@@ -38,10 +38,11 @@ export const ContactRow = styled.div`
 
   ${narrowScreen} {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
     gap: 0.4rem;
     font-size: clamp(0.75rem, 0.68rem + 0.35vw, 1rem);
+    text-align: center;
   }
 `;
 
@@ -56,6 +57,11 @@ export const ContactTitle = styled.h1`
   font-weight: bold;
   line-height: 0.95;
   text-transform: lowercase;
+
+  ${narrowScreen} {
+    align-self: center;
+    text-align: center;
+  }
 `;
 
 export const MiddleColumn = styled.div`
@@ -101,9 +107,10 @@ export const RightColumn = styled.div`
 
   ${narrowScreen} {
     flex: 0 1 auto;
-    align-items: flex-start;
+    align-items: center;
     max-width: 100%;
     gap: 0.08em;
+    text-align: center;
   }
 `;
 
