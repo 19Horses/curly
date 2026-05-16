@@ -11,7 +11,12 @@ import {
 
 function MuxDockCloseIcon() {
   return (
-    <svg viewBox="0 0 12 12" aria-hidden fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      viewBox="0 0 12 12"
+      aria-hidden
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         d="M1 1l10 10M11 1L1 11"
         stroke="currentColor"
