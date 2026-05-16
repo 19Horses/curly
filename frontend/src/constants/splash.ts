@@ -3,7 +3,6 @@ export const SPLASH_REPEAT_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
 export const HAS_SEEN_SPLASH_STORAGE_KEY = 'hasSeenSplashScreen';
 
 export function readHasSeenSplashFromStorage(): boolean {
-  return false;
   try {
     const raw = localStorage.getItem(HAS_SEEN_SPLASH_STORAGE_KEY);
     if (raw === null) {

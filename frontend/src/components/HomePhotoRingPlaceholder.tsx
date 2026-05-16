@@ -53,6 +53,7 @@ import {
 
 /** Bottom-center of panel mesh → screen (footer ↔ ring connector) */
 const _footerAnchorProj = new Vector3();
+const HOME_PHOTO_RING_TOUCH_DRAG_IMPULSE_PER_PX = 0.012;
 
 /** Uniform scale so the ring fits horizontally (caps at 1); floored so panels don’t shrink past readability. */
 function ringViewportUniformScale(
@@ -366,6 +367,8 @@ export function HomePhotoRingPlaceholder({
   /** Idle spin + this offset per sec; decays after leaving list hover so momentum eases down. */
   const listLeaveSpinOffsetRef = useRef(0);
   const hoverLeaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dragPointerIdRef = useRef<number | null>(null);
+  const dragLastXRef = useRef<number | null>(null);
   const exitSequenceStartRef = useRef<number | null>(null);
   const exitCompleteFiredRef = useRef(false);
   const exitSelectedFadeStartFiredRef = useRef(false);
@@ -436,6 +439,60 @@ export function HomePhotoRingPlaceholder({
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
+  }, [gl]);
+
+  useEffect(() => {
+    const el = gl.domElement;
+
+    const clearDrag = () => {
+      dragPointerIdRef.current = null;
+      dragLastXRef.current = null;
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType !== 'touch') return;
+      dragPointerIdRef.current = e.pointerId;
+      dragLastXRef.current = e.clientX;
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType !== 'touch') return;
+      if (dragPointerIdRef.current !== e.pointerId) return;
+      const prevX = dragLastXRef.current;
+      dragLastXRef.current = e.clientX;
+      if (prevX === null) return;
+
+      const dx = e.clientX - prevX;
+      let w =
+        scrollAngularVelocityRef.current +
+        dx * HOME_PHOTO_RING_TOUCH_DRAG_IMPULSE_PER_PX;
+      w = MathUtils.clamp(
+        w,
+        -HOME_PHOTO_RING_SCROLL_MAX_RAD_PER_SEC,
+        HOME_PHOTO_RING_SCROLL_MAX_RAD_PER_SEC
+      );
+      scrollAngularVelocityRef.current = w;
+
+      // Prevent page-level touch scrolling while swiping the ring.
+      e.preventDefault();
+    };
+
+    const onPointerEnd = (e: PointerEvent) => {
+      if (dragPointerIdRef.current !== e.pointerId) return;
+      clearDrag();
+    };
+
+    el.addEventListener('pointerdown', onPointerDown);
+    el.addEventListener('pointermove', onPointerMove, { passive: false });
+    el.addEventListener('pointerup', onPointerEnd);
+    el.addEventListener('pointercancel', onPointerEnd);
+
+    return () => {
+      el.removeEventListener('pointerdown', onPointerDown);
+      el.removeEventListener('pointermove', onPointerMove);
+      el.removeEventListener('pointerup', onPointerEnd);
+      el.removeEventListener('pointercancel', onPointerEnd);
+    };
   }, [gl]);
 
   const clearHoverLeaveTimer = useCallback(() => {
