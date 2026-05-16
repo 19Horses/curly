@@ -253,7 +253,10 @@ function Header() {
             <StaggerRow $staggerIndex={1} $align="end">
               <MobileNavItem>
                 <MobileActiveSquare $active={isContactPage} />
-                <MobileNavLink to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
+                <MobileNavLink
+                  to="/contact"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   contact
                 </MobileNavLink>
               </MobileNavItem>
@@ -261,7 +264,10 @@ function Header() {
             <StaggerRow $staggerIndex={2} $align="end">
               <MobileNavItem>
                 <MobileActiveSquare $active={isJobsPage} />
-                <MobileNavLink to="/jobs" onClick={() => setIsMobileMenuOpen(false)}>
+                <MobileNavLink
+                  to="/jobs"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   jobs
                 </MobileNavLink>
               </MobileNavItem>
@@ -307,8 +313,7 @@ const MobileMenuButton = styled.button<{ $open: boolean; $light: boolean }>`
     background: transparent;
     padding: 0;
     cursor: pointer;
-    color: ${({ $open, $light }) =>
-      $open || $light ? '#ffffff' : '#000000'};
+    color: ${({ $open, $light }) => ($open || $light ? '#ffffff' : '#000000')};
     transition: color 0.25s ease;
   }
 `;
@@ -319,9 +324,7 @@ const MobileMenuLine = styled.span<{ $open: boolean }>`
   height: 2px;
   border-radius: 1px;
   background: currentColor;
-  transition:
-    transform 0.25s ease,
-    opacity 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 
   &:first-child {
     transform: ${({ $open }) =>
@@ -349,9 +352,7 @@ const MobileMenuOverlay = styled.div<{ $open: boolean }>`
     opacity: ${({ $open }) => ($open ? 1 : 0)};
     visibility: ${({ $open }) => ($open ? 'visible' : 'hidden')};
     pointer-events: ${({ $open }) => ($open ? 'auto' : 'none')};
-    transition:
-      opacity 0.3s ease,
-      visibility 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
 `;
 
@@ -366,15 +367,14 @@ const MobileMenuPanel = styled.div`
   align-items: flex-end;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: clamp(4.5rem, 4rem + 2.5vw, 6rem) clamp(1.4rem, 1.15rem + 1.3vw, 2.1rem)
-    clamp(1.4rem, 1.1rem + 1.3vw, 2.2rem);
+  padding: clamp(4.5rem, 4rem + 2.5vw, 6rem)
+    clamp(1.4rem, 1.15rem + 1.3vw, 2.1rem) clamp(1.4rem, 1.1rem + 1.3vw, 2.2rem);
 `;
 
 const mobileSectionFade = css<{ $open: boolean; $delayMs: number }>`
   opacity: ${({ $open }) => ($open ? 1 : 0)};
   transform: translateY(${({ $open }) => ($open ? '0' : '8px')});
-  transition:
-    opacity 0.28s ease ${({ $delayMs }) => $delayMs}ms,
+  transition: opacity 0.28s ease ${({ $delayMs }) => $delayMs}ms,
     transform 0.28s ease ${({ $delayMs }) => $delayMs}ms;
 `;
 
