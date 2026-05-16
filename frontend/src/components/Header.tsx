@@ -26,10 +26,18 @@ function ordinalDay(n: number): string {
   }
 }
 
-function formatHeaderDate(date: Date): string {
+function formatHeaderDate(date: Date, compact = false): string {
   const weekday = new Intl.DateTimeFormat('en-GB', { weekday: 'short' }).format(
     date
   );
+
+  if (compact) {
+    const month = new Intl.DateTimeFormat('en-GB', { month: 'short' }).format(
+      date
+    );
+    return `${weekday} ${date.getDate()} ${month}`;
+  }
+
   const month = new Intl.DateTimeFormat('en-GB', { month: 'long' }).format(
     date
   );
@@ -154,7 +162,7 @@ function Header() {
 
   const lightOnDark = jobsBleed || projectChrome;
   const navLight = (jobsBleed && narrowStack) || projectChrome;
-  const formattedDate = formatHeaderDate(new Date());
+  const formattedDate = formatHeaderDate(new Date(), narrowStack);
   const today = new Date().toISOString().slice(0, 10);
 
   return (
