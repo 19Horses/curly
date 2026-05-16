@@ -291,6 +291,42 @@ export const CaseStudyMuxGrabEdge = styled.div<{
   }}
 `;
 
+export const CaseStudyMuxCloseButton = styled.button`
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0.2rem;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.65;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+
+  svg {
+    display: block;
+    width: 0.72rem;
+    height: 0.72rem;
+  }
+`;
+
 export const CaseStudyMuxPlayerShell = styled.div<{ $aspectRatio: string }>`
   position: relative;
   z-index: 0;

@@ -2,11 +2,25 @@ import MuxPlayer from '@mux/mux-player-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
+  CaseStudyMuxCloseButton,
   CaseStudyMuxDockAnchor,
   CaseStudyMuxDockPanel,
   CaseStudyMuxGrabEdge,
   CaseStudyMuxPlayerShell,
 } from '../pages/ProjectPage/styles';
+
+function MuxDockCloseIcon() {
+  return (
+    <svg viewBox="0 0 12 12" aria-hidden fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M1 1l10 10M11 1L1 11"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 import { useGetCaseStudy } from '../queries/useGetCaseStudy';
 
 function cssAspectRatioFromMux(value: string | null | undefined): string {
@@ -92,6 +106,9 @@ export function PersistedCaseStudyMuxPlayer() {
     setTranslate({ x: 0, y: 0 });
   }, [muxPlaybackId]);
 
+  const [dismissedPlaybackId, setDismissedPlaybackId] = useState<string | null>(
+    null
+  );
   const [mediaVisible, setMediaVisible] = useState(false);
   const revealedRef = useRef(false);
 
@@ -163,7 +180,11 @@ export function PersistedCaseStudyMuxPlayer() {
     setTranslate(clamped);
   }, []);
 
-  if (!muxPlaybackId || !data) {
+  const handleClose = useCallback(() => {
+    if (muxPlaybackId) setDismissedPlaybackId(muxPlaybackId);
+  }, [muxPlaybackId]);
+
+  if (!muxPlaybackId || !data || dismissedPlaybackId === muxPlaybackId) {
     return null;
   }
 
@@ -191,6 +212,14 @@ export function PersistedCaseStudyMuxPlayer() {
             onPointerCancel={endDrag}
           />
         ))}
+        <CaseStudyMuxCloseButton
+          type="button"
+          aria-label="Close video"
+          title="Close"
+          onClick={handleClose}
+        >
+          <MuxDockCloseIcon />
+        </CaseStudyMuxCloseButton>
         <CaseStudyMuxPlayerShell $aspectRatio={aspectCss}>
           <MuxPlayer
             playbackId={muxPlaybackId}
