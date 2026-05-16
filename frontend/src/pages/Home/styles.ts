@@ -2,6 +2,8 @@ import { motion } from 'motion/react';
 import { styled } from 'styled-components';
 import { StaggerRow } from '../../components/StaggerRow';
 
+const HOME_MOBILE_MQ = '(max-width: 48rem)';
+
 export const HomeRoot = styled.div`
   position: relative;
   flex: 1;
@@ -111,6 +113,11 @@ export const HomeFooter = styled(motion.footer)`
   gap: clamp(0.75rem, 2vw + 0.25rem, 2rem);
   padding: clamp(0.75rem, 0.4rem + 2.2vw, 2.5rem);
   font-size: clamp(0.8125rem, 0.72rem + 0.45vw, 1.125rem);
+
+  @media ${HOME_MOBILE_MQ} {
+    width: 100%;
+    align-items: flex-start;
+  }
 `;
 
 export const FooterLeft = styled.div`
@@ -119,6 +126,11 @@ export const FooterLeft = styled.div`
   display: flex;
   flex-direction: column;
   gap: clamp(0.25em, 0.15em + 0.6vw, 0.35em);
+
+  @media ${HOME_MOBILE_MQ} {
+    width: 100%;
+    flex: 1 1 100%;
+  }
 `;
 
 export const FooterLeftStagger = styled(StaggerRow)`
@@ -140,4 +152,8 @@ export const FooterRight = styled.div`
   align-items: flex-end;
   gap: clamp(0.25em, 0.15em + 0.6vw, 0.35em);
   text-align: right;
+
+  @media ${HOME_MOBILE_MQ} {
+    display: none;
+  }
 `;
