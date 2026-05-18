@@ -50,8 +50,8 @@ function Home() {
   const [phase, setPhase] = useState<HomePhase>(() =>
     readHasSeenSplashFromStorage() ? 'main' : 'splash'
   );
-  const [isMobileViewport, setIsMobileViewport] = useState(() =>
-    window.matchMedia(HOME_MOBILE_MQ).matches
+  const [isMobileViewport, setIsMobileViewport] = useState(
+    () => window.matchMedia(HOME_MOBILE_MQ).matches
   );
   /** Footer row highlight — driven by list hover or ring pane hover */
   const [highlightedCaseStudyId, setHighlightedCaseStudyId] = useState<
