@@ -1,14 +1,5 @@
-/** Camera eases to splash rest `(0, 2.5, 28)` after Enter (before model moves). */
-export const HOME_CAMERA_ENTER_LERP_MS = 1600;
-
-/** Photo ring eases from `HOME_PHOTO_RING_ENTER_OFFSET` to origin (parallel with camera enter). */
-export const HOME_MODEL_TO_REST_LERP_MS = 1600;
-
-/** Full Enter sequence wall time (camera + ring enter tweens run together). */
-export const HOME_ENTER_SEQUENCE_MS = Math.max(
-  HOME_CAMERA_ENTER_LERP_MS,
-  HOME_MODEL_TO_REST_LERP_MS
-);
+/** Photo ring eases from `HOME_PHOTO_RING_ENTER_OFFSET` to origin on first render. */
+export const HOME_PHOTO_RING_ENTER_LERP_MS = 1600;
 
 /** Pink guide torus: major radius (centerline of the circle in the XZ plane). */
 export const HOME_PHOTO_RING_RADIUS = 13;
@@ -30,7 +21,7 @@ export const HOME_PHOTO_RING_PANEL_WIDTH = 4;
 export const HOME_PHOTO_RING_PANEL_HEIGHT = 5.1;
 
 /**
- * Parent group position at t=0; lerps to origin with the model rest tween.
+ * Parent group position at t=0; lerps to origin when the home screen renders.
  * +Z moves the ring toward the camera so it eases back into the orbit target.
  */
 export const HOME_PHOTO_RING_ENTER_OFFSET: [number, number, number] = [

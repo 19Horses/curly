@@ -200,31 +200,6 @@ export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
     };
   }, [completeSong]);
 
-  useEffect(() => {
-    if (!completeSong) return;
-    const el = audioRef.current;
-    if (!el) return;
-
-    let cancelled = false;
-    const tryAutoplay = () => {
-      if (cancelled) return;
-      void el.play().catch(() => undefined);
-    };
-
-    tryAutoplay();
-    el.addEventListener('canplay', tryAutoplay, { once: true });
-
-    return () => {
-      cancelled = true;
-      el.removeEventListener('canplay', tryAutoplay);
-      try {
-        el.pause();
-      } catch {
-        /* e.g. jsdom */
-      }
-    };
-  }, [completeSong]);
-
   const seekFromClientX = useCallback(
     (clientX: number, currentTarget: HTMLDivElement) => {
       const audio = audioRef.current;
@@ -292,7 +267,6 @@ export function HeaderAudioTrack({ lightOnDark }: HeaderAudioTrackProps) {
         src={audioSrc}
         preload="metadata"
         playsInline
-        autoPlay
       />
     </>
   );
