@@ -350,7 +350,7 @@ export function HomePhotoRingPlaceholder({
   onExitAnimationComplete?: () => void;
   /** Fires once when the selected panel begins fading (after other panels have faded). */
   onExitSelectedFadeStart?: () => void;
-  /** When false, panels stay — only the pink torus guide ({@link HOME_PHOTO_RING_GUIDE_COLOR}) is omitted */
+  /** When false, panels stay — only the pink torus guide ({@link HOME_PHOTO_RING_GUIDE_COLOR}) is omitted. */
   showPinkGuide?: boolean;
 }) {
   const { gl, camera, controls, size } = useThree();
