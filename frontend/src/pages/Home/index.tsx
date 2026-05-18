@@ -36,13 +36,10 @@ import {
   HomeRoot,
   HomeUiStack,
   HOME_MOBILE_MQ,
-  HomeVersionToggle,
-  HomeVersionToggleButton,
   SplashChrome,
 } from './styles';
 
 type HomePhase = 'splash' | 'transitioning' | 'main';
-type HomeLayoutVersion = 'v1' | 'v2';
 
 function Home() {
   const navigate = useNavigate();
@@ -53,8 +50,6 @@ function Home() {
   const [phase, setPhase] = useState<HomePhase>(() =>
     readHasSeenSplashFromStorage() ? 'main' : 'splash'
   );
-  const [homeLayoutVersion, setHomeLayoutVersion] =
-    useState<HomeLayoutVersion>('v1');
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     window.matchMedia(HOME_MOBILE_MQ).matches
   );
@@ -259,7 +254,6 @@ function Home() {
       <HomeSplashCanvas
         phase={phase}
         renderPhotoRing={!showMobileCarousel}
-        showPinkGuide={homeLayoutVersion === 'v1'}
         caseStudySummaries={showMobileCarousel ? undefined : caseStudies}
         listDriveCaseStudyId={listDriveCaseStudyId}
         highlightedCaseStudyId={highlightedCaseStudyId}
@@ -271,7 +265,7 @@ function Home() {
         onRingExitAnimationComplete={handleRingExitAnimationComplete}
         onRingExitSelectedFadeStart={handleRingExitSelectedFadeStart}
       />
-      {homeLayoutVersion === 'v1' && !showMobileCarousel ? (
+      {!showMobileCarousel ? (
         <HomeListRingConnector
           highlightedCaseStudyId={highlightedCaseStudyId}
           listDotRefs={listDotElementRefs}
@@ -293,26 +287,6 @@ function Home() {
         ) : null}
         {phase === 'main' ? (
           <>
-            {!showMobileCarousel ? (
-              <HomeVersionToggle role="group" aria-label="Home layout version">
-                <HomeVersionToggleButton
-                  type="button"
-                  aria-pressed={homeLayoutVersion === 'v1'}
-                  $active={homeLayoutVersion === 'v1'}
-                  onClick={() => setHomeLayoutVersion('v1')}
-                >
-                  Version 1
-                </HomeVersionToggleButton>
-                <HomeVersionToggleButton
-                  type="button"
-                  aria-pressed={homeLayoutVersion === 'v2'}
-                  $active={homeLayoutVersion === 'v2'}
-                  onClick={() => setHomeLayoutVersion('v2')}
-                >
-                  Version 2
-                </HomeVersionToggleButton>
-              </HomeVersionToggle>
-            ) : null}
             {showMobileCarousel ? (
               <HomeMobileProjectCarousel
                 caseStudySummaries={caseStudies}

@@ -195,7 +195,6 @@ function HeroModelExitGroup({
 function Scene({
   phase,
   renderPhotoRing,
-  showPinkGuide,
   caseStudySummaries,
   listDriveCaseStudyId,
   highlightedCaseStudyId,
@@ -210,8 +209,6 @@ function Scene({
 }: {
   phase: CanvasPhase;
   renderPhotoRing: boolean;
-  /** When false (home v2), photo panels stay — pink torus guide hidden. */
-  showPinkGuide: boolean;
   caseStudySummaries: CaseStudySummary[] | undefined;
   listDriveCaseStudyId: string | null;
   highlightedCaseStudyId: string | null;
@@ -275,7 +272,6 @@ function Scene({
         <Suspense fallback={null}>
           <HomePhotoRingPlaceholder
             phase={phase}
-            showPinkGuide={showPinkGuide}
             caseStudySummaries={caseStudySummaries}
             listDriveCaseStudyId={listDriveCaseStudyId}
             highlightedCaseStudyId={highlightedCaseStudyId}
@@ -353,8 +349,6 @@ export type HomeSplashCanvasProps = {
   phase: CanvasPhase;
   caseStudySummaries?: CaseStudySummary[];
   renderPhotoRing?: boolean;
-  /** Default true — set false to hide only the pink torus guide on home. */
-  showPinkGuide?: boolean;
   /** Footer list hover only — drives ring rotation toward that panel */
   listDriveCaseStudyId?: string | null;
   /** List or ring pane hover — drives connector line (with listFooterAnchorScreenRef) */
@@ -378,7 +372,6 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   phase,
   caseStudySummaries,
   renderPhotoRing = true,
-  showPinkGuide = true,
   listDriveCaseStudyId = null,
   highlightedCaseStudyId = null,
   listFooterAnchorScreenRef,
@@ -417,7 +410,6 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
           <Scene
             phase={phase}
             renderPhotoRing={renderPhotoRing}
-            showPinkGuide={showPinkGuide}
             caseStudySummaries={caseStudySummaries}
             listDriveCaseStudyId={listDriveCaseStudyId}
             highlightedCaseStudyId={highlightedCaseStudyId}
