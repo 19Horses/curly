@@ -194,7 +194,6 @@ function HeroModelExitGroup({
 
 function Scene({
   phase,
-  showPinkGuide,
   caseStudySummaries,
   listDriveCaseStudyId,
   highlightedCaseStudyId,
@@ -208,8 +207,6 @@ function Scene({
   onRingExitSelectedFadeStart,
 }: {
   phase: CanvasPhase;
-  /** When false (home v2), photo panels stay — pink torus guide hidden */
-  showPinkGuide: boolean;
   caseStudySummaries: CaseStudySummary[] | undefined;
   listDriveCaseStudyId: string | null;
   highlightedCaseStudyId: string | null;
@@ -272,7 +269,6 @@ function Scene({
         <Suspense fallback={null}>
           <HomePhotoRingPlaceholder
             phase={phase}
-            showPinkGuide={showPinkGuide}
             caseStudySummaries={caseStudySummaries}
             listDriveCaseStudyId={listDriveCaseStudyId}
             highlightedCaseStudyId={highlightedCaseStudyId}
@@ -366,8 +362,6 @@ export type HomeSplashCanvasProps = {
   onRingExitAnimationComplete?: () => void;
   /** Ring begins fading the selected panel (others already faded) — e.g. footer out */
   onRingExitSelectedFadeStart?: () => void;
-  /** Default true — set false to hide only the pink torus guide on home */
-  showPinkGuide?: boolean;
 };
 
 const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
@@ -382,7 +376,6 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   exitTargetCaseStudyId = null,
   onRingExitAnimationComplete,
   onRingExitSelectedFadeStart,
-  showPinkGuide = true,
 }) => {
   const [sceneReveal, setSceneReveal] = useState(false);
 
@@ -411,7 +404,6 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
           <SplashClearColor phase={phase} />
           <Scene
             phase={phase}
-            showPinkGuide={showPinkGuide}
             caseStudySummaries={caseStudySummaries}
             listDriveCaseStudyId={listDriveCaseStudyId}
             highlightedCaseStudyId={highlightedCaseStudyId}

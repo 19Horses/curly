@@ -34,14 +34,10 @@ import {
   HomeFooter,
   HomeRoot,
   HomeUiStack,
-  HomeVersionToggle,
-  HomeVersionToggleButton,
   SplashChrome,
 } from './styles';
 
 type HomePhase = 'splash' | 'transitioning' | 'main';
-
-type HomeLayoutVersion = 'v1' | 'v2';
 
 function Home() {
   const navigate = useNavigate();
@@ -52,8 +48,6 @@ function Home() {
   const [phase, setPhase] = useState<HomePhase>(() =>
     readHasSeenSplashFromStorage() ? 'main' : 'splash'
   );
-  const [homeLayoutVersion, setHomeLayoutVersion] =
-    useState<HomeLayoutVersion>('v1');
   /** Footer row highlight — driven by list hover or ring pane hover */
   const [highlightedCaseStudyId, setHighlightedCaseStudyId] = useState<
     string | null
@@ -242,7 +236,6 @@ function Home() {
       />
       <HomeSplashCanvas
         phase={phase}
-        showPinkGuide={homeLayoutVersion === 'v1'}
         caseStudySummaries={caseStudies}
         listDriveCaseStudyId={listDriveCaseStudyId}
         highlightedCaseStudyId={highlightedCaseStudyId}
@@ -254,14 +247,12 @@ function Home() {
         onRingExitAnimationComplete={handleRingExitAnimationComplete}
         onRingExitSelectedFadeStart={handleRingExitSelectedFadeStart}
       />
-      {homeLayoutVersion === 'v1' ? (
-        <HomeListRingConnector
-          highlightedCaseStudyId={highlightedCaseStudyId}
-          listDotRefs={listDotElementRefs}
-          ringAnchorScreenRef={listFooterAnchorScreenRef}
-          isLeavingHome={isLeavingHome}
-        />
-      ) : null}
+      <HomeListRingConnector
+        highlightedCaseStudyId={highlightedCaseStudyId}
+        listDotRefs={listDotElementRefs}
+        ringAnchorScreenRef={listFooterAnchorScreenRef}
+        isLeavingHome={isLeavingHome}
+      />
       <HomeUiStack>
         {phase === 'splash' ? (
           <SplashChrome>
@@ -276,24 +267,6 @@ function Home() {
         ) : null}
         {phase === 'main' ? (
           <>
-            <HomeVersionToggle role="group" aria-label="Home layout version">
-              <HomeVersionToggleButton
-                type="button"
-                aria-pressed={homeLayoutVersion === 'v1'}
-                $active={homeLayoutVersion === 'v1'}
-                onClick={() => setHomeLayoutVersion('v1')}
-              >
-                Version 1
-              </HomeVersionToggleButton>
-              <HomeVersionToggleButton
-                type="button"
-                aria-pressed={homeLayoutVersion === 'v2'}
-                $active={homeLayoutVersion === 'v2'}
-                onClick={() => setHomeLayoutVersion('v2')}
-              >
-                Version 2
-              </HomeVersionToggleButton>
-            </HomeVersionToggle>
             <HomeFooter
               initial={false}
               animate={{ opacity: isLeavingHome ? 0 : 1 }}
