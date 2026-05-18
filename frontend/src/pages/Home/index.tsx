@@ -6,7 +6,6 @@ import {
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HomeMobileProjectCarousel from '../../components/HomeMobileProjectCarousel';
 import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
 import { HomeListRingConnector } from '../../components/HomeListRingConnector';
 import HomeSplashCanvas from '../../components/HomeSplashCanvas';
@@ -35,7 +34,6 @@ import {
   HomeFooter,
   HomeRoot,
   HomeUiStack,
-  HOME_MOBILE_MQ,
   SplashChrome,
 } from './styles';
 
@@ -49,9 +47,6 @@ function Home() {
 
   const [phase, setPhase] = useState<HomePhase>(() =>
     readHasSeenSplashFromStorage() ? 'main' : 'splash'
-  );
-  const [isMobileViewport, setIsMobileViewport] = useState(() =>
-    window.matchMedia(HOME_MOBILE_MQ).matches
   );
   /** Footer row highlight — driven by list hover or ring pane hover */
   const [highlightedCaseStudyId, setHighlightedCaseStudyId] = useState<
@@ -218,16 +213,6 @@ function Home() {
   };
 
   useEffect(() => {
-    const media = window.matchMedia(HOME_MOBILE_MQ);
-    const onChange = (event: MediaQueryListEvent) => {
-      setIsMobileViewport(event.matches);
-    };
-    setIsMobileViewport(media.matches);
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
-  }, []);
-
-  useEffect(() => {
     if (phase !== 'transitioning') {
       return;
     }
@@ -242,8 +227,6 @@ function Home() {
     return () => clearFocusLeaveTimer();
   }, [clearFocusLeaveTimer]);
 
-  const showMobileCarousel = phase === 'main' && isMobileViewport;
-
   return (
     <HomeRoot>
       <SplashPlusGridSketch
@@ -253,8 +236,7 @@ function Home() {
       />
       <HomeSplashCanvas
         phase={phase}
-        renderPhotoRing={!showMobileCarousel}
-        caseStudySummaries={showMobileCarousel ? undefined : caseStudies}
+        caseStudySummaries={caseStudies}
         listDriveCaseStudyId={listDriveCaseStudyId}
         highlightedCaseStudyId={highlightedCaseStudyId}
         listFooterAnchorScreenRef={listFooterAnchorScreenRef}
@@ -265,14 +247,12 @@ function Home() {
         onRingExitAnimationComplete={handleRingExitAnimationComplete}
         onRingExitSelectedFadeStart={handleRingExitSelectedFadeStart}
       />
-      {!showMobileCarousel ? (
-        <HomeListRingConnector
-          highlightedCaseStudyId={highlightedCaseStudyId}
-          listDotRefs={listDotElementRefs}
-          ringAnchorScreenRef={listFooterAnchorScreenRef}
-          isLeavingHome={isLeavingHome}
-        />
-      ) : null}
+      <HomeListRingConnector
+        highlightedCaseStudyId={highlightedCaseStudyId}
+        listDotRefs={listDotElementRefs}
+        ringAnchorScreenRef={listFooterAnchorScreenRef}
+        isLeavingHome={isLeavingHome}
+      />
       <HomeUiStack>
         {phase === 'splash' ? (
           <SplashChrome>
@@ -287,13 +267,6 @@ function Home() {
         ) : null}
         {phase === 'main' ? (
           <>
-            {showMobileCarousel ? (
-              <HomeMobileProjectCarousel
-                caseStudySummaries={caseStudies}
-                isLoading={isLoading}
-                isError={isError}
-              />
-            ) : null}
             <HomeFooter
               initial={false}
               animate={{ opacity: isLeavingHome ? 0 : 1 }}
