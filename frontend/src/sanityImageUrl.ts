@@ -28,6 +28,7 @@ export function sanityImageUrl(
 }
 
 const LIST_COVER_WIDTH = 800;
+export const CASE_STUDY_MOBILE_CAROUSEL_IMAGE_WIDTH = 1200;
 
 /** Same max width as {@link toCaseStudyImageList} defaults — detail gallery / large in-layout photos. */
 export const CASE_STUDY_DETAIL_IMAGE_WIDTH = 1600;
