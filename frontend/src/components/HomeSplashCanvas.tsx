@@ -194,6 +194,7 @@ function HeroModelExitGroup({
 
 function Scene({
   phase,
+  renderPhotoRing,
   caseStudySummaries,
   listDriveCaseStudyId,
   highlightedCaseStudyId,
@@ -207,6 +208,7 @@ function Scene({
   onRingExitSelectedFadeStart,
 }: {
   phase: CanvasPhase;
+  renderPhotoRing: boolean;
   caseStudySummaries: CaseStudySummary[] | undefined;
   listDriveCaseStudyId: string | null;
   highlightedCaseStudyId: string | null;
@@ -225,6 +227,7 @@ function Scene({
   const [modelLoaded, setModelLoaded] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const isSplash = phase === 'splash';
+  const shouldRenderRing = phase !== 'splash' && renderPhotoRing;
   const showHeroModel = phase !== 'main';
   const camera = useThree((s) => s.camera);
   const viewportWidth = useThree((s) => s.size.width);
@@ -265,7 +268,7 @@ function Scene({
           </HeroModelExitGroup>
         </Suspense>
       ) : null}
-      {phase !== 'splash' ? (
+      {shouldRenderRing ? (
         <Suspense fallback={null}>
           <HomePhotoRingPlaceholder
             phase={phase}
@@ -345,6 +348,7 @@ const CanvasReveal = styled.div<{ $visible: boolean }>`
 export type HomeSplashCanvasProps = {
   phase: CanvasPhase;
   caseStudySummaries?: CaseStudySummary[];
+  renderPhotoRing?: boolean;
   /** Footer list hover only — drives ring rotation toward that panel */
   listDriveCaseStudyId?: string | null;
   /** List or ring pane hover — drives connector line (with listFooterAnchorScreenRef) */
@@ -367,6 +371,7 @@ export type HomeSplashCanvasProps = {
 const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
   phase,
   caseStudySummaries,
+  renderPhotoRing = true,
   listDriveCaseStudyId = null,
   highlightedCaseStudyId = null,
   listFooterAnchorScreenRef,
@@ -404,6 +409,7 @@ const HomeSplashCanvas: FC<HomeSplashCanvasProps> = ({
           <SplashClearColor phase={phase} />
           <Scene
             phase={phase}
+            renderPhotoRing={renderPhotoRing}
             caseStudySummaries={caseStudySummaries}
             listDriveCaseStudyId={listDriveCaseStudyId}
             highlightedCaseStudyId={highlightedCaseStudyId}

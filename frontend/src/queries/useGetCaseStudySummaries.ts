@@ -2,12 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import type { SanityImageSource } from '@sanity/image-url';
 import { getApiUrl } from '../sanityIntegration';
-import { toCoverImageFields } from '../sanityImageUrl';
+import {
+  CASE_STUDY_MOBILE_CAROUSEL_IMAGE_WIDTH,
+  toCoverImageFields,
+} from '../sanityImageUrl';
 
 /** First gallery image only — enough for list / 3D ring without brief, approach, results, video. */
 export type CaseStudyCoverImage = {
   alt: string;
   url: string;
+  mobileCarouselUrl?: string;
 };
 
 export type CaseStudySummary = {
@@ -38,10 +42,22 @@ const getCaseStudySummaries = async (): Promise<{
     }
   >;
   return {
-    result: rows.map((row) => ({
-      ...row,
-      coverImage: toCoverImageFields(row.coverImage) ?? null,
-    })),
+    result: rows.map((row) => {
+      const coverImage = toCoverImageFields(row.coverImage);
+      const mobileCarouselImage = toCoverImageFields(
+        row.coverImage,
+        CASE_STUDY_MOBILE_CAROUSEL_IMAGE_WIDTH
+      );
+      return {
+        ...row,
+        coverImage: coverImage
+          ? {
+              ...coverImage,
+              mobileCarouselUrl: mobileCarouselImage?.url ?? coverImage.url,
+            }
+          : null,
+      };
+    }),
   };
 };
 
