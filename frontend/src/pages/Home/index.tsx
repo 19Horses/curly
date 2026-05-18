@@ -1,33 +1,21 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HomeMobileProjectCarousel from '../../components/HomeMobileProjectCarousel';
-import { useHomeSplashChrome } from '../../context/HomeSplashChromeContext';
 import { HomeListRingConnector } from '../../components/HomeListRingConnector';
-import HomeSplashCanvas from '../../components/HomeSplashCanvas';
-import {
-  SplashPlusGridSketch,
-  type SplashPlusExcludeRect,
-} from '../../components/SplashPlusGridSketch';
+import HomePhotoRingCanvas from '../../components/HomePhotoRingCanvas';
 import CaseStudiesList from '../../components/CaseStudiesList';
 import {
-  HOME_ENTER_SEQUENCE_MS,
   HOME_FOOTER_EXIT_FADE_DURATION_S,
   HOME_PHOTO_RING_LIST_FOCUS_LEAVE_MS,
 } from '../../constants/homeScene';
-import {
-  persistSplashDismissedAtNow,
-  readHasSeenSplashFromStorage,
-} from '../../constants/splash';
 import { usePrefetchData } from '../../hooks/usePrefetchData';
 import { useGetCaseStudySummaries } from '../../queries/useGetCaseStudySummaries';
 import {
-  EnterButton,
   FooterLeft,
   FooterLeftStagger,
   FooterLine,
@@ -36,20 +24,13 @@ import {
   HomeRoot,
   HomeUiStack,
   HOME_MOBILE_MQ,
-  SplashChrome,
 } from './styles';
-
-type HomePhase = 'splash' | 'transitioning' | 'main';
 
 function Home() {
   const navigate = useNavigate();
   const { data: caseStudies, isLoading, isError } = useGetCaseStudySummaries();
   usePrefetchData(caseStudies);
-  const { setSuppressSiteHeader } = useHomeSplashChrome();
 
-  const [phase, setPhase] = useState<HomePhase>(() =>
-    readHasSeenSplashFromStorage() ? 'main' : 'splash'
-  );
   const [isMobileViewport, setIsMobileViewport] = useState(
     () => window.matchMedia(HOME_MOBILE_MQ).matches
   );
@@ -78,41 +59,6 @@ function Home() {
   const listDotRefCallbackCache = useRef<
     Map<string, (el: HTMLSpanElement | null) => void>
   >(new Map());
-  const splashPlusLayerRef = useRef<HTMLDivElement>(null);
-  const enterButtonRef = useRef<HTMLButtonElement>(null);
-  const [splashEnterExcludeRect, setSplashEnterExcludeRect] =
-    useState<SplashPlusExcludeRect | null>(null);
-
-  const measureSplashEnterExclude = useCallback(() => {
-    const layer = splashPlusLayerRef.current;
-    const btn = enterButtonRef.current;
-    if (!layer || !btn) return;
-    const lr = layer.getBoundingClientRect();
-    const br = btn.getBoundingClientRect();
-    setSplashEnterExcludeRect({
-      x: br.left - lr.left,
-      y: br.top - lr.top,
-      width: br.width,
-      height: br.height,
-    });
-  }, []);
-
-  useLayoutEffect(() => {
-    if (phase !== 'splash') {
-      setSplashEnterExcludeRect(null);
-      return;
-    }
-    measureSplashEnterExclude();
-    const ro = new ResizeObserver(measureSplashEnterExclude);
-    ro.observe(document.documentElement);
-    const btn = enterButtonRef.current;
-    if (btn) ro.observe(btn);
-    window.addEventListener('resize', measureSplashEnterExclude);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', measureSplashEnterExclude);
-    };
-  }, [phase, measureSplashEnterExclude]);
 
   const getListDotRefCallback = useCallback((caseStudyId: string) => {
     let cb = listDotRefCallbackCache.current.get(caseStudyId);
@@ -171,7 +117,6 @@ function Home() {
 
   const beginProjectExit = useCallback(
     (slug: string, caseStudyId: string) => {
-      if (phase !== 'main') return;
       if (exitInProgressRef.current) return;
       exitInProgressRef.current = true;
       exitSlugRef.current = slug;
@@ -180,7 +125,7 @@ function Home() {
       setListDriveCaseStudyId(caseStudyId);
       setPendingExit({ slug, caseStudyId });
     },
-    [phase, clearFocusLeaveTimer]
+    [clearFocusLeaveTimer]
   );
 
   const handleRingExitAnimationComplete = useCallback(() => {
@@ -202,21 +147,6 @@ function Home() {
     setIsLeavingHome(true);
   }, []);
 
-  useLayoutEffect(() => {
-    const hideHeader = phase === 'splash' || phase === 'transitioning';
-    setSuppressSiteHeader(hideHeader);
-    return () => setSuppressSiteHeader(false);
-  }, [phase, setSuppressSiteHeader]);
-
-  const persistSeenAndShowFooter = useCallback(() => {
-    persistSplashDismissedAtNow();
-    setPhase('main');
-  }, []);
-
-  const handleEnter = () => {
-    setPhase('transitioning');
-  };
-
   useEffect(() => {
     const media = window.matchMedia(HOME_MOBILE_MQ);
     const onChange = (event: MediaQueryListEvent) => {
@@ -228,43 +158,27 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    if (phase !== 'transitioning') {
-      return;
-    }
-    const id = window.setTimeout(
-      persistSeenAndShowFooter,
-      HOME_ENTER_SEQUENCE_MS
-    );
-    return () => window.clearTimeout(id);
-  }, [phase, persistSeenAndShowFooter]);
-
-  useEffect(() => {
     return () => clearFocusLeaveTimer();
   }, [clearFocusLeaveTimer]);
 
-  const showMobileCarousel = phase === 'main' && isMobileViewport;
+  const showMobileCarousel = isMobileViewport;
 
   return (
     <HomeRoot>
-      <SplashPlusGridSketch
-        ref={splashPlusLayerRef}
-        active={phase === 'splash'}
-        excludeRect={splashEnterExcludeRect}
-      />
-      <HomeSplashCanvas
-        phase={phase}
-        renderPhotoRing={!showMobileCarousel}
-        caseStudySummaries={showMobileCarousel ? undefined : caseStudies}
-        listDriveCaseStudyId={listDriveCaseStudyId}
-        highlightedCaseStudyId={highlightedCaseStudyId}
-        listFooterAnchorScreenRef={listFooterAnchorScreenRef}
-        onRingHighlightEnter={handleRingHighlightEnter}
-        onRingHighlightLeave={handleRingHighlightLeave}
-        onRingPanelClick={handleRingPanelClick}
-        exitTargetCaseStudyId={pendingExit?.caseStudyId ?? null}
-        onRingExitAnimationComplete={handleRingExitAnimationComplete}
-        onRingExitSelectedFadeStart={handleRingExitSelectedFadeStart}
-      />
+      {!showMobileCarousel ? (
+        <HomePhotoRingCanvas
+          caseStudySummaries={caseStudies}
+          listDriveCaseStudyId={listDriveCaseStudyId}
+          highlightedCaseStudyId={highlightedCaseStudyId}
+          listFooterAnchorScreenRef={listFooterAnchorScreenRef}
+          onRingHighlightEnter={handleRingHighlightEnter}
+          onRingHighlightLeave={handleRingHighlightLeave}
+          onRingPanelClick={handleRingPanelClick}
+          exitTargetCaseStudyId={pendingExit?.caseStudyId ?? null}
+          onRingExitAnimationComplete={handleRingExitAnimationComplete}
+          onRingExitSelectedFadeStart={handleRingExitSelectedFadeStart}
+        />
+      ) : null}
       {!showMobileCarousel ? (
         <HomeListRingConnector
           highlightedCaseStudyId={highlightedCaseStudyId}
@@ -274,67 +188,52 @@ function Home() {
         />
       ) : null}
       <HomeUiStack>
-        {phase === 'splash' ? (
-          <SplashChrome>
-            <EnterButton
-              ref={enterButtonRef}
-              type="button"
-              onClick={handleEnter}
-            >
-              Enter
-            </EnterButton>
-          </SplashChrome>
+        {showMobileCarousel ? (
+          <HomeMobileProjectCarousel
+            caseStudySummaries={caseStudies}
+            isLoading={isLoading}
+            isError={isError}
+          />
         ) : null}
-        {phase === 'main' ? (
-          <>
-            {showMobileCarousel ? (
-              <HomeMobileProjectCarousel
-                caseStudySummaries={caseStudies}
-                isLoading={isLoading}
-                isError={isError}
-              />
-            ) : null}
-            <HomeFooter
-              initial={false}
-              animate={{ opacity: isLeavingHome ? 0 : 1 }}
-              transition={{
-                duration: HOME_FOOTER_EXIT_FADE_DURATION_S,
-                ease: [0.33, 1, 0.68, 1],
+        <HomeFooter
+          initial={false}
+          animate={{ opacity: isLeavingHome ? 0 : 1 }}
+          transition={{
+            duration: HOME_FOOTER_EXIT_FADE_DURATION_S,
+            ease: [0.33, 1, 0.68, 1],
+          }}
+        >
+          <FooterLeft>
+            <FooterLeftStagger $staggerIndex={0} $align="start">
+              <FooterLine>
+                <strong>curly</strong> is an independent creative studio.
+              </FooterLine>
+            </FooterLeftStagger>
+            <FooterLeftStagger $staggerIndex={1} $align="start">
+              <FooterLine>
+                we use world building to create moments in culture.
+              </FooterLine>
+            </FooterLeftStagger>
+          </FooterLeft>
+          <FooterRight>
+            <CaseStudiesList
+              summaries={caseStudies}
+              isLoading={isLoading}
+              isError={isError}
+              highlightedId={highlightedCaseStudyId}
+              getDotRefCallback={getListDotRefCallback}
+              onItemEnter={handleCaseLinkEnter}
+              onItemLeave={handleCaseLinkLeave}
+              onItemClick={(e, slug, id) => {
+                if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
+                  return;
+                }
+                e.preventDefault();
+                beginProjectExit(slug, id);
               }}
-            >
-              <FooterLeft>
-                <FooterLeftStagger $staggerIndex={0} $align="start">
-                  <FooterLine>
-                    <strong>curly</strong> is an independent creative studio.
-                  </FooterLine>
-                </FooterLeftStagger>
-                <FooterLeftStagger $staggerIndex={1} $align="start">
-                  <FooterLine>
-                    we use world building to create moments in culture.
-                  </FooterLine>
-                </FooterLeftStagger>
-              </FooterLeft>
-              <FooterRight>
-                <CaseStudiesList
-                  summaries={caseStudies}
-                  isLoading={isLoading}
-                  isError={isError}
-                  highlightedId={highlightedCaseStudyId}
-                  getDotRefCallback={getListDotRefCallback}
-                  onItemEnter={handleCaseLinkEnter}
-                  onItemLeave={handleCaseLinkLeave}
-                  onItemClick={(e, slug, id) => {
-                    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
-                      return;
-                    }
-                    e.preventDefault();
-                    beginProjectExit(slug, id);
-                  }}
-                />
-              </FooterRight>
-            </HomeFooter>
-          </>
-        ) : null}
+            />
+          </FooterRight>
+        </HomeFooter>
       </HomeUiStack>
     </HomeRoot>
   );

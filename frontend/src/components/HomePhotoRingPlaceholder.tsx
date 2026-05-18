@@ -24,9 +24,9 @@ import {
 } from 'three';
 import type { CaseStudySummary } from '../queries/useGetCaseStudySummaries';
 import {
-  HOME_MODEL_TO_REST_LERP_MS,
   HOME_PHOTO_RING_CONNECTOR_BELOW_IMAGE,
   HOME_PHOTO_RING_ENTER_OFFSET,
+  HOME_PHOTO_RING_ENTER_LERP_MS,
   HOME_PHOTO_RING_GUIDE_COLOR,
   HOME_PHOTO_RING_GUIDE_THICKNESS,
   HOME_PHOTO_RING_PANEL_HEIGHT,
@@ -121,8 +121,6 @@ function nearestYawToBringPanelForward(
 function shortestYawDelta(yaw: number, targetYaw: number): number {
   return Math.atan2(Math.sin(targetYaw - yaw), Math.cos(targetYaw - yaw));
 }
-
-export type HomePhotoRingPhase = 'splash' | 'transitioning' | 'main';
 
 type Slot = { x: number; z: number; yaw: number };
 
@@ -319,7 +317,6 @@ function RingPanel({
 }
 
 export function HomePhotoRingPlaceholder({
-  phase,
   caseStudySummaries,
   listDriveCaseStudyId,
   highlightedCaseStudyId,
@@ -331,7 +328,6 @@ export function HomePhotoRingPlaceholder({
   onExitAnimationComplete,
   onExitSelectedFadeStart,
 }: {
-  phase: HomePhotoRingPhase;
   caseStudySummaries: CaseStudySummary[] | undefined;
   /** Footer list hover only — when set, ring eases that panel forward */
   listDriveCaseStudyId: string | null;
@@ -370,7 +366,6 @@ export function HomePhotoRingPlaceholder({
   const exitCompleteFiredRef = useRef(false);
   const exitSelectedFadeStartFiredRef = useRef(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const atSplash = phase === 'splash';
 
   const exitTargetId = exitTargetCaseStudyId ?? null;
 
@@ -545,12 +540,6 @@ export function HomePhotoRingPlaceholder({
   );
   const endPos = useMemo(() => new Vector3(0, 0, 0), []);
 
-  useLayoutEffect(() => {
-    if (atSplash) {
-      tweenStartRef.current = null;
-    }
-  }, [atSplash]);
-
   useFrame(({ clock }, delta) => {
     const g = outerRef.current;
     const inner = innerRef.current;
@@ -667,16 +656,11 @@ export function HomePhotoRingPlaceholder({
       }
     }
 
-    if (atSplash) {
-      g.position.copy(startOffset);
-      return;
-    }
-
     if (tweenStartRef.current === null) {
       tweenStartRef.current = clock.elapsedTime;
     }
 
-    const dur = HOME_MODEL_TO_REST_LERP_MS / 1000;
+    const dur = HOME_PHOTO_RING_ENTER_LERP_MS / 1000;
     const rawT = Math.min(1, (clock.elapsedTime - tweenStartRef.current) / dur);
     const t = easeFromT(rawT);
 
