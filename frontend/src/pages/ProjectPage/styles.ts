@@ -34,6 +34,7 @@ export const ProjectPageTransition = styled(motion.div)`
   flex: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: clamp(0.75rem, 2vw, 1.5rem);
   min-height: 0;
   min-width: 0;
@@ -50,8 +51,21 @@ export const ProjectPageTransition = styled(motion.div)`
 `;
 
 /** Loading / error / missing copy spans both main columns */
-export const ProjectMainMessage = styled.div`
+export const ProjectMainMessage = styled.div<{ $absoluteCenter?: boolean }>`
   grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+
+  ${({ $absoluteCenter }) =>
+    $absoluteCenter &&
+    css`
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      min-height: 0;
+    `}
 `;
 
 export const ProjectRoot = styled.article<{ $surfaceActive: boolean }>`

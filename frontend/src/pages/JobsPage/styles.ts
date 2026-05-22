@@ -122,7 +122,6 @@ export const RightPanel = styled.div`
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  ${hideScrollbar}
 
   ${narrowScreen} {
     margin-left: 0;

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { useGetJobs } from '../../queries/useGetJobs';
 import { useGetJobsImage } from '../../queries/useGetJobsImage';
 import type { JobsImageType } from '../../queries/useGetJobsImage';
@@ -56,7 +57,7 @@ function JobsPage() {
   const { data, isLoading, isError } = useGetJobs();
 
   if (isLoading) {
-    return <JobsLayout heroImage={jobsImage} right={<p>Loading…</p>} />;
+    return <JobsLayout heroImage={jobsImage} right={<LoadingSpinner />} />;
   }
 
   if (isError || !data) {
