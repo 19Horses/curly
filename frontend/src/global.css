@@ -9,35 +9,17 @@
 }
 
 html {
-  --accent-pink: #ec4899;
-  --accent-pink-hover: #db2777;
-
   height: 100%;
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent-pink) transparent;
+  scrollbar-width: none;
 }
 
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent-pink) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 *::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-  background-color: var(--accent-pink);
-  border-radius: 0;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background-color: var(--accent-pink-hover);
+  display: none;
 }
 
 body {
