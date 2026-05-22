@@ -26,6 +26,8 @@ To upload case studies and jobs you can go to the `Content` panel section at the
 
 The videos are uploaded via Sanity but are stored on [Mux](https://dashboard.mux.com/organizations/kr7dvi/environments/6j59gl/video/assets). The free tier of Mux only allows 10 videos. If you have trouble uploading videos through Sanity this could be the issue. To have more than 10 videos you can upgrade to a paid version of Mux.
 
+You can manage all of the videos in Sanity [here](https://core-b4y2wuwly.sanity.build/@oJckvGHYA/studio/mqzqomz1b2co7uvbgx794mfm/default/mux).
+
 ## For developers
 
 ### High level architecture
