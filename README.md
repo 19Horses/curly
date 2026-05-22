@@ -13,16 +13,15 @@ The backend Content Management System (CMS) is a Sanity studio hosted at [https:
 To upload `Global` content like contact information you can go to the `Global` panel section at the above url. Example below:
 
 <img width="1728" height="1117" alt="Screenshot 2026-05-22 at 14 14 25" src="https://github.com/user-attachments/assets/c2337453-bc76-47ec-a9e9-52ac8ab27174" />
-
-
-
+<br>
+<br>
 To upload case studies and jobs you can go to the `Content` panel section at the above url. Example below:
 
 <img width="1728" height="1117" alt="Screenshot 2026-05-22 at 14 14 54" src="https://github.com/user-attachments/assets/e8817e78-20f5-4ef7-bc06-244734cda307" />
+<br>
+<br>
 
-
-
-##### Videos
+#### Videos
 
 The videos are uploaded via Sanity but are stored on [Mux](https://dashboard.mux.com/organizations/kr7dvi/environments/6j59gl/video/assets). The free tier of Mux only allows 10 videos. If you have trouble uploading videos through Sanity this could be the issue. To have more than 10 videos you can upgrade to a paid version of Mux.
 
