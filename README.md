@@ -11,12 +11,12 @@ The website can be seen at [https://curlymedialtd.com/](https://curlymedialtd.co
 The backend Content Management System (CMS) is a Sanity studio hosted at [https://curly.sanity.studio/](https://curly.sanity.studio/).
 
 To upload `Global` content like contact information you can go to the `Global` panel section at the above url. Example below:
-
+<br>
 <img width="1728" height="1117" alt="Screenshot 2026-05-22 at 14 14 25" src="https://github.com/user-attachments/assets/c2337453-bc76-47ec-a9e9-52ac8ab27174" />
 <br>
 <br>
 To upload case studies and jobs you can go to the `Content` panel section at the above url. Example below:
-
+<br>
 <img width="1728" height="1117" alt="Screenshot 2026-05-22 at 14 14 54" src="https://github.com/user-attachments/assets/e8817e78-20f5-4ef7-bc06-244734cda307" />
 <br>
 <br>
