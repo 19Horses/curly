@@ -1,4 +1,4 @@
-import { styled, css } from 'styled-components';
+import { styled } from 'styled-components';
 import { StaggerRow } from '../../components/StaggerRow';
 import { fadeIn } from '../../styles/animations';
 
@@ -7,28 +7,6 @@ export const APPLY_EMAIL = 'hello@curlymedialtd.com';
 export const accentPink = '#ec4899';
 
 export const stackBp = '@media (max-width: 52rem)';
-
-export const thinPinkScrollbar = css`
-  scrollbar-width: thin;
-  scrollbar-color: ${accentPink} transparent;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: ${accentPink};
-    border-radius: 0;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: #db2777;
-  }
-`;
 
 export const JobRoot = styled.article`
   flex: 1;
@@ -88,7 +66,6 @@ export const MidRightScroll = styled.div`
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  ${thinPinkScrollbar}
 
   ${stackBp} {
     flex: 1 1 0%;
