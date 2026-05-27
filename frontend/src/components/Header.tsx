@@ -213,7 +213,7 @@ function Header() {
         </DateDisplay>
         <HeaderAudioTrack lightOnDark={lightOnDark} />
       </LeftCluster>
-      <LogoLink to="/" aria-label="Curly home">
+      <LogoLink to="/" aria-label="curly home">
         <LogoImg src={logoSrc} alt="" decoding="async" />
       </LogoLink>
       <RightCluster>
@@ -328,12 +328,12 @@ const MobileMenuLine = styled.span<{ $open: boolean }>`
 
   &:first-child {
     transform: ${({ $open }) =>
-      $open ? 'translateY(0) rotate(45deg)' : 'translateY(-0.28rem) rotate(0)'};
+    $open ? 'translateY(0) rotate(45deg)' : 'translateY(-0.28rem) rotate(0)'};
   }
 
   &:last-child {
     transform: ${({ $open }) =>
-      $open ? 'translateY(0) rotate(-45deg)' : 'translateY(0.28rem) rotate(0)'};
+    $open ? 'translateY(0) rotate(-45deg)' : 'translateY(0.28rem) rotate(0)'};
   }
 `;
 
